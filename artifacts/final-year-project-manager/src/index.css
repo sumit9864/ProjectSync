@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: 42 38% 95%;
+  --foreground: 190 33% 16%;
+  --border: 39 23% 84%;
+  --card: 42 44% 98%;
+  --card-foreground: 190 33% 16%;
+  --card-border: 39 23% 84%;
+  --sidebar: 191 35% 18%;
+  --sidebar-foreground: 42 38% 95%;
+  --sidebar-border: 191 29% 26%;
+  --sidebar-primary: 38 90% 63%;
+  --sidebar-primary-foreground: 191 35% 18%;
+  --sidebar-accent: 191 27% 25%;
+  --sidebar-accent-foreground: 42 38% 95%;
+  --sidebar-ring: 38 90% 63%;
+  --popover: 42 44% 98%;
+  --popover-foreground: 190 33% 16%;
+  --popover-border: 39 23% 84%;
+  --primary: 185 53% 36%;
+  --primary-foreground: 42 44% 98%;
+  --secondary: 39 35% 89%;
+  --secondary-foreground: 190 33% 16%;
+  --muted: 40 28% 91%;
+  --muted-foreground: 190 15% 45%;
+  --accent: 38 90% 63%;
+  --accent-foreground: 191 35% 18%;
+  --destructive: 4 63% 50%;
+  --destructive-foreground: 42 44% 98%;
+  --input: 39 23% 84%;
+  --ring: 185 53% 36%;
+  --app-font-sans: 'DM Sans', sans-serif;
+  --app-font-serif: 'Fraunces', serif;
+  --app-font-mono: 'DM Mono', monospace;
+  --radius: 0.75rem;
+  --elevate-1: rgba(28, 62, 67, 0.05);
+  --elevate-2: rgba(28, 62, 67, 0.1);
+}
+
+.dark {
+  --background: 190 33% 10%;
+  --foreground: 42 38% 95%;
+  --border: 190 20% 27%;
+  --card: 190 28% 14%;
+  --card-foreground: 42 38% 95%;
+  --card-border: 190 20% 27%;
+  --sidebar: 190 35% 8%;
+  --sidebar-foreground: 42 38% 95%;
+  --sidebar-border: 190 20% 18%;
+  --sidebar-primary: 38 90% 63%;
+  --sidebar-primary-foreground: 190 35% 8%;
+  --sidebar-accent: 190 25% 17%;
+  --sidebar-accent-foreground: 42 38% 95%;
+  --sidebar-ring: 38 90% 63%;
+  --popover: 190 28% 14%;
+  --popover-foreground: 42 38% 95%;
+  --popover-border: 190 20% 27%;
+  --primary: 38 90% 63%;
+  --primary-foreground: 190 35% 8%;
+  --secondary: 190 20% 23%;
+  --secondary-foreground: 42 38% 95%;
+  --muted: 190 22% 20%;
+  --muted-foreground: 40 14% 67%;
+  --accent: 185 53% 45%;
+  --accent-foreground: 190 35% 8%;
+  --destructive: 4 63% 58%;
+  --destructive-foreground: 42 44% 98%;
+  --input: 190 20% 27%;
+  --ring: 38 90% 63%;
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply font-sans antialiased bg-background text-foreground; margin: 0; }
+}
+
+@layer utilities {
+  .hover-elevate { transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+  .hover-elevate:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(28, 62, 67, .08); }
+  .fade-in { animation: fade-in 320ms ease both; }
+  .rise-in { animation: rise-in 420ms cubic-bezier(.22,.8,.3,1) both; }
+}
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
