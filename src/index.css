@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink-50 text-ink-800 font-sans antialiased;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    @apply bg-ink-300 rounded-full;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-ink-400;
+  }
+}
+
+@layer components {
+  .skeleton {
+    @apply relative overflow-hidden bg-ink-200/60 rounded-md;
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.5s infinite;
+  }
+  .input-field {
+    @apply w-full rounded-lg border border-ink-200 bg-white px-3.5 py-2.5 text-sm text-ink-800 placeholder:text-ink-400 transition-colors focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10;
+  }
+  .input-field-error {
+    @apply border-rose-400 focus:border-rose-400 focus:ring-rose-400/10;
+  }
+}
