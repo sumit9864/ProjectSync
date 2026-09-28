@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { AppShell, type PageId } from '@/components/AppShell';
-import { Landing } from '@/components/Landing';
+import { StudentShell, type StudentPageId } from '@/components/StudentShell';
+import { MentorShell, type MentorPageId } from '@/components/MentorShell';
+import { Landing, type Role } from '@/components/Landing';
 import { ToastProvider } from '@/components/Toast';
 import { OverviewPage } from '@/pages/OverviewPage';
 import { GroupRegistrationPage } from '@/pages/GroupRegistrationPage';
@@ -9,30 +10,110 @@ import { TopicStudioPage } from '@/pages/TopicStudioPage';
 import { GithubTrackerPage } from '@/pages/GithubTrackerPage';
 import { MilestonesPage } from '@/pages/MilestonesPage';
 import { LogBookPage } from '@/pages/LogBookPage';
+import { AdminPlaceholder } from '@/pages/AdminPlaceholder';
+import { MentorOverviewPage } from '@/pages/mentor/MentorOverviewPage';
+import { MentorReviewQueuePage } from '@/pages/mentor/MentorReviewQueuePage';
+import { MentorMyGroupsPage } from '@/pages/mentor/MentorMyGroupsPage';
+import { MentorLogBookPage } from '@/pages/mentor/MentorLogBookPage';
+import { MentorCalendarPage } from '@/pages/mentor/MentorCalendarPage';
 
 function App() {
-  const [entered, setEntered] = useState(false);
-  const [page, setPage] = useState<PageId>('overview');
+  const [role, setRole] = useState<Role | null>(null);
+  const [studentPage, setStudentPage] = useState<StudentPageId>('overview');
+  const [mentorPage, setMentorPage] = useState<MentorPageId>('overview');
+  const [reviewGroupId, setReviewGroupId] = useState<string | null>(null);
+  const [logBookGroupId, setLogBookGroupId] = useState<string | null>(null);
 
-  if (!entered) {
+  const handleExit = () => {
+    setRole(null);
+    setStudentPage('overview');
+    setMentorPage('overview');
+    setReviewGroupId(null);
+    setLogBookGroupId(null);
+  };
+
+  if (!role) {
     return (
       <ToastProvider>
-        <Landing onEnter={() => setEntered(true)} />
+        <Landing onSelect={setRole} />
       </ToastProvider>
     );
   }
 
+  if (role === 'admin') {
+    return (
+      <ToastProvider>
+        <AdminPlaceholder onExit={handleExit} />
+      </ToastProvider>
+    );
+  }
+
+  if (role === 'student') {
+    return (
+      <ToastProvider>
+        <StudentShell
+          currentPage={studentPage}
+          onNavigate={setStudentPage}
+          onExit={handleExit}
+        >
+          {studentPage === 'overview' && <OverviewPage onNavigate={setStudentPage} />}
+          {studentPage === 'group' && <GroupRegistrationPage />}
+          {studentPage === 'preferences' && <MentorPreferencesPage />}
+          {studentPage === 'topic' && <TopicStudioPage />}
+          {studentPage === 'github' && <GithubTrackerPage />}
+          {studentPage === 'milestones' && <MilestonesPage />}
+          {studentPage === 'logbook' && <LogBookPage />}
+        </StudentShell>
+      </ToastProvider>
+    );
+  }
+
+  // role === 'mentor'
+  const openReviewForGroup = (groupId: string) => {
+    setReviewGroupId(groupId);
+    setMentorPage('review');
+  };
+
+  const openLogBookForGroup = (groupId: string) => {
+    setLogBookGroupId(groupId);
+    setMentorPage('logbook');
+  };
+
   return (
     <ToastProvider>
-      <AppShell currentPage={page} onNavigate={setPage} onExit={() => setEntered(false)}>
-        {page === 'overview' && <OverviewPage onNavigate={setPage} />}
-        {page === 'group' && <GroupRegistrationPage />}
-        {page === 'preferences' && <MentorPreferencesPage />}
-        {page === 'topic' && <TopicStudioPage />}
-        {page === 'github' && <GithubTrackerPage />}
-        {page === 'milestones' && <MilestonesPage />}
-        {page === 'logbook' && <LogBookPage />}
-      </AppShell>
+      <MentorShell
+        currentPage={mentorPage}
+        onNavigate={(page) => {
+          setMentorPage(page);
+          if (page !== 'review') setReviewGroupId(null);
+          if (page !== 'logbook') setLogBookGroupId(null);
+        }}
+        onExit={handleExit}
+      >
+        {mentorPage === 'overview' && (
+          <MentorOverviewPage
+            onNavigate={setMentorPage}
+            onOpenReview={openReviewForGroup}
+          />
+        )}
+        {mentorPage === 'review' && (
+          <MentorReviewQueuePage
+            preselectedGroupId={reviewGroupId}
+            onNavigateToLogBook={openLogBookForGroup}
+          />
+        )}
+        {mentorPage === 'groups' && (
+          <MentorMyGroupsPage
+            onNavigate={setMentorPage}
+            onOpenReview={openReviewForGroup}
+            onOpenLogBook={openLogBookForGroup}
+          />
+        )}
+        {mentorPage === 'logbook' && (
+          <MentorLogBookPage preselectedGroupId={logBookGroupId} />
+        )}
+        {mentorPage === 'calendar' && <MentorCalendarPage />}
+      </MentorShell>
     </ToastProvider>
   );
 }

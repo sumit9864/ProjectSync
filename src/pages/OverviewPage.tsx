@@ -15,7 +15,7 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import { Card, CardHeader, CardBody, Button, Badge, Skeleton } from '@/components/ui';
-import type { PageId } from '@/components/AppShell';
+import type { StudentPageId as PageId } from '@/components/StudentShell';
 import {
   projectProgress,
   groupHealth,

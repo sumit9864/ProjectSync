@@ -1,55 +1,44 @@
 import { type ReactNode, useState, useEffect, useRef } from 'react';
-import {
-  LayoutDashboard,
-  Users,
-  UserCheck,
-  Lightbulb,
-  Github,
-  Target,
-  BookOpen,
-  Bell,
-  Menu,
-  X,
-  LogOut,
-  ChevronRight,
-} from 'lucide-react';
+import { Target, Bell, Menu, X, LogOut, ChevronRight } from 'lucide-react';
 import { Avatar } from '@/components/ui';
-import { useToast } from '@/components/Toast';
-import { currentUser, notifications as initialNotifications } from '@/data/mockData';
-
-export type PageId =
-  | 'overview'
-  | 'group'
-  | 'preferences'
-  | 'topic'
-  | 'github'
-  | 'milestones'
-  | 'logbook';
+import type { Notification } from '@/types';
 
 export type NavItem = {
-  id: PageId;
+  id: string;
   label: string;
-  icon: typeof LayoutDashboard;
+  icon: React.ComponentType<{ className?: string }>;
 };
 
-const navItems: NavItem[] = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'group', label: 'Group Registration', icon: Users },
-  { id: 'preferences', label: 'Mentor Preferences', icon: UserCheck },
-  { id: 'topic', label: 'Topic Studio', icon: Lightbulb },
-  { id: 'github', label: 'GitHub Tracker', icon: Github },
-  { id: 'milestones', label: 'Milestones', icon: Target },
-  { id: 'logbook', label: 'Log Book', icon: BookOpen },
-];
+type AppShellUser = {
+  name: string;
+  email: string;
+  role: string;
+  avatarColor: string;
+};
 
 type AppShellProps = {
-  currentPage: PageId;
-  onNavigate: (page: PageId) => void;
+  currentPage: string;
+  onNavigate: (page: string) => void;
   onExit: () => void;
   children: ReactNode;
+  navItems: NavItem[];
+  user: AppShellUser;
+  notifications: Notification[];
+  workspaceLabel: string;
+  sidebarFooterText: string;
 };
 
-export function AppShell({ currentPage, onNavigate, onExit, children }: AppShellProps) {
+export function AppShell({
+  currentPage,
+  onNavigate,
+  onExit,
+  children,
+  navItems,
+  user,
+  notifications: initialNotifications,
+  workspaceLabel,
+  sidebarFooterText,
+}: AppShellProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -72,7 +61,7 @@ export function AppShell({ currentPage, onNavigate, onExit, children }: AppShell
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleNavigate = (page: PageId) => {
+  const handleNavigate = (page: string) => {
     onNavigate(page);
     setMobileNavOpen(false);
   };
@@ -89,7 +78,14 @@ export function AppShell({ currentPage, onNavigate, onExit, children }: AppShell
     <div className="flex h-screen overflow-hidden bg-ink-50">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-ink-200/70 bg-white">
-        <SidebarContent currentPage={currentPage} onNavigate={handleNavigate} onExit={onExit} />
+        <SidebarContent
+          currentPage={currentPage}
+          onNavigate={handleNavigate}
+          onExit={onExit}
+          navItems={navItems}
+          workspaceLabel={workspaceLabel}
+          sidebarFooterText={sidebarFooterText}
+        />
       </aside>
 
       {/* Sidebar - Mobile */}
@@ -107,7 +103,14 @@ export function AppShell({ currentPage, onNavigate, onExit, children }: AppShell
             >
               <X className="h-5 w-5" />
             </button>
-            <SidebarContent currentPage={currentPage} onNavigate={handleNavigate} onExit={onExit} />
+            <SidebarContent
+              currentPage={currentPage}
+              onNavigate={handleNavigate}
+              onExit={onExit}
+              navItems={navItems}
+              workspaceLabel={workspaceLabel}
+              sidebarFooterText={sidebarFooterText}
+            />
           </aside>
         </div>
       )}
@@ -164,7 +167,9 @@ export function AppShell({ currentPage, onNavigate, onExit, children }: AppShell
                   </div>
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <p className="px-4 py-8 text-center text-sm text-ink-400">No notifications</p>
+                      <p className="px-4 py-8 text-center text-sm text-ink-400">
+                        No notifications
+                      </p>
                     ) : (
                       notifications.map((n) => (
                         <button
@@ -198,10 +203,10 @@ export function AppShell({ currentPage, onNavigate, onExit, children }: AppShell
                 onClick={() => setUserMenuOpen((v) => !v)}
                 className="flex items-center gap-2 rounded-lg p-1 hover:bg-ink-100 transition-colors"
               >
-                <Avatar name={currentUser.name} color={currentUser.avatarColor} size="sm" />
+                <Avatar name={user.name} color={user.avatarColor} size="sm" />
                 <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium text-ink-800">{currentUser.name}</p>
-                  <p className="text-xs text-ink-400">{currentUser.role}</p>
+                  <p className="text-sm font-medium text-ink-800">{user.name}</p>
+                  <p className="text-xs text-ink-400">{user.role}</p>
                 </div>
                 <ChevronRight className="hidden sm:block h-4 w-4 rotate-90 text-ink-400" />
               </button>
@@ -209,9 +214,9 @@ export function AppShell({ currentPage, onNavigate, onExit, children }: AppShell
               {userMenuOpen && (
                 <div className="absolute right-0 top-12 w-56 rounded-xl border border-ink-200 bg-white shadow-xl animate-scale-in">
                   <div className="border-b border-ink-100 px-4 py-3">
-                    <p className="text-sm font-semibold text-ink-900">{currentUser.name}</p>
-                    <p className="mt-0.5 text-xs text-ink-500">{currentUser.email}</p>
-                    <p className="mt-1 text-xs font-medium text-brand-600">{currentUser.role}</p>
+                    <p className="text-sm font-semibold text-ink-900">{user.name}</p>
+                    <p className="mt-0.5 text-xs text-ink-500">{user.email}</p>
+                    <p className="mt-1 text-xs font-medium text-brand-600">{user.role}</p>
                   </div>
                   <div className="py-1">
                     <button
@@ -241,10 +246,16 @@ function SidebarContent({
   currentPage,
   onNavigate,
   onExit,
+  navItems,
+  workspaceLabel,
+  sidebarFooterText,
 }: {
-  currentPage: PageId;
-  onNavigate: (page: PageId) => void;
+  currentPage: string;
+  onNavigate: (page: string) => void;
   onExit: () => void;
+  navItems: NavItem[];
+  workspaceLabel: string;
+  sidebarFooterText: string;
 }) {
   return (
     <>
@@ -254,7 +265,7 @@ function SidebarContent({
         </div>
         <div>
           <p className="font-display text-base font-bold text-ink-900">FYPM Hub</p>
-          <p className="text-xs text-ink-400">Student Workspace</p>
+          <p className="text-xs text-ink-400">{workspaceLabel}</p>
         </div>
       </div>
 
@@ -282,8 +293,7 @@ function SidebarContent({
 
       <div className="border-t border-ink-100 p-3">
         <div className="rounded-lg bg-ink-50 p-3">
-          <p className="text-xs font-medium text-ink-500">Need help?</p>
-          <p className="mt-1 text-xs text-ink-400">Check the Log Book or contact your mentor.</p>
+          <p className="text-xs font-medium text-ink-500">{sidebarFooterText}</p>
         </div>
         <button
           onClick={onExit}
