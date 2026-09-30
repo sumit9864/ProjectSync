@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Target, CheckCircle2, Circle, Clock, CalendarClock, ChevronDown } from 'lucide-react';
+import { Target, CheckCircle2, Clock, CalendarClock } from 'lucide-react';
 import { Card, CardHeader, CardBody, Button, Badge, Skeleton, EmptyState } from '@/components/ui';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';

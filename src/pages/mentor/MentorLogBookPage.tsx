@@ -16,8 +16,8 @@ import { Card, CardHeader, CardBody, Button, Badge, Skeleton, EmptyState } from 
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';
 import { mentorGroups } from '@/data/mentorData';
-import type { MentorGroup, LogBookEntry } from '@/data/mentorData';
-import type { LogBookEntry as LogBookEntryType } from '@/types';
+
+import type { LogBookEntry } from '@/types';
 
 type LogBookState = Record<
   string,
@@ -121,7 +121,6 @@ export function MentorLogBookPage({
     setPointsDiscussed(entry.pointsDiscussed);
     setMentorSuggestions(entry.mentorSuggestions);
     setRemarks(entry.remarks);
-    const [datePart] = entry.date.split(', ');
     setSessionDate(new Date(entry.date).toISOString().split('T')[0]);
     setSessionTime('14:00');
     setEditingEntry(entry);

@@ -16,7 +16,7 @@ import { Card, CardHeader, CardBody, Button, Badge, Avatar, Skeleton, EmptyState
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useToast } from '@/components/Toast';
 import { mentorUser, mentorGroups } from '@/data/mentorData';
-import type { MentorGroup, TopicVersionMentor } from '@/data/mentorData';
+import type { MentorGroup } from '@/data/mentorData';
 
 const statusConfig: Record<
   string,

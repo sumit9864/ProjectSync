@@ -4,11 +4,8 @@ import {
   BookOpen,
   Lightbulb,
   CheckCircle2,
-  Circle,
-  Clock,
 } from 'lucide-react';
 import { Card, CardBody, Button, Badge, Skeleton, EmptyState } from '@/components/ui';
-import type { MentorPageId } from '@/components/MentorShell';
 import { mentorGroups } from '@/data/mentorData';
 import type { MentorGroup } from '@/data/mentorData';
 
@@ -23,11 +20,9 @@ const statusBadgeMap: Record<
 };
 
 export function MentorMyGroupsPage({
-  onNavigate,
   onOpenReview,
   onOpenLogBook,
 }: {
-  onNavigate: (page: MentorPageId) => void;
   onOpenReview: (groupId: string) => void;
   onOpenLogBook: (groupId: string) => void;
 }) {

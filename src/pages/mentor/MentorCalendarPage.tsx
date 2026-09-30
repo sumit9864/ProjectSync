@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Activity } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, Activity } from 'lucide-react';
 import { Card, CardHeader, CardBody, Badge, Skeleton, EmptyState } from '@/components/ui';
 import { mentorCalendarEvents, calendarLatestActivity } from '@/data/mentorData';
 

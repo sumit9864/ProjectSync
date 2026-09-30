@@ -10,7 +10,14 @@ import { TopicStudioPage } from '@/pages/TopicStudioPage';
 import { GithubTrackerPage } from '@/pages/GithubTrackerPage';
 import { MilestonesPage } from '@/pages/MilestonesPage';
 import { LogBookPage } from '@/pages/LogBookPage';
-import { AdminPlaceholder } from '@/pages/AdminPlaceholder';
+import { AdminShell, type AdminPageId } from '@/components/AdminShell';
+import { AdminOverviewPage } from '@/pages/admin/AdminOverviewPage';
+import { AdminPipelinePage } from '@/pages/admin/AdminPipelinePage';
+import { AdminAllocationPage } from '@/pages/admin/AdminAllocationPage';
+import { AdminControlsPage } from '@/pages/admin/AdminControlsPage';
+import { AdminAuditLogPage } from '@/pages/admin/AdminAuditLogPage';
+import { AdminArchivePage } from '@/pages/admin/AdminArchivePage';
+import { AdminMentorsPage } from '@/pages/admin/AdminMentorsPage';
 import { MentorOverviewPage } from '@/pages/mentor/MentorOverviewPage';
 import { MentorReviewQueuePage } from '@/pages/mentor/MentorReviewQueuePage';
 import { MentorMyGroupsPage } from '@/pages/mentor/MentorMyGroupsPage';
@@ -23,6 +30,7 @@ function App() {
   const [mentorPage, setMentorPage] = useState<MentorPageId>('overview');
   const [reviewGroupId, setReviewGroupId] = useState<string | null>(null);
   const [logBookGroupId, setLogBookGroupId] = useState<string | null>(null);
+  const [adminPage, setAdminPage] = useState<AdminPageId>('overview');
 
   const handleExit = () => {
     setRole(null);
@@ -30,6 +38,7 @@ function App() {
     setMentorPage('overview');
     setReviewGroupId(null);
     setLogBookGroupId(null);
+    setAdminPage('overview');
   };
 
   if (!role) {
@@ -43,7 +52,19 @@ function App() {
   if (role === 'admin') {
     return (
       <ToastProvider>
-        <AdminPlaceholder onExit={handleExit} />
+        <AdminShell
+          currentPage={adminPage}
+          onNavigate={setAdminPage}
+          onExit={handleExit}
+        >
+          {adminPage === 'overview' && <AdminOverviewPage onNavigate={setAdminPage} />}
+          {adminPage === 'pipeline' && <AdminPipelinePage />}
+          {adminPage === 'allocation' && <AdminAllocationPage />}
+          {adminPage === 'controls' && <AdminControlsPage />}
+          {adminPage === 'audit' && <AdminAuditLogPage />}
+          {adminPage === 'archive' && <AdminArchivePage />}
+          {adminPage === 'mentors' && <AdminMentorsPage />}
+        </AdminShell>
       </ToastProvider>
     );
   }
@@ -104,7 +125,6 @@ function App() {
         )}
         {mentorPage === 'groups' && (
           <MentorMyGroupsPage
-            onNavigate={setMentorPage}
             onOpenReview={openReviewForGroup}
             onOpenLogBook={openLogBookForGroup}
           />

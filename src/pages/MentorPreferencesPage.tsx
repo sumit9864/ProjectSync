@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
   UserCheck,
-  X,
   Plus,
   Trash2,
   Eye,
   GitCompare,
   Clock,
   CheckCircle2,
-  AlertCircle,
   Briefcase,
   Award,
 } from 'lucide-react';

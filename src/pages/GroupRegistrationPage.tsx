@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  Users,
   Plus,
   Trash2,
   AlertCircle,

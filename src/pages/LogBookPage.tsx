@@ -7,7 +7,7 @@ import {
   XCircle,
   Lock,
 } from 'lucide-react';
-import { Card, CardHeader, CardBody, Badge, Skeleton, EmptyState } from '@/components/ui';
+import { Card, Badge, Skeleton, EmptyState } from '@/components/ui';
 import { logBookEntries } from '@/data/mockData';
 import type { LogBookEntry } from '@/types';
 

@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Lightbulb,
   Clock,
   CheckCircle2,
   AlertCircle,
-  History,
   Send,
   Save,
   Lock,
