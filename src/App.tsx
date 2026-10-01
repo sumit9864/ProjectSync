@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { StudentShell, type StudentPageId } from '@/components/StudentShell';
 import { MentorShell, type MentorPageId } from '@/components/MentorShell';
-import { Landing, type Role } from '@/components/Landing';
+import { AdminShell, type AdminPageId } from '@/components/AdminShell';
+import { AuthScreen } from '@/components/AuthScreen';
 import { ToastProvider } from '@/components/Toast';
+import { useAuth } from '@/hooks/useAuth';
 import { OverviewPage } from '@/pages/OverviewPage';
 import { GroupRegistrationPage } from '@/pages/GroupRegistrationPage';
 import { MentorPreferencesPage } from '@/pages/MentorPreferencesPage';
@@ -10,7 +12,6 @@ import { TopicStudioPage } from '@/pages/TopicStudioPage';
 import { GithubTrackerPage } from '@/pages/GithubTrackerPage';
 import { MilestonesPage } from '@/pages/MilestonesPage';
 import { LogBookPage } from '@/pages/LogBookPage';
-import { AdminShell, type AdminPageId } from '@/components/AdminShell';
 import { AdminOverviewPage } from '@/pages/admin/AdminOverviewPage';
 import { AdminPipelinePage } from '@/pages/admin/AdminPipelinePage';
 import { AdminAllocationPage } from '@/pages/admin/AdminAllocationPage';
@@ -25,7 +26,7 @@ import { MentorLogBookPage } from '@/pages/mentor/MentorLogBookPage';
 import { MentorCalendarPage } from '@/pages/mentor/MentorCalendarPage';
 
 function App() {
-  const [role, setRole] = useState<Role | null>(null);
+  const { session, signIn, signOut } = useAuth();
   const [studentPage, setStudentPage] = useState<StudentPageId>('overview');
   const [mentorPage, setMentorPage] = useState<MentorPageId>('overview');
   const [reviewGroupId, setReviewGroupId] = useState<string | null>(null);
@@ -33,7 +34,7 @@ function App() {
   const [adminPage, setAdminPage] = useState<AdminPageId>('overview');
 
   const handleExit = () => {
-    setRole(null);
+    signOut();
     setStudentPage('overview');
     setMentorPage('overview');
     setReviewGroupId(null);
@@ -41,15 +42,15 @@ function App() {
     setAdminPage('overview');
   };
 
-  if (!role) {
+  if (!session) {
     return (
       <ToastProvider>
-        <Landing onSelect={setRole} />
+        <AuthScreen onSignIn={signIn} />
       </ToastProvider>
     );
   }
 
-  if (role === 'admin') {
+  if (session.role === 'admin') {
     return (
       <ToastProvider>
         <AdminShell
@@ -69,7 +70,7 @@ function App() {
     );
   }
 
-  if (role === 'student') {
+  if (session.role === 'student') {
     return (
       <ToastProvider>
         <StudentShell
@@ -89,7 +90,7 @@ function App() {
     );
   }
 
-  // role === 'mentor'
+  // session.role === 'mentor'
   const openReviewForGroup = (groupId: string) => {
     setReviewGroupId(groupId);
     setMentorPage('review');
