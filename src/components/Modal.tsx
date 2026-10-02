@@ -16,13 +16,13 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-2xl' }
     <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto p-4 sm:items-center">
       <div className="absolute inset-0 bg-ink-900/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       <div
-        className={`relative my-auto w-full ${maxWidth} rounded-2xl bg-white shadow-xl animate-scale-in`}
+        className={`relative my-auto w-full ${maxWidth} rounded-2xl bg-white shadow-xl animate-scale-in dark:bg-ink-900 dark:border dark:border-ink-700`}
       >
-        <div className="flex items-center justify-between gap-4 border-b border-ink-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-ink-900">{title}</h2>
+        <div className="flex items-center justify-between gap-4 border-b border-ink-100 px-6 py-4 dark:border-ink-800">
+          <h2 className="text-lg font-semibold text-ink-900 dark:text-ink-100">{title}</h2>
           <button
             onClick={onClose}
-            className="text-ink-400 hover:text-ink-600 transition-colors"
+            className="text-ink-400 hover:text-ink-600 transition-colors dark:text-ink-500 dark:hover:text-ink-300"
             aria-label="Close"
           >
             <X className="h-5 w-5" />

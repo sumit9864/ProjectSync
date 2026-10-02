@@ -14,11 +14,15 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { demoUsers, type AuthRole } from '@/data/demoUsers';
 import type { AuthSession } from '@/hooks/useAuth';
+import type { ThemeMode } from '@/hooks/useTheme';
 
 type AuthScreenProps = {
   onSignIn: (email: string, password: string) => { success: boolean; session?: AuthSession };
+  theme: ThemeMode;
+  onToggleTheme: () => void;
 };
 
 type Mode = 'signin' | 'signup';
@@ -36,33 +40,38 @@ const roleLabels: Record<AuthRole, string> = {
 };
 
 const roleAccents: Record<AuthRole, string> = {
-  student: 'bg-brand-50 text-brand-600 border-brand-200',
-  mentor: 'bg-sky-50 text-sky-600 border-sky-200',
-  admin: 'bg-violet-50 text-violet-600 border-violet-200',
+  student: 'bg-brand-50 text-brand-600 border-brand-200 dark:bg-brand-950/60 dark:text-brand-400 dark:border-brand-800/60',
+  mentor: 'bg-sky-50 text-sky-600 border-sky-200 dark:bg-sky-950/60 dark:text-sky-400 dark:border-sky-800/60',
+  admin: 'bg-violet-50 text-violet-600 border-violet-200 dark:bg-violet-950/60 dark:text-violet-400 dark:border-violet-800/60',
 };
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-export function AuthScreen({ onSignIn }: AuthScreenProps) {
+export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) {
   const [mode, setMode] = useState<Mode>('signin');
   const { showToast } = useToast();
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 px-4 py-8">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 px-4 py-8 dark:bg-black">
       {/* Background decoration — same visual language as the old landing */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-brand-600/20 blur-3xl" />
-        <div className="absolute -right-40 top-1/3 h-96 w-96 rounded-full bg-sky-600/10 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-emerald-600/10 blur-3xl" />
+        <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-brand-600/20 blur-3xl dark:bg-brand-600/10" />
+        <div className="absolute -right-40 top-1/3 h-96 w-96 rounded-full bg-sky-600/10 blur-3xl dark:bg-sky-600/5" />
+        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-emerald-600/10 blur-3xl dark:bg-emerald-600/5" />
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
           style={{
             backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
             backgroundSize: '32px 32px',
           }}
         />
+      </div>
+
+      {/* Theme toggle — top right */}
+      <div className="absolute right-4 top-4 z-20">
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} className="text-ink-400 hover:bg-white/10 dark:text-ink-500 dark:hover:bg-white/5" />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
@@ -78,15 +87,15 @@ export function AuthScreen({ onSignIn }: AuthScreenProps) {
         </div>
 
         {/* Card with mode tabs */}
-        <div className="rounded-2xl border border-white/10 bg-white shadow-2xl animate-scale-in">
+        <div className="rounded-2xl border border-white/10 bg-white shadow-2xl animate-scale-in dark:border-ink-700 dark:bg-ink-900">
           {/* Tab switcher */}
-          <div className="flex border-b border-ink-100">
+          <div className="flex border-b border-ink-100 dark:border-ink-800">
             <button
               onClick={() => setMode('signin')}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 mode === 'signin'
-                  ? 'border-b-2 border-brand-600 text-brand-600'
-                  : 'text-ink-400 hover:text-ink-600'
+                  ? 'border-b-2 border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400'
+                  : 'text-ink-400 hover:text-ink-600 dark:text-ink-500 dark:hover:text-ink-300'
               }`}
             >
               Sign In
@@ -95,8 +104,8 @@ export function AuthScreen({ onSignIn }: AuthScreenProps) {
               onClick={() => setMode('signup')}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 mode === 'signup'
-                  ? 'border-b-2 border-brand-600 text-brand-600'
-                  : 'text-ink-400 hover:text-ink-600'
+                  ? 'border-b-2 border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400'
+                  : 'text-ink-400 hover:text-ink-600 dark:text-ink-500 dark:hover:text-ink-300'
               }`}
             >
               Sign Up
@@ -195,11 +204,11 @@ function SignInForm({
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {/* Email */}
       <div>
-        <label htmlFor="signin-email" className="mb-1.5 block text-sm font-medium text-ink-700">
+        <label htmlFor="signin-email" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
           Email
         </label>
         <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
           <input
             ref={emailRef}
             id="signin-email"
@@ -215,25 +224,25 @@ function SignInForm({
             autoComplete="email"
           />
         </div>
-        {emailError && <p className="mt-1.5 text-xs text-rose-600">{emailError}</p>}
+        {emailError && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{emailError}</p>}
       </div>
 
       {/* Password */}
       <div>
         <div className="mb-1.5 flex items-center justify-between">
-          <label htmlFor="signin-password" className="block text-sm font-medium text-ink-700">
+          <label htmlFor="signin-password" className="block text-sm font-medium text-ink-700 dark:text-ink-200">
             Password
           </label>
           <button
             type="button"
             onClick={() => showToast('Password reset is not available in this demo.', 'info')}
-            className="text-xs font-medium text-brand-600 hover:text-brand-700"
+            className="text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
           >
             Forgot password?
           </button>
         </div>
         <div className="relative">
-          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
           <input
             id="signin-password"
             type={showPassword ? 'text' : 'password'}
@@ -250,18 +259,18 @@ function SignInForm({
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 transition-colors dark:text-ink-500 dark:hover:text-ink-300"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        {passwordError && <p className="mt-1.5 text-xs text-rose-600">{passwordError}</p>}
+        {passwordError && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{passwordError}</p>}
       </div>
 
       {/* Auth error */}
       {authError && (
-        <div className="flex items-center gap-2 rounded-lg bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700 animate-fade-in">
+        <div className="flex items-center gap-2 rounded-lg bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700 animate-fade-in dark:bg-rose-950/60 dark:text-rose-400">
           <Info className="h-4 w-4 shrink-0" />
           {authError}
         </div>
@@ -287,12 +296,12 @@ function SignInForm({
       </button>
 
       {/* Sign up link */}
-      <p className="text-center text-sm text-ink-500">
+      <p className="text-center text-sm text-ink-500 dark:text-ink-400">
         Don't have an account?{' '}
         <button
           type="button"
           onClick={onSwitchToSignUp}
-          className="font-semibold text-brand-600 hover:text-brand-700"
+          className="font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
         >
           Sign up
         </button>
@@ -352,13 +361,13 @@ function SignUpForm({
   if (submitted) {
     return (
       <div className="flex flex-col items-center text-center py-4 animate-fade-in">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
           <Info className="h-7 w-7" />
         </div>
-        <h3 className="font-display text-lg font-semibold text-ink-900">
+        <h3 className="font-display text-lg font-semibold text-ink-900 dark:text-ink-100">
           Self-registration isn't available yet
         </h3>
-        <p className="mt-2 max-w-xs text-sm text-ink-500 leading-relaxed">
+        <p className="mt-2 max-w-xs text-sm text-ink-500 leading-relaxed dark:text-ink-400">
           This demo doesn't support creating new accounts. Please use one of the
           demo accounts to explore the workspace.
         </p>
@@ -380,11 +389,11 @@ function SignUpForm({
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {/* Full name */}
       <div>
-        <label htmlFor="signup-name" className="mb-1.5 block text-sm font-medium text-ink-700">
+        <label htmlFor="signup-name" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
           Full Name
         </label>
         <div className="relative">
-          <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+          <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
           <input
             ref={nameRef}
             id="signup-name"
@@ -399,16 +408,16 @@ function SignUpForm({
             autoComplete="name"
           />
         </div>
-        {errors.name && <p className="mt-1.5 text-xs text-rose-600">{errors.name}</p>}
+        {errors.name && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.name}</p>}
       </div>
 
       {/* Email */}
       <div>
-        <label htmlFor="signup-email" className="mb-1.5 block text-sm font-medium text-ink-700">
+        <label htmlFor="signup-email" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
           Email
         </label>
         <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
           <input
             id="signup-email"
             type="email"
@@ -422,16 +431,16 @@ function SignUpForm({
             autoComplete="email"
           />
         </div>
-        {errors.email && <p className="mt-1.5 text-xs text-rose-600">{errors.email}</p>}
+        {errors.email && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.email}</p>}
       </div>
 
       {/* Password */}
       <div>
-        <label htmlFor="signup-password" className="mb-1.5 block text-sm font-medium text-ink-700">
+        <label htmlFor="signup-password" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
           Password
         </label>
         <div className="relative">
-          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
           <input
             id="signup-password"
             type={showPassword ? 'text' : 'password'}
@@ -447,22 +456,22 @@ function SignUpForm({
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 transition-colors dark:text-ink-500 dark:hover:text-ink-300"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        {errors.password && <p className="mt-1.5 text-xs text-rose-600">{errors.password}</p>}
+        {errors.password && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.password}</p>}
       </div>
 
       {/* Confirm password */}
       <div>
-        <label htmlFor="signup-confirm" className="mb-1.5 block text-sm font-medium text-ink-700">
+        <label htmlFor="signup-confirm" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
           Confirm Password
         </label>
         <div className="relative">
-          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
           <input
             id="signup-confirm"
             type={showPassword ? 'text' : 'password'}
@@ -477,7 +486,7 @@ function SignUpForm({
           />
         </div>
         {errors.confirmPassword && (
-          <p className="mt-1.5 text-xs text-rose-600">{errors.confirmPassword}</p>
+          <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.confirmPassword}</p>
         )}
       </div>
 
@@ -490,12 +499,12 @@ function SignUpForm({
         <ArrowRight className="h-4 w-4" />
       </button>
 
-      <p className="text-center text-sm text-ink-500">
+      <p className="text-center text-sm text-ink-500 dark:text-ink-400">
         Already have an account?{' '}
         <button
           type="button"
           onClick={onSwitchToSignIn}
-          className="font-semibold text-brand-600 hover:text-brand-700"
+          className="font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
         >
           Sign in
         </button>
@@ -512,8 +521,8 @@ function DemoAccountsHelper({
   onFill: (email: string, password: string) => void;
 }) {
   return (
-    <div className="border-t border-ink-100 pt-4">
-      <p className="mb-2.5 text-xs font-medium text-ink-400">Demo accounts — click to pre-fill</p>
+      <div className="border-t border-ink-100 pt-4 dark:border-ink-800">
+      <p className="mb-2.5 text-xs font-medium text-ink-400 dark:text-ink-500">Demo accounts — click to pre-fill</p>
       <div className="space-y-1.5">
         {demoUsers.map((user) => {
           const Icon = roleIcons[user.role];
@@ -522,7 +531,7 @@ function DemoAccountsHelper({
               key={user.email}
               type="button"
               onClick={() => onFill(user.email, user.password)}
-              className="flex w-full items-center gap-2.5 rounded-lg border border-ink-100 px-3 py-2 text-left transition-all hover:border-ink-200 hover:bg-ink-50"
+              className="flex w-full items-center gap-2.5 rounded-lg border border-ink-100 px-3 py-2 text-left transition-all hover:border-ink-200 hover:bg-ink-50 dark:border-ink-800 dark:hover:border-ink-700 dark:hover:bg-ink-800/50"
             >
               <div
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${roleAccents[user.role]}`}
@@ -530,8 +539,8 @@ function DemoAccountsHelper({
                 <Icon className="h-3.5 w-3.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-ink-700">{roleLabels[user.role]}</p>
-                <p className="truncate text-xs text-ink-400">{user.email}</p>
+                <p className="text-xs font-semibold text-ink-700 dark:text-ink-200">{roleLabels[user.role]}</p>
+                <p className="truncate text-xs text-ink-400 dark:text-ink-500">{user.email}</p>
               </div>
             </button>
           );

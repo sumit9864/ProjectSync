@@ -161,8 +161,8 @@ export function AdminAllocationPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Mentor Allocation</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Mentor Allocation</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Run FCFS allocation rounds or manually assign mentors as exceptions.
         </p>
       </div>
@@ -180,7 +180,7 @@ export function AdminAllocationPage() {
                   className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
                     round === r
                       ? 'bg-brand-600 text-white shadow-sm'
-                      : 'bg-ink-100 text-ink-600 hover:bg-ink-200'
+                      : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'
                   }`}
                 >
                   Round {r}
@@ -193,32 +193,32 @@ export function AdminAllocationPage() {
             </Button>
           </div>
           {unassignedGroups.length === 0 && (
-            <p className="text-sm text-ink-400">
+            <p className="text-sm text-ink-400 dark:text-ink-500">
               All groups already have mentors assigned.
             </p>
           )}
 
           {/* Results */}
           {results && (
-            <div className="rounded-xl border border-ink-100 bg-ink-50/50 p-4 space-y-3">
-              <p className="text-sm font-semibold text-ink-700">Round {round} Results</p>
+            <div className="rounded-xl border border-ink-100 dark:border-ink-800 bg-ink-50/50 dark:bg-ink-900/50 p-4 space-y-3">
+              <p className="text-sm font-semibold text-ink-700 dark:text-ink-200">Round {round} Results</p>
               {results.length === 0 ? (
-                <p className="text-sm text-ink-400">No unassigned groups to process.</p>
+                <p className="text-sm text-ink-400 dark:text-ink-500">No unassigned groups to process.</p>
               ) : (
-                <div className="divide-y divide-ink-100">
+                <div className="divide-y divide-ink-100 dark:divide-ink-800">
                   {results.map((r) => (
                     <div key={r.groupId} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="flex items-center gap-3 min-w-0">
                         {r.status === 'assigned' ? (
-                          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+                          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500 dark:text-emerald-400" />
                         ) : (
                           <XCircle className="h-5 w-5 shrink-0 text-rose-400" />
                         )}
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-ink-800 truncate">
+                          <p className="text-sm font-semibold text-ink-800 truncate dark:text-ink-100">
                             {r.groupName}
                           </p>
-                          <p className="text-xs text-ink-400 truncate">
+                          <p className="text-xs text-ink-400 truncate dark:text-ink-500">
                             {r.projectId} · {r.reason}
                             {r.matchedMentorName && ` · ${r.matchedMentorName}`}
                           </p>
@@ -238,19 +238,19 @@ export function AdminAllocationPage() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Manual assignment */}
-        <Card className="border-amber-200">
+        <Card className="border-amber-200 dark:border-amber-800/60">
           <CardHeader
             title="Manual Assignment"
             subtitle="Exception path — override allocation results"
           />
           <CardBody className="space-y-4">
-            <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-950/60 dark:text-amber-400">
               <Lock className="h-3.5 w-3.5" />
               Use only when FCFS rounds cannot place a group.
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 Unassigned Group
               </label>
               <select
@@ -268,7 +268,7 @@ export function AdminAllocationPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Mentor</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Mentor</label>
               <select
                 value={selectedMentorId}
                 onChange={(e) => setSelectedMentorId(e.target.value)}
@@ -305,18 +305,18 @@ export function AdminAllocationPage() {
                 message="Run your first allocation round to see results here."
               />
             ) : (
-              <div className="divide-y divide-ink-50">
+              <div className="divide-y divide-ink-50 dark:divide-ink-800">
                 {history.map((h) => (
                   <div key={h.id} className="flex items-center justify-between gap-3 px-5 py-4">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400">
                         <History className="h-4.5 w-4.5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-ink-800">
+                        <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">
                           Round {h.round}
                         </p>
-                        <p className="text-xs text-ink-400 truncate">
+                        <p className="text-xs text-ink-400 truncate dark:text-ink-500">
                           {h.runAt} · by {h.runBy}
                         </p>
                       </div>

@@ -100,8 +100,8 @@ export function AdminPipelinePage() {
     <div className="space-y-4 animate-fade-in">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900">Pipeline</h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Pipeline</h1>
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             All {adminGroups.length} groups across every stage of the project lifecycle.
           </p>
         </div>
@@ -115,7 +115,7 @@ export function AdminPipelinePage() {
       <Card>
         <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
             <input
               type="text"
               value={search}
@@ -154,7 +154,7 @@ export function AdminPipelinePage() {
               <div className="hidden overflow-x-auto lg:block">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-ink-100 text-left text-xs font-semibold uppercase tracking-wide text-ink-400">
+                    <tr className="border-b border-ink-100 dark:border-ink-800 text-left text-xs font-semibold uppercase tracking-wide text-ink-400 dark:text-ink-500">
                       <th className="px-5 py-3">Group</th>
                       <th className="px-5 py-3">Members</th>
                       <th className="px-5 py-3">Elective</th>
@@ -165,23 +165,23 @@ export function AdminPipelinePage() {
                       <th className="px-5 py-3"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-ink-50">
+                  <tbody className="divide-y divide-ink-50 dark:divide-ink-800">
                     {filtered.map((g) => (
-                      <tr key={g.id} className="transition-colors hover:bg-ink-50/60">
+                      <tr key={g.id} className="transition-colors hover:bg-ink-50/60 dark:hover:bg-ink-800/60">
                         <td className="px-5 py-3.5">
-                          <p className="font-semibold text-ink-800">{g.name}</p>
-                          <p className="text-xs text-ink-400">{g.projectId}</p>
+                          <p className="font-semibold text-ink-800 dark:text-ink-100">{g.name}</p>
+                          <p className="text-xs text-ink-400 dark:text-ink-500">{g.projectId}</p>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className="flex items-center gap-1.5 text-ink-600">
-                            <Users className="h-3.5 w-3.5 text-ink-400" />
+                          <span className="flex items-center gap-1.5 text-ink-600 dark:text-ink-300">
+                            <Users className="h-3.5 w-3.5 text-ink-400 dark:text-ink-500" />
                             {g.memberCount}
                           </span>
                         </td>
-                        <td className="px-5 py-3.5 text-ink-600">{g.elective}</td>
+                        <td className="px-5 py-3.5 text-ink-600 dark:text-ink-300">{g.elective}</td>
                         <td className="px-5 py-3.5">
                           {g.mentorName ? (
-                            <span className="text-ink-700">{g.mentorName}</span>
+                            <span className="text-ink-700 dark:text-ink-200">{g.mentorName}</span>
                           ) : (
                             <Badge color="error">Unassigned</Badge>
                           )}
@@ -193,9 +193,9 @@ export function AdminPipelinePage() {
                         </td>
                         <td className="px-5 py-3.5">
                           {g.githubConnected ? (
-                            <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
+                            <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 dark:text-emerald-400" />
                           ) : (
-                            <XCircle className="h-4.5 w-4.5 text-ink-300" />
+                            <XCircle className="h-4.5 w-4.5 text-ink-300 dark:text-ink-600" />
                           )}
                         </td>
                         <td className="px-5 py-3.5">
@@ -207,23 +207,23 @@ export function AdminPipelinePage() {
                           <div className="relative inline-block" ref={openMenuId === g.id ? menuRef : undefined}>
                             <button
                               onClick={() => setOpenMenuId(openMenuId === g.id ? null : g.id)}
-                              className="rounded-lg p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 transition-colors"
+                              className="rounded-lg p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 transition-colors dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-300"
                               aria-label="Row actions"
                             >
                               <MoreVertical className="h-4 w-4" />
                             </button>
                             {openMenuId === g.id && (
-                              <div className="absolute right-0 top-9 z-20 w-44 rounded-xl border border-ink-200 bg-white shadow-xl animate-scale-in">
-                                <button className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-ink-600 hover:bg-ink-50 transition-colors">
-                                  <GitBranch className="h-4 w-4 text-ink-400" />
+                              <div className="absolute right-0 top-9 z-20 w-44 rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 shadow-xl animate-scale-in">
+                                <button className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-ink-600 hover:bg-ink-50 transition-colors dark:text-ink-300 dark:hover:bg-ink-800">
+                                  <GitBranch className="h-4 w-4 text-ink-400 dark:text-ink-500" />
                                   View details
                                 </button>
-                                <button className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-ink-600 hover:bg-ink-50 transition-colors">
-                                  <Users className="h-4 w-4 text-ink-400" />
+                                <button className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-ink-600 hover:bg-ink-50 transition-colors dark:text-ink-300 dark:hover:bg-ink-800">
+                                  <Users className="h-4 w-4 text-ink-400 dark:text-ink-500" />
                                   Reassign mentor
                                 </button>
-                                <button className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-ink-600 hover:bg-ink-50 transition-colors">
-                                  <Download className="h-4 w-4 text-ink-400" />
+                                <button className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-ink-600 hover:bg-ink-50 transition-colors dark:text-ink-300 dark:hover:bg-ink-800">
+                                  <Download className="h-4 w-4 text-ink-400 dark:text-ink-500" />
                                   Export group
                                 </button>
                               </div>
@@ -237,20 +237,20 @@ export function AdminPipelinePage() {
               </div>
 
               {/* Mobile cards */}
-              <div className="divide-y divide-ink-50 lg:hidden">
+              <div className="divide-y divide-ink-50 dark:divide-ink-800 lg:hidden">
                 {filtered.map((g) => (
                   <div key={g.id} className="px-5 py-4">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="font-semibold text-ink-800">{g.name}</p>
-                        <p className="text-xs text-ink-400">{g.projectId}</p>
+                        <p className="font-semibold text-ink-800 dark:text-ink-100">{g.name}</p>
+                        <p className="text-xs text-ink-400 dark:text-ink-500">{g.projectId}</p>
                       </div>
                       <Badge color={stageBadgeColor[g.stage]}>
                         {pipelineStageLabels[g.stage]}
                       </Badge>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                      <span className="flex items-center gap-1 text-ink-500">
+                      <span className="flex items-center gap-1 text-ink-500 dark:text-ink-400">
                         <Users className="h-3.5 w-3.5" />
                         {g.memberCount}
                       </span>
@@ -258,17 +258,17 @@ export function AdminPipelinePage() {
                         {topicStatusLabel[g.topicStatus]}
                       </Badge>
                       {g.mentorName ? (
-                        <span className="text-ink-600">{g.mentorName}</span>
+                        <span className="text-ink-600 dark:text-ink-300">{g.mentorName}</span>
                       ) : (
                         <Badge color="error">Unassigned</Badge>
                       )}
                       {g.githubConnected ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
                       ) : (
-                        <XCircle className="h-4 w-4 text-ink-300" />
+                        <XCircle className="h-4 w-4 text-ink-300 dark:text-ink-600" />
                       )}
                     </div>
-                    <p className="mt-1.5 text-xs text-ink-400">{g.elective}</p>
+                    <p className="mt-1.5 text-xs text-ink-400 dark:text-ink-500">{g.elective}</p>
                   </div>
                 ))}
               </div>

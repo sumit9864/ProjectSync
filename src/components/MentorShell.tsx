@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { AppShell, type NavItem } from '@/components/AppShell';
 import { mentorUser, mentorNotifications } from '@/data/mentorData';
+import type { ThemeMode } from '@/hooks/useTheme';
 
 export type MentorPageId =
   | 'overview'
@@ -29,9 +30,11 @@ type MentorShellProps = {
   onNavigate: (page: MentorPageId) => void;
   onExit: () => void;
   children: ReactNode;
+  theme: ThemeMode;
+  onToggleTheme: () => void;
 };
 
-export function MentorShell({ currentPage, onNavigate, onExit, children }: MentorShellProps) {
+export function MentorShell({ currentPage, onNavigate, onExit, children, theme, onToggleTheme }: MentorShellProps) {
   return (
     <AppShell
       currentPage={currentPage}
@@ -42,6 +45,8 @@ export function MentorShell({ currentPage, onNavigate, onExit, children }: Mento
       notifications={mentorNotifications}
       workspaceLabel="Mentor Workspace"
       sidebarFooterText="Stay on top of your reviews and mentoring sessions."
+      theme={theme}
+      onToggleTheme={onToggleTheme}
     >
       {children}
     </AppShell>

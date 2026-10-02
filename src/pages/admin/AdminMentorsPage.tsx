@@ -122,8 +122,8 @@ export function AdminMentorsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Mentor Management</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Mentor Management</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Add mentors individually or in bulk, and manage the roster.
         </p>
       </div>
@@ -134,7 +134,7 @@ export function AdminMentorsPage() {
           <CardHeader title="Add Single Mentor" subtitle="Create one mentor at a time" />
           <CardBody className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Name</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Name</label>
               <input
                 type="text"
                 value={name}
@@ -144,7 +144,7 @@ export function AdminMentorsPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Email</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Email</label>
               <input
                 type="email"
                 value={email}
@@ -154,7 +154,7 @@ export function AdminMentorsPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Domain</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Domain</label>
               <input
                 type="text"
                 value={domain}
@@ -164,7 +164,7 @@ export function AdminMentorsPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Capacity</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Capacity</label>
               <input
                 type="number"
                 value={capacity}
@@ -188,8 +188,8 @@ export function AdminMentorsPage() {
             subtitle="Paste a comma-separated list"
           />
           <CardBody className="space-y-4">
-            <p className="text-xs text-ink-400">
-              One mentor per line. Format: <span className="font-mono text-ink-500">Name, Email, Domain, Capacity</span>
+            <p className="text-xs text-ink-400 dark:text-ink-500">
+              One mentor per line. Format: <span className="font-mono text-ink-500 dark:text-ink-400">Name, Email, Domain, Capacity</span>
             </p>
             <textarea
               value={bulkText}
@@ -204,17 +204,17 @@ export function AdminMentorsPage() {
             </Button>
 
             {bulkPreview && (
-              <div className="rounded-xl border border-ink-100 bg-ink-50/50 p-4 space-y-3">
-                <p className="text-sm font-semibold text-ink-700">
+              <div className="rounded-xl border border-ink-100 dark:border-ink-800 bg-ink-50/50 dark:bg-ink-900/50 p-4 space-y-3">
+                <p className="text-sm font-semibold text-ink-700 dark:text-ink-200">
                   {bulkPreview.length} mentor{bulkPreview.length !== 1 ? 's' : ''} ready to add
                 </p>
-                <div className="divide-y divide-ink-100">
+                <div className="divide-y divide-ink-100 dark:divide-ink-800">
                   {bulkPreview.map((m) => (
                     <div key={m.id} className="flex items-center gap-3 py-2">
-                      <Check className="h-4 w-4 shrink-0 text-emerald-500" />
+                      <Check className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-ink-800 truncate">{m.name}</p>
-                        <p className="text-xs text-ink-400 truncate">{m.email} · {m.domain} · cap {m.capacity}</p>
+                        <p className="text-sm font-medium text-ink-800 truncate dark:text-ink-100">{m.name}</p>
+                        <p className="text-xs text-ink-400 truncate dark:text-ink-500">{m.email} · {m.domain} · cap {m.capacity}</p>
                       </div>
                     </div>
                   ))}
@@ -245,27 +245,27 @@ export function AdminMentorsPage() {
               message="Add mentors using the forms above."
             />
           ) : (
-            <div className="divide-y divide-ink-50">
+            <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {mentors.map((m) => (
                 <div key={m.id} className="flex items-center justify-between gap-3 px-5 py-4">
                   <div className="flex items-center gap-3 min-w-0">
                     <Avatar name={m.name} color={m.avatarColor} size="sm" />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-ink-800 truncate">{m.name}</p>
-                      <p className="text-xs text-ink-400 truncate flex items-center gap-1.5">
+                      <p className="text-sm font-semibold text-ink-800 truncate dark:text-ink-100">{m.name}</p>
+                      <p className="text-xs text-ink-400 truncate flex items-center gap-1.5 dark:text-ink-500">
                         <Mail className="h-3 w-3" />
                         {m.email}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="hidden sm:block text-xs text-ink-500">{m.domain}</span>
+                    <span className="hidden sm:block text-xs text-ink-500 dark:text-ink-400">{m.domain}</span>
                     <Badge color={m.currentLoad >= m.capacity ? 'error' : 'info'}>
                       {m.currentLoad}/{m.capacity}
                     </Badge>
                     <button
                       onClick={() => removeMentor(m.id)}
-                      className="rounded-lg p-1.5 text-ink-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+                      className="rounded-lg p-1.5 text-ink-400 hover:bg-rose-50 hover:text-rose-500 transition-colors dark:text-ink-500 dark:hover:bg-rose-950/60 dark:hover:text-rose-400"
                       aria-label="Remove mentor"
                     >
                       <Trash2 className="h-4 w-4" />

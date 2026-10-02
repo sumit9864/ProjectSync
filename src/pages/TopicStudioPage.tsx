@@ -157,8 +157,8 @@ export function TopicStudioPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900">Topic Studio</h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Topic Studio</h1>
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             Define, refine, and submit your project topic for mentor approval.
           </p>
         </div>
@@ -174,33 +174,33 @@ export function TopicStudioPage() {
       <Card
         className={
           statusInfo.color === 'warning'
-            ? 'border-amber-200 bg-amber-50/50'
+            ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800/60 dark:bg-amber-950/30'
             : statusInfo.color === 'success'
-            ? 'border-emerald-200 bg-emerald-50/50'
-            : 'border-rose-200 bg-rose-50/50'
+            ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-800/60 dark:bg-emerald-950/30'
+            : 'border-rose-200 bg-rose-50/50 dark:border-rose-800/60 dark:bg-rose-950/30'
         }
       >
         <CardBody className="flex items-start gap-3">
           <div
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
               statusInfo.color === 'warning'
-                ? 'bg-amber-100 text-amber-600'
+                ? 'bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400'
                 : statusInfo.color === 'success'
-                ? 'bg-emerald-100 text-emerald-600'
-                : 'bg-rose-100 text-rose-600'
+                ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400'
+                : 'bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400'
             }`}
           >
             <StatusIcon className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="font-display font-semibold text-ink-900">{statusInfo.label}</p>
+            <p className="font-display font-semibold text-ink-900 dark:text-ink-100">{statusInfo.label}</p>
             {currentStatus === 'changes_requested' && versions[0]?.feedback && (
-              <p className="mt-1 text-sm text-ink-600">
+              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
                 <span className="font-medium">Mentor feedback:</span> {versions[0].feedback}
               </p>
             )}
             {currentStatus === 'approved' && (
-              <p className="mt-1 text-sm text-ink-600">
+              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
                 Your topic is approved. You can no longer edit it.
               </p>
             )}
@@ -216,12 +216,12 @@ export function TopicStudioPage() {
           action={
             <div className="flex items-center gap-2">
               {hasUnsavedChanges ? (
-                <span className="flex items-center gap-1.5 text-xs text-amber-600">
+                <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
                   <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse-dot" />
                   Unsaved changes
                 </span>
               ) : (
-                <span className="flex items-center gap-1.5 text-xs text-emerald-600">
+                <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   All changes saved
                 </span>
@@ -232,7 +232,7 @@ export function TopicStudioPage() {
         <CardBody className="space-y-5">
           {fields.map((field) => (
             <div key={field.key}>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 {field.label}
               </label>
               {field.rows === 1 ? (
@@ -242,7 +242,7 @@ export function TopicStudioPage() {
                   onChange={(e) => updateField(field.key, e.target.value)}
                   disabled={isApproved}
                   placeholder={field.placeholder}
-                  className="input-field disabled:bg-ink-50 disabled:text-ink-500"
+                  className="input-field disabled:bg-ink-50 disabled:text-ink-500 dark:disabled:bg-ink-800/50 dark:disabled:text-ink-500"
                 />
               ) : (
                 <textarea
@@ -251,14 +251,14 @@ export function TopicStudioPage() {
                   disabled={isApproved}
                   rows={field.rows}
                   placeholder={field.placeholder}
-                  className="input-field resize-none disabled:bg-ink-50 disabled:text-ink-500"
+                  className="input-field resize-none disabled:bg-ink-50 disabled:text-ink-500 dark:disabled:bg-ink-800/50 dark:disabled:text-ink-500"
                 />
               )}
             </div>
           ))}
 
           {!isApproved && (
-            <div className="flex justify-end gap-3 border-t border-ink-100 pt-4">
+            <div className="flex justify-end gap-3 border-t border-ink-100 pt-4 dark:border-ink-800">
               <Button
                 variant="secondary"
                 onClick={() => {
@@ -291,9 +291,9 @@ export function TopicStudioPage() {
       <Card>
         <CardHeader title="Version History" subtitle="All past submissions and their status" />
         <CardBody className="p-0">
-          <div className="divide-y divide-ink-50">
+          <div className="divide-y divide-ink-50 dark:divide-ink-800">
             {versions.length === 0 ? (
-              <p className="px-5 py-8 text-center text-sm text-ink-400">
+              <p className="px-5 py-8 text-center text-sm text-ink-400 dark:text-ink-500">
                 No submissions yet. Submit your topic for review to see versions here.
               </p>
             ) : (
@@ -301,16 +301,16 @@ export function TopicStudioPage() {
                 const vStatus = statusConfig[v.status];
                 return (
                   <div key={v.version} className="flex items-start gap-3 px-5 py-4">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-xs font-semibold text-ink-600">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-xs font-semibold text-ink-600 dark:bg-ink-800 dark:text-ink-300">
                       v{v.version}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <Badge color={vStatus.color}>{vStatus.label}</Badge>
-                        <span className="text-xs text-ink-400">{v.submittedAt}</span>
+                        <span className="text-xs text-ink-400 dark:text-ink-500">{v.submittedAt}</span>
                       </div>
                       {v.feedback && (
-                        <p className="mt-2 rounded-lg bg-ink-50 px-3 py-2 text-sm text-ink-600">
+                        <p className="mt-2 rounded-lg bg-ink-50 px-3 py-2 text-sm text-ink-600 dark:bg-ink-800/50 dark:text-ink-300">
                           {v.feedback}
                         </p>
                       )}
@@ -342,11 +342,11 @@ export function TopicStudioPage() {
                 <Avatar name={msg.author} color={msg.avatarColor} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-ink-800">{msg.author}</span>
+                    <span className="text-sm font-semibold text-ink-800 dark:text-ink-100">{msg.author}</span>
                     <Badge color={msg.role === 'Mentor' ? 'brand' : 'neutral'}>{msg.role}</Badge>
-                    <span className="text-xs text-ink-400">{msg.time}</span>
+                    <span className="text-xs text-ink-400 dark:text-ink-500">{msg.time}</span>
                   </div>
-                  <p className="mt-1.5 rounded-lg bg-ink-50 px-3.5 py-2.5 text-sm text-ink-700 leading-relaxed">
+                  <p className="mt-1.5 rounded-lg bg-ink-50 px-3.5 py-2.5 text-sm text-ink-700 leading-relaxed dark:bg-ink-800/50 dark:text-ink-300">
                     {msg.body}
                   </p>
                 </div>
@@ -355,7 +355,7 @@ export function TopicStudioPage() {
           </div>
 
           {/* Reply box */}
-          <div className="border-t border-ink-100 pt-4">
+          <div className="border-t border-ink-100 pt-4 dark:border-ink-800">
             <div className="flex items-start gap-3">
               <Avatar name={currentUser.name} color={currentUser.avatarColor} size="sm" />
               <div className="flex-1">

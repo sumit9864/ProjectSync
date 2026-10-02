@@ -123,22 +123,22 @@ export function MentorPreferencesPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Mentor Preferences</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Mentor Preferences</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Browse available mentors, build your shortlist, and submit your ranked preferences.
         </p>
       </div>
 
       {/* Round Selector */}
-      <div className="flex items-center gap-2 rounded-xl border border-ink-200 bg-white p-1.5 shadow-card">
+      <div className="flex items-center gap-2 rounded-xl border border-ink-200 bg-white p-1.5 shadow-card dark:border-ink-700 dark:bg-ink-900 dark:shadow-card-dark">
         {([1, 2] as const).map((r) => (
           <button
             key={r}
             onClick={() => setRound(r)}
             className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
               round === r
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'text-ink-600 hover:bg-ink-50'
+                ? 'bg-brand-600 text-white shadow-sm dark:bg-brand-500'
+                : 'text-ink-600 hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-ink-800'
             }`}
           >
             Round {r}
@@ -148,7 +148,7 @@ export function MentorPreferencesPage() {
       </div>
 
       {/* Shortlist Panel */}
-      <Card className={isSubmitted ? 'border-emerald-200' : ''}>
+      <Card className={isSubmitted ? 'border-emerald-200 dark:border-emerald-800/60' : ''}>
         <CardHeader
           title="Your Shortlist"
           subtitle={
@@ -181,22 +181,22 @@ export function MentorPreferencesPage() {
               {shortlistedMentors.map((mentor, idx) => (
                 <div
                   key={mentor.id}
-                  className="flex items-center gap-3 rounded-xl border border-ink-200 p-3 transition-colors hover:border-brand-200"
+                  className="flex items-center gap-3 rounded-xl border border-ink-200 p-3 transition-colors hover:border-brand-200 dark:border-ink-700 dark:hover:border-brand-800/60"
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
                     {idx + 1}
                   </div>
                   <Avatar name={mentor.name} color={mentor.avatarColor} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-ink-800 truncate">{mentor.name}</p>
-                    <p className="text-xs text-ink-500 truncate">{mentor.domain}</p>
+                    <p className="text-sm font-semibold text-ink-800 truncate dark:text-ink-100">{mentor.name}</p>
+                    <p className="text-xs text-ink-500 truncate dark:text-ink-400">{mentor.domain}</p>
                   </div>
                   {!isSubmitted && (
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => moveRank(mentor.id, 'up')}
                         disabled={idx === 0}
-                        className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 disabled:opacity-30 transition-colors"
+                        className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 disabled:opacity-30 transition-colors dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-300"
                         aria-label="Move up"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
@@ -204,14 +204,14 @@ export function MentorPreferencesPage() {
                       <button
                         onClick={() => moveRank(mentor.id, 'down')}
                         disabled={idx === shortlist.length - 1}
-                        className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 disabled:opacity-30 transition-colors"
+                        className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 disabled:opacity-30 transition-colors dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-300"
                         aria-label="Move down"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                       </button>
                       <button
                         onClick={() => removeFromShortlist(mentor.id)}
-                        className="rounded-md p-1.5 text-ink-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+                        className="rounded-md p-1.5 text-ink-400 hover:bg-rose-50 hover:text-rose-500 transition-colors dark:text-ink-500 dark:hover:bg-rose-950/60 dark:hover:text-rose-400"
                         aria-label="Remove from shortlist"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -221,12 +221,12 @@ export function MentorPreferencesPage() {
                 </div>
               ))}
               {!isSubmitted && shortlist.length < 3 && (
-                <p className="text-xs text-ink-400">
+                <p className="text-xs text-ink-400 dark:text-ink-500">
                   You can add {3 - shortlist.length} more mentor{3 - shortlist.length > 1 ? 's' : ''} from the list below.
                 </p>
               )}
               {isSubmitted && (
-                <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700">
+                <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
                   <Clock className="h-4 w-4 shrink-0" />
                   Submitted at {submission!.submittedAt}. You can revise and resubmit until the deadline.
                 </div>
@@ -238,11 +238,11 @@ export function MentorPreferencesPage() {
 
       {/* Compare bar */}
       {compareIds.length > 0 && (
-        <Card className="border-brand-200 bg-brand-50/40">
+        <Card className="border-brand-200 bg-brand-50/40 dark:border-brand-800/60 dark:bg-brand-950/30">
           <CardBody className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <GitCompare className="h-5 w-5 text-brand-600" />
-              <p className="text-sm text-ink-700">
+              <GitCompare className="h-5 w-5 text-brand-600 dark:text-brand-400" />
+              <p className="text-sm text-ink-700 dark:text-ink-300">
                 {compareIds.length} mentor{compareIds.length > 1 ? 's' : ''} selected for comparison
               </p>
             </div>
@@ -268,7 +268,7 @@ export function MentorPreferencesPage() {
 
       {/* Mentor List */}
       <div>
-        <h2 className="mb-3 font-display text-lg font-semibold text-ink-900">Available Mentors</h2>
+        <h2 className="mb-3 font-display text-lg font-semibold text-ink-900 dark:text-ink-100">Available Mentors</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {allMentors.map((mentor) => {
             const inShortlist = shortlist.includes(mentor.id);
@@ -282,22 +282,22 @@ export function MentorPreferencesPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="font-display font-semibold text-ink-900">{mentor.name}</p>
-                          <p className="text-xs text-ink-500">{mentor.domain}</p>
+                          <p className="font-display font-semibold text-ink-900 dark:text-ink-100">{mentor.name}</p>
+                          <p className="text-xs text-ink-500 dark:text-ink-400">{mentor.domain}</p>
                         </div>
                         {full && <Badge color="error">Full</Badge>}
                       </div>
-                      <p className="mt-2 text-sm text-ink-600">{mentor.focus}</p>
+                      <p className="mt-2 text-sm text-ink-600 dark:text-ink-300">{mentor.focus}</p>
 
                       {/* Capacity indicator */}
                       <div className="mt-3">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-ink-400">Current load</span>
-                          <span className={`font-medium ${full ? 'text-rose-600' : 'text-ink-600'}`}>
+                          <span className="text-ink-400 dark:text-ink-500">Current load</span>
+                          <span className={`font-medium ${full ? 'text-rose-600 dark:text-rose-400' : 'text-ink-600 dark:text-ink-300'}`}>
                             {mentor.currentLoad}/{mentor.capacity}
                           </span>
                         </div>
-                        <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-100">
+                        <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
                           <div
                             className={`h-full rounded-full transition-all ${
                               full ? 'bg-rose-400' : mentor.currentLoad >= mentor.capacity - 1 ? 'bg-amber-400' : 'bg-brand-500'
@@ -339,8 +339,8 @@ export function MentorPreferencesPage() {
                           onClick={() => toggleCompare(mentor.id)}
                           className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
                             inCompare
-                              ? 'bg-brand-100 text-brand-700'
-                              : 'text-ink-500 hover:bg-ink-100'
+                              ? 'bg-brand-100 text-brand-700 dark:bg-brand-950/50 dark:text-brand-300'
+                              : 'text-ink-500 hover:bg-ink-100 dark:text-ink-400 dark:hover:bg-ink-800'
                           }`}
                         >
                           <GitCompare className="h-3.5 w-3.5" />
@@ -368,19 +368,19 @@ export function MentorPreferencesPage() {
             <div className="flex items-start gap-4">
               <Avatar name={profileMentor.name} color={profileMentor.avatarColor} size="lg" />
               <div>
-                <p className="font-display text-lg font-bold text-ink-900">{profileMentor.name}</p>
-                <p className="text-sm text-brand-600">{profileMentor.domain}</p>
-                <p className="mt-1 text-sm text-ink-600">{profileMentor.focus}</p>
+                <p className="font-display text-lg font-bold text-ink-900 dark:text-ink-100">{profileMentor.name}</p>
+                <p className="text-sm text-brand-600 dark:text-brand-400">{profileMentor.domain}</p>
+                <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">{profileMentor.focus}</p>
               </div>
             </div>
 
-            <p className="text-sm leading-relaxed text-ink-600">{profileMentor.bio}</p>
+            <p className="text-sm leading-relaxed text-ink-600 dark:text-ink-300">{profileMentor.bio}</p>
 
-            <div className="flex items-center gap-3 rounded-lg bg-ink-50 px-4 py-3">
-              <Briefcase className="h-5 w-5 text-ink-500" />
+            <div className="flex items-center gap-3 rounded-lg bg-ink-50 px-4 py-3 dark:bg-ink-800/50">
+              <Briefcase className="h-5 w-5 text-ink-500 dark:text-ink-400" />
               <div>
-                <p className="text-xs text-ink-400">Capacity</p>
-                <p className="text-sm font-medium text-ink-700">
+                <p className="text-xs text-ink-400 dark:text-ink-500">Capacity</p>
+                <p className="text-sm font-medium text-ink-700 dark:text-ink-200">
                   {profileMentor.currentLoad} / {profileMentor.capacity} groups
                 </p>
               </div>
@@ -389,13 +389,13 @@ export function MentorPreferencesPage() {
             <div>
               <div className="mb-3 flex items-center gap-2">
                 <Award className="h-4 w-4 text-amber-500" />
-                <p className="text-sm font-semibold text-ink-700">Past Projects Guided</p>
+                <p className="text-sm font-semibold text-ink-700 dark:text-ink-200">Past Projects Guided</p>
               </div>
               <ul className="space-y-2">
                 {profileMentor.pastProjects.map((project, i) => (
                   <li
                     key={i}
-                    className="flex items-start gap-2.5 rounded-lg border border-ink-100 px-3 py-2.5 text-sm text-ink-600"
+                    className="flex items-start gap-2.5 rounded-lg border border-ink-100 px-3 py-2.5 text-sm text-ink-600 dark:border-ink-800 dark:text-ink-300"
                   >
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400" />
                     {project}
@@ -404,7 +404,7 @@ export function MentorPreferencesPage() {
               </ul>
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-ink-100 pt-4">
+            <div className="flex justify-end gap-3 border-t border-ink-100 pt-4 dark:border-ink-800">
               <Button variant="secondary" onClick={() => setProfileMentor(null)}>
                 Close
               </Button>
@@ -439,24 +439,24 @@ export function MentorPreferencesPage() {
             const mentor = allMentors.find((m) => m.id === id);
             if (!mentor) return null;
             return (
-              <div key={id} className="rounded-xl border border-ink-200 p-4">
+              <div key={id} className="rounded-xl border border-ink-200 p-4 dark:border-ink-700">
                 <div className="flex items-center gap-3">
                   <Avatar name={mentor.name} color={mentor.avatarColor} size="md" />
                   <div>
-                    <p className="font-display font-semibold text-ink-900">{mentor.name}</p>
-                    <p className="text-xs text-brand-600">{mentor.domain}</p>
+                    <p className="font-display font-semibold text-ink-900 dark:text-ink-100">{mentor.name}</p>
+                    <p className="text-xs text-brand-600 dark:text-brand-400">{mentor.domain}</p>
                   </div>
                 </div>
-                <p className="mt-3 text-sm text-ink-600">{mentor.focus}</p>
+                <p className="mt-3 text-sm text-ink-600 dark:text-ink-300">{mentor.focus}</p>
                 <div className="mt-4 space-y-3">
                   <div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-ink-400">Load</span>
-                      <span className="font-medium text-ink-600">
+                      <span className="text-ink-400 dark:text-ink-500">Load</span>
+                      <span className="font-medium text-ink-600 dark:text-ink-300">
                         {mentor.currentLoad}/{mentor.capacity}
                       </span>
                     </div>
-                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-100">
+                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
                       <div
                         className="h-full rounded-full bg-brand-500"
                         style={{ width: `${(mentor.currentLoad / mentor.capacity) * 100}%` }}
@@ -464,8 +464,8 @@ export function MentorPreferencesPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-ink-400">Past projects</p>
-                    <p className="text-sm text-ink-600">{mentor.pastProjects.length} guided</p>
+                    <p className="text-xs font-medium text-ink-400 dark:text-ink-500">Past projects</p>
+                    <p className="text-sm text-ink-600 dark:text-ink-300">{mentor.pastProjects.length} guided</p>
                   </div>
                 </div>
                 <Button

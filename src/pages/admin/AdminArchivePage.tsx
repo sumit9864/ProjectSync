@@ -39,8 +39,8 @@ export function AdminArchivePage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Project Archive</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Project Archive</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Browse past years' project titles and abstracts for reference.
         </p>
       </div>
@@ -48,7 +48,7 @@ export function AdminArchivePage() {
       <Card>
         <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
             <input
               type="text"
               value={search}
@@ -91,28 +91,28 @@ export function AdminArchivePage() {
 
 function ArchiveCard({ entry }: { entry: ArchiveEntry }) {
   return (
-    <Card className="transition-shadow hover:shadow-cardhover">
+    <Card className="transition-shadow hover:shadow-cardhover dark:hover:shadow-cardhover-dark">
       <CardBody>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-xs font-medium text-ink-400">
+            <p className="text-xs font-medium text-ink-400 dark:text-ink-500">
               {entry.year} · {entry.group}
             </p>
-            <p className="mt-0.5 font-display font-semibold text-ink-900 leading-snug">
+            <p className="mt-0.5 font-display font-semibold text-ink-900 dark:text-ink-100 leading-snug">
               {entry.title}
             </p>
           </div>
           <Badge color="brand">{entry.grade}</Badge>
         </div>
-        <p className="mt-2 text-sm text-ink-600 leading-relaxed line-clamp-3">
+        <p className="mt-2 text-sm text-ink-600 dark:text-ink-300 leading-relaxed line-clamp-3">
           {entry.abstract}
         </p>
-        <div className="mt-3 flex items-center gap-3 border-t border-ink-100 pt-3 text-xs text-ink-500">
+        <div className="mt-3 flex items-center gap-3 border-t border-ink-100 dark:border-ink-800 pt-3 text-xs text-ink-500 dark:text-ink-400">
           <span className="flex items-center gap-1.5">
-            <BookOpen className="h-3.5 w-3.5 text-ink-400" />
+            <BookOpen className="h-3.5 w-3.5 text-ink-400 dark:text-ink-500" />
             {entry.elective}
           </span>
-          <span className="text-ink-300">·</span>
+          <span className="text-ink-300 dark:text-ink-600">·</span>
           <span>{entry.mentor}</span>
         </div>
       </CardBody>

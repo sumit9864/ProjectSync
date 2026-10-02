@@ -85,10 +85,10 @@ export function OverviewPage({
     <div className="space-y-6 animate-fade-in">
       {/* Greeting */}
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">
           Welcome back, {currentUser.name.split(' ')[0]}
         </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Here is a snapshot of where your final-year project stands.
         </p>
       </div>
@@ -126,7 +126,7 @@ export function OverviewPage({
       </div>
 
       {/* Next Up Callout */}
-      <Card className="overflow-hidden border-brand-200 bg-gradient-to-br from-brand-50 to-white">
+      <Card className="overflow-hidden border-brand-200 bg-gradient-to-br from-brand-50 to-white dark:border-brand-800/60 dark:from-brand-950/40 dark:to-ink-900">
         <CardBody className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
@@ -135,9 +135,9 @@ export function OverviewPage({
             <div>
               <div className="flex items-center gap-2">
                 <Badge color="brand">Next up</Badge>
-                <span className="text-xs text-ink-400">Stage {nextUpStage + 1} of 4</span>
+                <span className="text-xs text-ink-400 dark:text-ink-500">Stage {nextUpStage + 1} of 4</span>
               </div>
-              <p className="mt-2 text-base font-medium text-ink-800">{nextUpInfo.message}</p>
+              <p className="mt-2 text-base font-medium text-ink-800 dark:text-ink-100">{nextUpInfo.message}</p>
             </div>
           </div>
           <Button onClick={() => onNavigate(nextUpInfo.page)} className="shrink-0">
@@ -157,25 +157,25 @@ export function OverviewPage({
               const isCurrent = !done && idx === completedStages.length;
               return (
                 <div key={stage.key} className="flex items-center sm:flex-1">
-                  <div className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-colors sm:flex-1 ${done ? 'bg-brand-50' : isCurrent ? 'bg-amber-50' : 'bg-ink-50'}`}>
+                  <div className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-colors sm:flex-1 ${done ? 'bg-brand-50 dark:bg-brand-950/40' : isCurrent ? 'bg-amber-50 dark:bg-amber-950/40' : 'bg-ink-50 dark:bg-ink-800/50'}`}>
                     {done ? (
-                      <CheckCircle2 className="h-5 w-5 text-brand-600" />
+                      <CheckCircle2 className="h-5 w-5 text-brand-600 dark:text-brand-400" />
                     ) : isCurrent ? (
-                      <Clock className="h-5 w-5 text-amber-500" />
+                      <Clock className="h-5 w-5 text-amber-500 dark:text-amber-400" />
                     ) : (
-                      <Circle className="h-5 w-5 text-ink-300" />
+                      <Circle className="h-5 w-5 text-ink-300 dark:text-ink-600" />
                     )}
                     <div className="min-w-0">
-                      <p className={`text-sm font-medium ${done ? 'text-brand-700' : isCurrent ? 'text-amber-700' : 'text-ink-400'}`}>
+                      <p className={`text-sm font-medium ${done ? 'text-brand-700 dark:text-brand-300' : isCurrent ? 'text-amber-700 dark:text-amber-400' : 'text-ink-400 dark:text-ink-500'}`}>
                         {stage.label}
                       </p>
-                      <p className="text-xs text-ink-400">
+                      <p className="text-xs text-ink-400 dark:text-ink-500">
                         {done ? 'Complete' : isCurrent ? 'In progress' : 'Pending'}
                       </p>
                     </div>
                   </div>
                   {idx < pipelineStages.length - 1 && (
-                    <div className={`hidden sm:block h-px flex-1 mx-1 ${done ? 'bg-brand-300' : 'bg-ink-200'}`} />
+                    <div className={`hidden sm:block h-px flex-1 mx-1 ${done ? 'bg-brand-300 dark:bg-brand-800' : 'bg-ink-200 dark:bg-ink-700'}`} />
                   )}
                 </div>
               );
@@ -189,19 +189,19 @@ export function OverviewPage({
         <Card>
           <CardHeader title="Recent Activity" subtitle="What has been happening in your project" />
           <CardBody className="p-0">
-            <div className="divide-y divide-ink-50">
+            <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {recentActivity.map((item) => {
                 const Icon = activityIcons[item.icon] ?? Bell;
                 return (
                   <div key={item.id} className="flex items-start gap-3 px-5 py-3.5">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400">
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-ink-700">
-                        <span className="font-medium text-ink-900">{item.actor}</span> {item.action}
+                      <p className="text-sm text-ink-700 dark:text-ink-300">
+                        <span className="font-medium text-ink-900 dark:text-ink-100">{item.actor}</span> {item.action}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-400">{item.time}</p>
+                      <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500">{item.time}</p>
                     </div>
                   </div>
                 );
@@ -213,20 +213,20 @@ export function OverviewPage({
         <Card>
           <CardHeader title="Upcoming Deadlines" subtitle="Don't miss these dates" />
           <CardBody className="p-0">
-            <div className="divide-y divide-ink-50">
+            <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {upcomingDeadlines.map((d) => (
                 <button
                   key={d.id}
                   onClick={() => onNavigate(d.page as PageId)}
-                  className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors hover:bg-ink-50"
+                  className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors hover:bg-ink-50 dark:hover:bg-ink-800/50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
                       <CalendarClock className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-ink-800">{d.title}</p>
-                      <p className="text-xs text-ink-400">{d.date}</p>
+                      <p className="text-sm font-medium text-ink-800 dark:text-ink-100">{d.title}</p>
+                      <p className="text-xs text-ink-400 dark:text-ink-500">{d.date}</p>
                     </div>
                   </div>
                   <Badge color={d.daysLeft <= 7 ? 'warning' : 'neutral'}>
@@ -244,18 +244,18 @@ export function OverviewPage({
         <Card>
           <CardHeader title="Team Roster" subtitle={`Members of "${groupName}"`} />
           <CardBody className="p-0">
-            <div className="divide-y divide-ink-50">
+            <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {teamMembers.map((m) => (
                 <div key={m.id} className="flex items-center gap-3 px-5 py-3.5">
                   <Avatar name={m.name} color="bg-brand-600" size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink-800">
+                    <p className="text-sm font-medium text-ink-800 dark:text-ink-100">
                       {m.name}
                       {m.email === currentUser.email && (
-                        <span className="ml-2 text-xs font-normal text-brand-600">(you)</span>
+                        <span className="ml-2 text-xs font-normal text-brand-600 dark:text-brand-400">(you)</span>
                       )}
                     </p>
-                    <p className="text-xs text-ink-400">{m.email}</p>
+                    <p className="text-xs text-ink-400 dark:text-ink-500">{m.email}</p>
                   </div>
                   <Badge color="neutral">{m.rollNumber}</Badge>
                 </div>
@@ -270,22 +270,22 @@ export function OverviewPage({
             <div className="flex items-center gap-4">
               <Avatar name={currentUser.name} color={currentUser.avatarColor} size="lg" />
               <div>
-                <p className="font-display text-lg font-bold text-ink-900">{currentUser.name}</p>
-                <p className="text-sm text-ink-500">{currentUser.email}</p>
+                <p className="font-display text-lg font-bold text-ink-900 dark:text-ink-100">{currentUser.name}</p>
+                <p className="text-sm text-ink-500 dark:text-ink-400">{currentUser.email}</p>
               </div>
             </div>
-            <div className="mt-4 space-y-2.5 rounded-xl bg-ink-50 p-4">
+            <div className="mt-4 space-y-2.5 rounded-xl bg-ink-50 p-4 dark:bg-ink-800/50">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-ink-400">Role</span>
+                <span className="text-xs text-ink-400 dark:text-ink-500">Role</span>
                 <Badge color="brand">{currentUser.role}</Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-ink-400">Roll Number</span>
-                <span className="text-sm font-medium text-ink-700">{currentUser.rollNumber}</span>
+                <span className="text-xs text-ink-400 dark:text-ink-500">Roll Number</span>
+                <span className="text-sm font-medium text-ink-700 dark:text-ink-200">{currentUser.rollNumber}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-ink-400">Elective</span>
-                <span className="text-sm font-medium text-ink-700 text-right">
+                <span className="text-xs text-ink-400 dark:text-ink-500">Elective</span>
+                <span className="text-sm font-medium text-ink-700 dark:text-ink-200 text-right">
                   {currentUser.elective}
                 </span>
               </div>
@@ -311,10 +311,10 @@ function StatCard({
   accent: 'brand' | 'amber' | 'sky' | 'emerald';
 }) {
   const accents: Record<string, string> = {
-    brand: 'bg-brand-50 text-brand-600',
-    amber: 'bg-amber-50 text-amber-600',
-    sky: 'bg-sky-50 text-sky-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
+    brand: 'bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400',
+    amber: 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400',
+    sky: 'bg-sky-50 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400',
+    emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400',
   };
   return (
     <Card className="transition-shadow hover:shadow-cardhover">
@@ -324,11 +324,11 @@ function StatCard({
             {icon}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-ink-400">{label}</p>
-            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900">{value}</p>
+            <p className="text-xs font-medium text-ink-400 dark:text-ink-500">{label}</p>
+            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900 dark:text-ink-100">{value}</p>
           </div>
         </div>
-        <p className="mt-3 text-xs text-ink-400">{sublabel}</p>
+        <p className="mt-3 text-xs text-ink-400 dark:text-ink-500">{sublabel}</p>
       </CardBody>
     </Card>
   );

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { AppShell, type NavItem } from '@/components/AppShell';
 import { currentUser, notifications } from '@/data/mockData';
+import type { ThemeMode } from '@/hooks/useTheme';
 
 export type StudentPageId =
   | 'overview'
@@ -35,9 +36,11 @@ type StudentShellProps = {
   onNavigate: (page: StudentPageId) => void;
   onExit: () => void;
   children: ReactNode;
+  theme: ThemeMode;
+  onToggleTheme: () => void;
 };
 
-export function StudentShell({ currentPage, onNavigate, onExit, children }: StudentShellProps) {
+export function StudentShell({ currentPage, onNavigate, onExit, children, theme, onToggleTheme }: StudentShellProps) {
   return (
     <AppShell
       currentPage={currentPage}
@@ -48,6 +51,8 @@ export function StudentShell({ currentPage, onNavigate, onExit, children }: Stud
       notifications={notifications}
       workspaceLabel="Student Workspace"
       sidebarFooterText="Need help? Check the Log Book or contact your mentor."
+      theme={theme}
+      onToggleTheme={onToggleTheme}
     >
       {children}
     </AppShell>

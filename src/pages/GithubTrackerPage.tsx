@@ -53,26 +53,26 @@ export function GithubTrackerPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">GitHub Tracker</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">GitHub Tracker</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Connect your project repository so your mentor can track progress.
         </p>
       </div>
 
       {/* Connection status */}
-      <Card className={repo.connected ? 'border-emerald-200' : ''}>
+      <Card className={repo.connected ? 'border-emerald-200 dark:border-emerald-800/60' : ''}>
         <CardBody>
           <div className="flex items-center gap-3">
             <div
               className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-                repo.connected ? 'bg-emerald-50 text-emerald-600' : 'bg-ink-100 text-ink-500'
+                repo.connected ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400'
               }`}
             >
               <Github className="h-6 w-6" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <p className="font-display font-semibold text-ink-900">Repository</p>
+                <p className="font-display font-semibold text-ink-900 dark:text-ink-100">Repository</p>
                 {repo.connected ? (
                   <Badge color="success">
                     <CheckCircle2 className="h-3.5 w-3.5" />
@@ -82,7 +82,7 @@ export function GithubTrackerPage() {
                   <Badge color="warning">Not connected</Badge>
                 )}
               </div>
-              <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-500">
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400">
                 <Clock className="h-3.5 w-3.5" />
                 Last updated {repo.lastUpdated}
               </p>
@@ -92,7 +92,7 @@ export function GithubTrackerPage() {
                 href={repo.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden items-center gap-1.5 rounded-lg border border-ink-200 px-3 py-2 text-sm font-medium text-ink-600 hover:bg-ink-50 transition-colors sm:flex"
+                className="hidden items-center gap-1.5 rounded-lg border border-ink-200 px-3 py-2 text-sm font-medium text-ink-600 hover:bg-ink-50 transition-colors sm:flex dark:border-ink-700 dark:text-ink-300 dark:hover:bg-ink-800"
               >
                 <ExternalLink className="h-4 w-4" />
                 Open repo
@@ -110,7 +110,7 @@ export function GithubTrackerPage() {
         />
         <CardBody className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-ink-700">
+            <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
               GitHub Repository URL
             </label>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -132,7 +132,7 @@ export function GithubTrackerPage() {
                 )}
               </Button>
             </div>
-            <p className="mt-2 text-xs text-ink-400">
+            <p className="mt-2 text-xs text-ink-400 dark:text-ink-500">
               Make sure your repository is public or your mentor has been added as a collaborator.
             </p>
           </div>

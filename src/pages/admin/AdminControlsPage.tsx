@@ -138,8 +138,8 @@ export function AdminControlsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Controls</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Controls</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Manage windows, deadlines, extensions, and mentor capacity.
         </p>
       </div>
@@ -152,12 +152,12 @@ export function AdminControlsPage() {
             {windowEntries.map(({ key, label }) => (
               <div
                 key={key}
-                className="flex items-center justify-between gap-3 rounded-lg border border-ink-100 px-4 py-3"
+                className="flex items-center justify-between gap-3 rounded-lg border border-ink-100 dark:border-ink-800 px-4 py-3"
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-ink-800">{label}</p>
-                  <p className="text-xs text-ink-400">
-                    {windows[key].opensOn} → {windows[key].closesOn}
+                  <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{label}</p>
+                  <p className="text-xs text-ink-400 dark:text-ink-500">
+                    {windows[key].opensOn} — {windows[key].closesOn}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -166,11 +166,11 @@ export function AdminControlsPage() {
                   </Badge>
                   <button
                     onClick={() => toggleWindow(key)}
-                    className="text-ink-400 hover:text-brand-600 transition-colors"
+                    className="text-ink-400 hover:text-brand-600 transition-colors dark:text-ink-500 dark:hover:text-brand-400"
                     aria-label={`Toggle ${label}`}
                   >
                     {windows[key].open ? (
-                      <ToggleRight className="h-7 w-7 text-brand-500" />
+                      <ToggleRight className="h-7 w-7 text-brand-500 dark:text-brand-400" />
                     ) : (
                       <ToggleLeft className="h-7 w-7" />
                     )}
@@ -188,15 +188,15 @@ export function AdminControlsPage() {
             subtitle="Demo window auto-close and deadline behavior"
           />
           <CardBody className="space-y-4">
-            <div className="flex items-center gap-3 rounded-lg bg-ink-50 px-4 py-3">
-              <Clock className="h-5 w-5 text-ink-400" />
+            <div className="flex items-center gap-3 rounded-lg bg-ink-50 dark:bg-ink-900/50 px-4 py-3">
+              <Clock className="h-5 w-5 text-ink-400 dark:text-ink-500" />
               <div>
-                <p className="text-xs font-medium text-ink-400">Current mock time</p>
-                <p className="text-sm font-semibold text-ink-800">{mockTime}</p>
+                <p className="text-xs font-medium text-ink-400 dark:text-ink-500">Current mock time</p>
+                <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{mockTime}</p>
               </div>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 Set mock datetime
               </label>
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -210,7 +210,7 @@ export function AdminControlsPage() {
                   Apply
                 </Button>
               </div>
-              <p className="mt-2 text-xs text-ink-400">
+              <p className="mt-2 text-xs text-ink-400 dark:text-ink-500">
                 In a real deployment, window auto-close and deadlines would use the server clock.
                 This control is for demonstration only.
               </p>
@@ -225,7 +225,7 @@ export function AdminControlsPage() {
         <CardBody className="space-y-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Group</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Group</label>
               <select
                 value={extGroupId}
                 onChange={(e) => setExtGroupId(e.target.value)}
@@ -240,7 +240,7 @@ export function AdminControlsPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 Offset (days)
               </label>
               <input
@@ -253,7 +253,7 @@ export function AdminControlsPage() {
               />
             </div>
             <div className="lg:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Reason</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Reason</label>
               <input
                 type="text"
                 value={extReason}
@@ -269,7 +269,7 @@ export function AdminControlsPage() {
           </Button>
 
           {/* Existing extensions */}
-          <div className="border-t border-ink-100 pt-4">
+          <div className="border-t border-ink-100 dark:border-ink-800 pt-4">
             {extList.length === 0 ? (
               <EmptyState
                 icon={<CalendarPlus className="h-7 w-7" />}
@@ -281,20 +281,20 @@ export function AdminControlsPage() {
                 {extList.map((ext) => (
                   <div
                     key={ext.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-ink-100 px-4 py-3"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-ink-100 dark:border-ink-800 px-4 py-3"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-ink-800">
+                      <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">
                         {ext.groupName}{' '}
-                        <span className="font-normal text-brand-600">+{ext.offsetDays} days</span>
+                        <span className="font-normal text-brand-600 dark:text-brand-400">+{ext.offsetDays} days</span>
                       </p>
-                      <p className="text-xs text-ink-400 truncate">
+                      <p className="text-xs text-ink-400 truncate dark:text-ink-500">
                         {ext.reason} · granted {ext.grantedAt} by {ext.grantedBy}
                       </p>
                     </div>
                     <button
                       onClick={() => revokeExtension(ext.id)}
-                      className="shrink-0 rounded-lg p-1.5 text-ink-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+                      className="shrink-0 rounded-lg p-1.5 text-ink-400 hover:bg-rose-50 hover:text-rose-500 transition-colors dark:text-ink-500 dark:hover:bg-rose-950/60 dark:hover:text-rose-400"
                       aria-label="Revoke extension"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -321,15 +321,15 @@ export function AdminControlsPage() {
               message="Add mentors to manage their capacity."
             />
           ) : (
-            <div className="divide-y divide-ink-50">
+            <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {mentors.map((m) => (
                 <div
                   key={m.id}
                   className="flex items-center justify-between gap-3 px-5 py-4"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-ink-800">{m.name}</p>
-                    <p className="text-xs text-ink-400 truncate">{m.domain}</p>
+                    <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{m.name}</p>
+                    <p className="text-xs text-ink-400 truncate dark:text-ink-500">{m.domain}</p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <Badge color={m.currentLoad >= m.capacity ? 'error' : 'info'}>
@@ -338,7 +338,7 @@ export function AdminControlsPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => updateCapacity(m.id, m.capacity - 1)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-100 text-ink-500 hover:bg-ink-200 transition-colors"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-100 text-ink-500 hover:bg-ink-200 transition-colors dark:bg-ink-800 dark:text-ink-400 dark:hover:bg-ink-700"
                         aria-label="Decrease capacity"
                       >
                         –
@@ -349,11 +349,11 @@ export function AdminControlsPage() {
                         onChange={(e) =>
                           updateCapacity(m.id, parseInt(e.target.value, 10) || 0)
                         }
-                        className="h-7 w-12 rounded-lg border border-ink-200 text-center text-sm font-semibold text-ink-800 focus:border-brand-500 focus:outline-none"
+                        className="h-7 w-12 rounded-lg border border-ink-200 dark:border-ink-700 text-center text-sm font-semibold text-ink-800 dark:text-ink-100 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                       />
                       <button
                         onClick={() => updateCapacity(m.id, m.capacity + 1)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-100 text-ink-500 hover:bg-ink-200 transition-colors"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-100 text-ink-500 hover:bg-ink-200 transition-colors dark:bg-ink-800 dark:text-ink-400 dark:hover:bg-ink-700"
                         aria-label="Increase capacity"
                       >
                         +

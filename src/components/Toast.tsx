@@ -25,10 +25,10 @@ const icons: Record<ToastType, typeof CheckCircle2> = {
 };
 
 const styles: Record<ToastType, string> = {
-  success: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-  error: 'text-rose-600 bg-rose-50 border-rose-200',
-  info: 'text-sky-600 bg-sky-50 border-sky-200',
-  warning: 'text-amber-600 bg-amber-50 border-amber-200',
+  success: 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/80 dark:border-emerald-800/60',
+  error: 'text-rose-600 bg-rose-50 border-rose-200 dark:text-rose-400 dark:bg-rose-950/80 dark:border-rose-800/60',
+  info: 'text-sky-600 bg-sky-50 border-sky-200 dark:text-sky-400 dark:bg-sky-950/80 dark:border-sky-800/60',
+  warning: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/80 dark:border-amber-800/60',
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -61,10 +61,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               className={`flex items-start gap-3 rounded-xl border px-4 py-3 shadow-cardhover animate-slide-in ${styles[toast.type]}`}
             >
               <Icon className="h-5 w-5 shrink-0 mt-0.5" />
-              <p className="flex-1 text-sm font-medium text-ink-800">{toast.message}</p>
+              <p className="flex-1 text-sm font-medium text-ink-800 dark:text-ink-100">{toast.message}</p>
               <button
                 onClick={() => dismissToast(toast.id)}
-                className="shrink-0 text-ink-400 hover:text-ink-600 transition-colors"
+                className="shrink-0 text-ink-400 hover:text-ink-600 transition-colors dark:text-ink-500 dark:hover:text-ink-300"
                 aria-label="Dismiss notification"
               >
                 <X className="h-4 w-4" />

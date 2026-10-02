@@ -48,8 +48,8 @@ export function AdminAuditLogPage() {
     <div className="space-y-4 animate-fade-in">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900">Audit Log</h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Audit Log</h1>
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             Complete system event history, newest first.
           </p>
         </div>
@@ -62,7 +62,7 @@ export function AdminAuditLogPage() {
       <Card>
         <CardBody>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
             <input
               type="text"
               value={search}
@@ -83,20 +83,20 @@ export function AdminAuditLogPage() {
               message="Try adjusting your search terms."
             />
           ) : (
-            <div className="divide-y divide-ink-50">
+            <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {filtered.map((event) => (
                 <div key={event.id} className="flex items-start gap-3 px-5 py-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400">
                     <ScrollText className="h-4.5 w-4.5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-ink-800">{event.description}</p>
+                    <p className="text-sm text-ink-800 dark:text-ink-100">{event.description}</p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
-                      <span className="text-ink-400">{event.timestamp}</span>
-                      <span className="text-ink-300">·</span>
+                      <span className="text-ink-400 dark:text-ink-500">{event.timestamp}</span>
+                      <span className="text-ink-300 dark:text-ink-600">·</span>
                       <Badge color="info">{event.actor}</Badge>
-                      <span className="text-ink-300">·</span>
-                      <span className="text-ink-500">{event.group}</span>
+                      <span className="text-ink-300 dark:text-ink-600">·</span>
+                      <span className="text-ink-500 dark:text-ink-400">{event.group}</span>
                     </div>
                   </div>
                 </div>

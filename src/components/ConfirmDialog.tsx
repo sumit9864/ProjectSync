@@ -30,24 +30,24 @@ export function ConfirmDialog({
         className="absolute inset-0 bg-ink-900/40 backdrop-blur-sm animate-fade-in"
         onClick={onCancel}
       />
-      <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl animate-scale-in">
-        <div className="flex items-start justify-between gap-4 border-b border-ink-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-ink-900">{title}</h2>
+      <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl animate-scale-in dark:bg-ink-900 dark:border dark:border-ink-700">
+        <div className="flex items-start justify-between gap-4 border-b border-ink-100 px-6 py-4 dark:border-ink-800">
+          <h2 className="text-lg font-semibold text-ink-900 dark:text-ink-100">{title}</h2>
           <button
             onClick={onCancel}
-            className="text-ink-400 hover:text-ink-600 transition-colors"
+            className="text-ink-400 hover:text-ink-600 transition-colors dark:text-ink-500 dark:hover:text-ink-300"
             aria-label="Close dialog"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="px-6 py-5">
-          <div className="text-sm text-ink-600 leading-relaxed">{message}</div>
+          <div className="text-sm text-ink-600 leading-relaxed dark:text-ink-300">{message}</div>
         </div>
-        <div className="flex justify-end gap-3 border-t border-ink-100 px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-ink-100 px-6 py-4 dark:border-ink-800">
           <button
             onClick={onCancel}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100 transition-colors"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100 transition-colors dark:text-ink-300 dark:hover:bg-ink-800"
           >
             {cancelLabel}
           </button>
@@ -55,8 +55,8 @@ export function ConfirmDialog({
             onClick={onConfirm}
             className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors ${
               destructive
-                ? 'bg-rose-600 hover:bg-rose-700'
-                : 'bg-brand-600 hover:bg-brand-700'
+                ? 'bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600'
+                : 'bg-brand-600 hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-400'
             }`}
           >
             {confirmLabel}

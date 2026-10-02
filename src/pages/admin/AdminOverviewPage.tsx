@@ -75,8 +75,8 @@ export function AdminOverviewPage({
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Program Overview</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Program Overview</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Final-year project pipeline at a glance · {activeGroups} groups · {adminMentors.length} mentors
         </p>
       </div>
@@ -125,12 +125,12 @@ export function AdminOverviewPage({
                 return (
                   <div key={stage}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-medium text-ink-700">
+                      <span className="text-sm font-medium text-ink-700 dark:text-ink-200">
                         {pipelineStageLabels[stage]}
                       </span>
-                      <span className="text-sm font-semibold text-ink-900">{count}</span>
+                      <span className="text-sm font-semibold text-ink-900 dark:text-ink-100">{count}</span>
                     </div>
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-ink-100">
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
                       <div
                         className={`h-full rounded-full transition-all duration-700 ${stageColors[stage]}`}
                         style={{ width: `${pct}%` }}
@@ -154,28 +154,28 @@ export function AdminOverviewPage({
                 message="All groups have mentors, active reviews, and connected repos."
               />
             ) : (
-              <div className="divide-y divide-ink-50">
+              <div className="divide-y divide-ink-50 dark:divide-ink-800">
                 {attentionItems.map((item) => (
                   <div
                     key={item.id}
                     className="flex items-center justify-between gap-3 px-5 py-4"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
                         <AlertTriangle className="h-4.5 w-4.5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-ink-800 truncate">
+                        <p className="text-sm font-semibold text-ink-800 truncate dark:text-ink-100">
                           {item.name}
                         </p>
-                        <p className="text-xs text-ink-400 truncate">
+                        <p className="text-xs text-ink-400 truncate dark:text-ink-500">
                           {item.projectId} · {item.reason}
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => onNavigate('pipeline')}
-                      className="shrink-0 text-xs font-medium text-brand-600 hover:text-brand-700"
+                      className="shrink-0 text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
                     >
                       View
                     </button>
@@ -195,7 +195,7 @@ export function AdminOverviewPage({
           action={
             <button
               onClick={() => onNavigate('audit')}
-              className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700"
+              className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
             >
               View full audit log
               <ArrowRight className="h-3.5 w-3.5" />
@@ -210,15 +210,15 @@ export function AdminOverviewPage({
               message="System events will appear here as they occur."
             />
           ) : (
-            <div className="divide-y divide-ink-50">
+            <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {auditEvents.slice(0, 6).map((event) => (
                 <div key={event.id} className="flex items-start gap-3 px-5 py-3.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400">
                     <Activity className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-ink-800">{event.description}</p>
-                    <p className="mt-0.5 text-xs text-ink-400">
+                    <p className="text-sm text-ink-800 dark:text-ink-100">{event.description}</p>
+                    <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500">
                       {event.timestamp} · {event.actor} · {event.group}
                     </p>
                   </div>
@@ -253,24 +253,24 @@ function StatCard({
   accent: 'brand' | 'amber' | 'sky' | 'emerald';
 }) {
   const accents: Record<string, string> = {
-    brand: 'bg-brand-50 text-brand-600',
-    amber: 'bg-amber-50 text-amber-600',
-    sky: 'bg-sky-50 text-sky-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
+    brand: 'bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400',
+    amber: 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400',
+    sky: 'bg-sky-50 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400',
+    emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400',
   };
   return (
-    <Card className="transition-shadow hover:shadow-cardhover">
+    <Card className="transition-shadow hover:shadow-cardhover dark:hover:shadow-cardhover-dark">
       <CardBody>
         <div className="flex items-center gap-3">
           <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${accents[accent]}`}>
             {icon}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-ink-400">{label}</p>
-            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900">{value}</p>
+            <p className="text-xs font-medium text-ink-400 dark:text-ink-500">{label}</p>
+            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900 dark:text-ink-100">{value}</p>
           </div>
         </div>
-        <p className="mt-3 text-xs text-ink-400">{sublabel}</p>
+        <p className="mt-3 text-xs text-ink-400 dark:text-ink-500">{sublabel}</p>
       </CardBody>
     </Card>
   );

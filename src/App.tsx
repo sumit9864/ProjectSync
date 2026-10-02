@@ -5,6 +5,7 @@ import { AdminShell, type AdminPageId } from '@/components/AdminShell';
 import { AuthScreen } from '@/components/AuthScreen';
 import { ToastProvider } from '@/components/Toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import { OverviewPage } from '@/pages/OverviewPage';
 import { GroupRegistrationPage } from '@/pages/GroupRegistrationPage';
 import { MentorPreferencesPage } from '@/pages/MentorPreferencesPage';
@@ -27,6 +28,7 @@ import { MentorCalendarPage } from '@/pages/mentor/MentorCalendarPage';
 
 function App() {
   const { session, signIn, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [studentPage, setStudentPage] = useState<StudentPageId>('overview');
   const [mentorPage, setMentorPage] = useState<MentorPageId>('overview');
   const [reviewGroupId, setReviewGroupId] = useState<string | null>(null);
@@ -45,7 +47,7 @@ function App() {
   if (!session) {
     return (
       <ToastProvider>
-        <AuthScreen onSignIn={signIn} />
+        <AuthScreen onSignIn={signIn} theme={theme} onToggleTheme={toggleTheme} />
       </ToastProvider>
     );
   }
@@ -57,6 +59,8 @@ function App() {
           currentPage={adminPage}
           onNavigate={setAdminPage}
           onExit={handleExit}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         >
           {adminPage === 'overview' && <AdminOverviewPage onNavigate={setAdminPage} />}
           {adminPage === 'pipeline' && <AdminPipelinePage />}
@@ -77,6 +81,8 @@ function App() {
           currentPage={studentPage}
           onNavigate={setStudentPage}
           onExit={handleExit}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         >
           {studentPage === 'overview' && <OverviewPage onNavigate={setStudentPage} />}
           {studentPage === 'group' && <GroupRegistrationPage />}
@@ -111,6 +117,8 @@ function App() {
           if (page !== 'logbook') setLogBookGroupId(null);
         }}
         onExit={handleExit}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       >
         {mentorPage === 'overview' && (
           <MentorOverviewPage

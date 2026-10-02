@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { AppShell, type NavItem } from '@/components/AppShell';
 import { adminUser, adminNotifications } from '@/data/adminData';
+import type { ThemeMode } from '@/hooks/useTheme';
 
 export type AdminPageId =
   | 'overview'
@@ -35,9 +36,11 @@ type AdminShellProps = {
   onNavigate: (page: AdminPageId) => void;
   onExit: () => void;
   children: ReactNode;
+  theme: ThemeMode;
+  onToggleTheme: () => void;
 };
 
-export function AdminShell({ currentPage, onNavigate, onExit, children }: AdminShellProps) {
+export function AdminShell({ currentPage, onNavigate, onExit, children, theme, onToggleTheme }: AdminShellProps) {
   return (
     <AppShell
       currentPage={currentPage}
@@ -48,6 +51,8 @@ export function AdminShell({ currentPage, onNavigate, onExit, children }: AdminS
       notifications={adminNotifications}
       workspaceLabel="Admin Workspace"
       sidebarFooterText="Program-wide oversight for final-year projects."
+      theme={theme}
+      onToggleTheme={onToggleTheme}
     >
       {children}
     </AppShell>

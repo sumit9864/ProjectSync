@@ -8,12 +8,21 @@
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
   }
+  html.dark {
+    color-scheme: dark;
+  }
   body {
     @apply bg-ink-50 text-ink-800 font-sans antialiased;
   }
+  html.dark body {
+    @apply bg-ink-950 text-ink-200;
+  }
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(203 213 225) transparent;
+    scrollbar-color: rgb(71 85 105) transparent;
+  }
+  .dark * {
+    scrollbar-color: rgb(51 65 85) transparent;
   }
   *::-webkit-scrollbar {
     width: 6px;
@@ -25,14 +34,23 @@
   *::-webkit-scrollbar-thumb {
     @apply bg-ink-300 rounded-full;
   }
+  .dark *::-webkit-scrollbar-thumb {
+    @apply bg-ink-700;
+  }
   *::-webkit-scrollbar-thumb:hover {
     @apply bg-ink-400;
+  }
+  .dark *::-webkit-scrollbar-thumb:hover {
+    @apply bg-ink-600;
   }
 }
 
 @layer components {
   .skeleton {
     @apply relative overflow-hidden bg-ink-200/60 rounded-md;
+  }
+  .dark .skeleton {
+    @apply bg-ink-800/80;
   }
   .skeleton::after {
     content: '';
@@ -41,10 +59,19 @@
     transform: translateX(-100%);
     animation: shimmer 1.5s infinite;
   }
+  .dark .skeleton::after {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  }
   .input-field {
     @apply w-full rounded-lg border border-ink-200 bg-white px-3.5 py-2.5 text-sm text-ink-800 placeholder:text-ink-400 transition-colors focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10;
   }
+  .dark .input-field {
+    @apply border-ink-700 bg-ink-900 text-ink-100 placeholder:text-ink-500 focus:border-brand-400 focus:ring-brand-400/15;
+  }
   .input-field-error {
     @apply border-rose-400 focus:border-rose-400 focus:ring-rose-400/10;
+  }
+  .dark .input-field-error {
+    @apply border-rose-500 focus:border-rose-500 focus:ring-rose-500/15;
   }
 }
