@@ -60,10 +60,10 @@ export function MentorOverviewPage({
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">
           Welcome back, {mentorUser.name.split(' ').slice(0, 2).join(' ')}
         </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           You have {pendingReviews.length} topic {pendingReviews.length === 1 ? 'review' : 'reviews'} waiting and{' '}
           {mentorStats.assignedGroups} active groups.
         </p>
@@ -116,7 +116,7 @@ export function MentorOverviewPage({
                 message="No topic reviews are waiting. You will see new submissions here as they come in."
               />
             ) : (
-              <div className="divide-y divide-ink-50">
+              <div className="divide-y divide-ink-50 dark:divide-ink-800">
                 {pendingReviews.map((group) => {
                   const latestVersion = group.topicVersions[0];
                   const info = statusBadgeMap[group.status];
@@ -124,17 +124,17 @@ export function MentorOverviewPage({
                     <button
                       key={group.id}
                       onClick={() => onOpenReview(group.id)}
-                      className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-ink-50"
+                      className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-ink-50 dark:hover:bg-ink-800/50"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
                           <Lightbulb className="h-5 w-5" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-ink-800 truncate">
+                          <p className="text-sm font-semibold text-ink-800 truncate dark:text-ink-100">
                             {group.name}
                           </p>
-                          <p className="text-xs text-ink-400 truncate">
+                          <p className="text-xs text-ink-400 truncate dark:text-ink-500">
                             {group.projectId} · v{latestVersion.version} · submitted{' '}
                             {latestVersion.submittedAt}
                           </p>
@@ -142,7 +142,7 @@ export function MentorOverviewPage({
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <Badge color={info.color}>{info.label}</Badge>
-                        <ArrowRight className="h-4 w-4 text-ink-300" />
+                        <ArrowRight className="h-4 w-4 text-ink-300 dark:text-ink-600" />
                       </div>
                     </button>
                   );
@@ -166,7 +166,7 @@ export function MentorOverviewPage({
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="8"
-                    className="text-ink-100"
+                    className="text-ink-100 dark:text-ink-800"
                   />
                   <circle
                     cx="50"
@@ -181,14 +181,14 @@ export function MentorOverviewPage({
                   />
                 </svg>
                 <div className="absolute text-center">
-                  <p className="font-display text-xl font-bold text-ink-900">{weekProgress}%</p>
+                  <p className="font-display text-xl font-bold text-ink-900 dark:text-ink-100">{weekProgress}%</p>
                 </div>
               </div>
-              <p className="mt-4 text-sm text-ink-600">
-                <span className="font-semibold text-ink-800">{reviewWeekProgress.reviewed}</span> of{' '}
+              <p className="mt-4 text-sm text-ink-600 dark:text-ink-300">
+                <span className="font-semibold text-ink-800 dark:text-ink-100">{reviewWeekProgress.reviewed}</span> of{' '}
                 {reviewWeekProgress.total} reviews completed
               </p>
-              <p className="mt-1 text-xs text-ink-400">
+              <p className="mt-1 text-xs text-ink-400 dark:text-ink-500">
                 {reviewWeekProgress.total - reviewWeekProgress.reviewed} remaining this week
               </p>
             </div>
@@ -198,7 +198,7 @@ export function MentorOverviewPage({
 
       {/* Assigned group cards */}
       <div>
-        <h2 className="mb-3 font-display text-lg font-semibold text-ink-900">Your Assigned Groups</h2>
+        <h2 className="mb-3 font-display text-lg font-semibold text-ink-900 dark:text-ink-100">Your Assigned Groups</h2>
         {mentorGroups.length === 0 ? (
           <Card>
             <EmptyState
@@ -218,36 +218,36 @@ export function MentorOverviewPage({
                   <CardBody>
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-xs font-medium text-ink-400">{group.projectId}</p>
-                        <p className="mt-0.5 font-display font-semibold text-ink-900 truncate">
+                        <p className="text-xs font-medium text-ink-400 dark:text-ink-500">{group.projectId}</p>
+                        <p className="mt-0.5 font-display font-semibold text-ink-900 truncate dark:text-ink-100">
                           {group.name}
                         </p>
                       </div>
                       <Badge color={info.color}>{info.label}</Badge>
                     </div>
-                    <p className="mt-2 text-sm text-ink-600 line-clamp-2">{group.description}</p>
+                    <p className="mt-2 text-sm text-ink-600 line-clamp-2 dark:text-ink-300">{group.description}</p>
 
-                    <div className="mt-4 flex items-center gap-4 text-xs text-ink-500">
+                    <div className="mt-4 flex items-center gap-4 text-xs text-ink-500 dark:text-ink-400">
                       <span className="flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-brand-500" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-brand-500 dark:text-brand-400" />
                         {milestoneCount}/{group.milestones.length} milestones
                       </span>
                       {latestVersion && (
                         <span className="flex items-center gap-1.5">
-                          <Lightbulb className="h-3.5 w-3.5 text-ink-400" />
+                          <Lightbulb className="h-3.5 w-3.5 text-ink-400 dark:text-ink-500" />
                           Topic v{latestVersion.version}
                         </span>
                       )}
                     </div>
 
                     {group.daysSinceLastActivity > 3 && (
-                      <div className="mt-3 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                      <div className="mt-3 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-950/60 dark:text-amber-400">
                         <AlertCircle className="h-3.5 w-3.5" />
                         Last activity {group.daysSinceLastActivity} days ago
                       </div>
                     )}
 
-                    <div className="mt-4 flex items-center gap-2 border-t border-ink-100 pt-3">
+                    <div className="mt-4 flex items-center gap-2 border-t border-ink-100 pt-3 dark:border-ink-800">
                       <Button
                         variant="secondary"
                         size="sm"
@@ -290,10 +290,10 @@ function StatCard({
   accent: 'brand' | 'amber' | 'sky' | 'emerald';
 }) {
   const accents: Record<string, string> = {
-    brand: 'bg-brand-50 text-brand-600',
-    amber: 'bg-amber-50 text-amber-600',
-    sky: 'bg-sky-50 text-sky-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
+    brand: 'bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400',
+    amber: 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400',
+    sky: 'bg-sky-50 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400',
+    emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400',
   };
   return (
     <Card className="transition-shadow hover:shadow-cardhover">
@@ -303,11 +303,11 @@ function StatCard({
             {icon}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-ink-400">{label}</p>
-            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900">{value}</p>
+            <p className="text-xs font-medium text-ink-400 dark:text-ink-500">{label}</p>
+            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900 dark:text-ink-100">{value}</p>
           </div>
         </div>
-        <p className="mt-3 text-xs text-ink-400">{sublabel}</p>
+        <p className="mt-3 text-xs text-ink-400 dark:text-ink-500">{sublabel}</p>
       </CardBody>
     </Card>
   );

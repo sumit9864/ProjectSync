@@ -173,19 +173,19 @@ export function MentorReviewQueuePage({
   return (
     <div className="space-y-4 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Review Queue</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Review Queue</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Review pending topic submissions and provide decisions.
         </p>
       </div>
 
       {/* Bulk action bar */}
       {pendingGroups.length > 0 && (
-        <Card className={bulkSelected.size > 0 ? 'border-brand-200 bg-brand-50/40' : ''}>
+        <Card className={bulkSelected.size > 0 ? 'border-brand-200 bg-brand-50/40 dark:border-brand-800/60 dark:bg-brand-950/30' : ''}>
           <CardBody className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-brand-600" />
-              <p className="text-sm text-ink-700">
+              <ClipboardCheck className="h-5 w-5 text-brand-600 dark:text-brand-400" />
+              <p className="text-sm text-ink-700 dark:text-ink-300">
                 {bulkSelected.size > 0
                   ? `${bulkSelected.size} selected for bulk action`
                   : `${pendingGroups.length} pending review${pendingGroups.length > 1 ? 's' : ''} — select multiple to act at once`}
@@ -230,7 +230,7 @@ export function MentorReviewQueuePage({
                   message="Groups assigned to you will appear here for review."
                 />
               ) : (
-                <div className="divide-y divide-ink-50">
+                <div className="divide-y divide-ink-50 dark:divide-ink-800">
                   {groups.map((group) => {
                     const latestVersion = group.topicVersions[0];
                     const statusInfo = latestVersion
@@ -244,7 +244,7 @@ export function MentorReviewQueuePage({
                       <div
                         key={group.id}
                         className={`flex items-start gap-2 px-3 py-1 transition-colors ${
-                          isSelected ? 'bg-brand-50/50' : ''
+                          isSelected ? 'bg-brand-50/50 dark:bg-brand-950/30' : ''
                         }`}
                       >
                         {isPending && (
@@ -253,7 +253,7 @@ export function MentorReviewQueuePage({
                             className={`mt-3 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all ${
                               isBulkSelected
                                 ? 'border-brand-500 bg-brand-500 text-white'
-                                : 'border-ink-300 hover:border-brand-400'
+                                : 'border-ink-300 hover:border-brand-400 dark:border-ink-600 dark:hover:border-brand-500'
                             }`}
                             aria-label="Select for bulk action"
                           >
@@ -262,18 +262,18 @@ export function MentorReviewQueuePage({
                         )}
                         <button
                           onClick={() => setSelectedId(group.id)}
-                          className={`flex flex-1 items-start gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-ink-50 ${
+                          className={`flex flex-1 items-start gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-ink-50 dark:hover:bg-ink-800/50 ${
                             isSelected ? '' : ''
                           }`}
                         >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-xs font-semibold text-ink-600">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-xs font-semibold text-ink-600 dark:bg-ink-800 dark:text-ink-300">
                             {group.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-ink-800 truncate">
+                            <p className="text-sm font-semibold text-ink-800 truncate dark:text-ink-100">
                               {group.name}
                             </p>
-                            <p className="text-xs text-ink-400 truncate">
+                            <p className="text-xs text-ink-400 truncate dark:text-ink-500">
                               {group.projectId}
                               {latestVersion && ` · v${latestVersion.version}`}
                             </p>
@@ -282,7 +282,7 @@ export function MentorReviewQueuePage({
                                 <Badge color={statusInfo.color}>{statusInfo.label}</Badge>
                               )}
                               {group.daysSinceLastActivity > 3 && isPending && (
-                                <span className="flex items-center gap-1 text-xs text-amber-600">
+                                <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
                                   <Clock className="h-3 w-3" />
                                   {group.daysSinceLastActivity}d
                                 </span>
@@ -290,7 +290,7 @@ export function MentorReviewQueuePage({
                             </div>
                           </div>
                           {isSelected && (
-                            <ChevronRight className="mt-3 h-4 w-4 shrink-0 text-brand-500" />
+                            <ChevronRight className="mt-3 h-4 w-4 shrink-0 text-brand-500 dark:text-brand-400" />
                           )}
                         </button>
                       </div>
@@ -438,11 +438,11 @@ function ReviewDetail({
         <CardBody>
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs text-ink-400">{group.projectId}</p>
-              <h2 className="mt-0.5 font-display text-lg font-bold text-ink-900">
+              <p className="text-xs text-ink-400 dark:text-ink-500">{group.projectId}</p>
+              <h2 className="mt-0.5 font-display text-lg font-bold text-ink-900 dark:text-ink-100">
                 {group.name}
               </h2>
-              <p className="mt-1 text-sm text-ink-600">{group.description}</p>
+              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">{group.description}</p>
             </div>
             {statusInfo && <Badge color={statusInfo.color}>{statusInfo.label}</Badge>}
           </div>
@@ -452,19 +452,19 @@ function ReviewDetail({
             {group.members.map((m) => (
               <div
                 key={m.id}
-                className="flex items-center gap-2 rounded-lg bg-ink-50 px-3 py-1.5"
+                className="flex items-center gap-2 rounded-lg bg-ink-50 px-3 py-1.5 dark:bg-ink-800/50"
               >
                 <Avatar name={m.name} color="bg-ink-400" size="sm" />
                 <div>
-                  <p className="text-xs font-medium text-ink-700">{m.name}</p>
-                  <p className="text-xs text-ink-400">{m.rollNumber}</p>
+                  <p className="text-xs font-medium text-ink-700 dark:text-ink-200">{m.name}</p>
+                  <p className="text-xs text-ink-400 dark:text-ink-500">{m.rollNumber}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {quietWarning && (
-            <div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+            <div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:bg-amber-950/60 dark:text-amber-400">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {quietWarning} — consider following up.
             </div>
@@ -472,9 +472,9 @@ function ReviewDetail({
 
           {/* Previous feedback */}
           {latestVersion.feedback && !isPending && (
-            <div className="mt-3 rounded-lg bg-ink-50 px-4 py-3">
-              <p className="text-xs font-semibold text-ink-400">Your previous feedback</p>
-              <p className="mt-1 text-sm text-ink-600">{latestVersion.feedback}</p>
+            <div className="mt-3 rounded-lg bg-ink-50 px-4 py-3 dark:bg-ink-800/50">
+              <p className="text-xs font-semibold text-ink-400 dark:text-ink-500">Your previous feedback</p>
+              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">{latestVersion.feedback}</p>
             </div>
           )}
         </CardBody>
@@ -515,11 +515,11 @@ function ReviewDetail({
                 <Avatar name={msg.author} color={msg.avatarColor} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-ink-800">{msg.author}</span>
+                    <span className="text-sm font-semibold text-ink-800 dark:text-ink-100">{msg.author}</span>
                     <Badge color={msg.role === 'Mentor' ? 'brand' : 'neutral'}>{msg.role}</Badge>
-                    <span className="text-xs text-ink-400">{msg.time}</span>
+                    <span className="text-xs text-ink-400 dark:text-ink-500">{msg.time}</span>
                   </div>
-                  <p className="mt-1.5 rounded-lg bg-ink-50 px-3.5 py-2.5 text-sm text-ink-700 leading-relaxed">
+                  <p className="mt-1.5 rounded-lg bg-ink-50 px-3.5 py-2.5 text-sm text-ink-700 leading-relaxed dark:bg-ink-800/50 dark:text-ink-300">
                     {msg.body}
                   </p>
                 </div>
@@ -528,7 +528,7 @@ function ReviewDetail({
           </div>
 
           {/* Reply box */}
-          <div className="border-t border-ink-100 pt-4">
+          <div className="border-t border-ink-100 pt-4 dark:border-ink-800">
             <div className="flex items-start gap-3">
               <Avatar name={mentorUser.name} color={mentorUser.avatarColor} size="sm" />
               <div className="flex-1">
@@ -552,11 +552,11 @@ function ReviewDetail({
       </Card>
 
       {/* Decision bar */}
-      <Card className={isPending ? 'border-brand-200' : ''}>
+      <Card className={isPending ? 'border-brand-200 dark:border-brand-800/60' : ''}>
         <CardBody className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-ink-900">Decision</p>
-            <p className="text-xs text-ink-400">
+            <p className="text-sm font-semibold text-ink-900 dark:text-ink-100">Decision</p>
+            <p className="text-xs text-ink-400 dark:text-ink-500">
               {isPending
                 ? 'Approve or request changes for this topic submission.'
                 : 'A decision has already been made on this version.'}
@@ -589,8 +589,8 @@ function ReviewDetail({
 function TopicField({ label, content }: { label: string; content: string }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-ink-400">{label}</p>
-      <p className="mt-1 text-sm text-ink-700 leading-relaxed">{content}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-ink-400 dark:text-ink-500">{label}</p>
+      <p className="mt-1 text-sm text-ink-700 leading-relaxed dark:text-ink-300">{content}</p>
     </div>
   );
 }

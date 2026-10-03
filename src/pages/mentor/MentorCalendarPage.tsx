@@ -14,9 +14,9 @@ const eventTypeConfig: Record<
   string,
   { label: string; color: string; dot: string }
 > = {
-  review: { label: 'Review', color: 'text-amber-700 bg-amber-50', dot: 'bg-amber-400' },
-  session: { label: 'Session', color: 'text-sky-700 bg-sky-50', dot: 'bg-sky-400' },
-  deadline: { label: 'Deadline', color: 'text-rose-700 bg-rose-50', dot: 'bg-rose-400' },
+  review: { label: 'Review', color: 'text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/60', dot: 'bg-amber-400' },
+  session: { label: 'Session', color: 'text-sky-700 bg-sky-50 dark:text-sky-400 dark:bg-sky-950/60', dot: 'bg-sky-400' },
+  deadline: { label: 'Deadline', color: 'text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/60', dot: 'bg-rose-400' },
 };
 
 export function MentorCalendarPage() {
@@ -65,8 +65,8 @@ export function MentorCalendarPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Calendar</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Calendar</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Upcoming deadlines, review sessions, and mentoring meetings.
         </p>
       </div>
@@ -82,14 +82,14 @@ export function MentorCalendarPage() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={prevMonth}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-400 hover:bg-ink-100 hover:text-ink-600 transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-400 hover:bg-ink-100 hover:text-ink-600 transition-colors dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-300"
                     aria-label="Previous month"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
                   <button
                     onClick={nextMonth}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-400 hover:bg-ink-100 hover:text-ink-600 transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-400 hover:bg-ink-100 hover:text-ink-600 transition-colors dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-300"
                     aria-label="Next month"
                   >
                     <ChevronRight className="h-5 w-5" />
@@ -103,7 +103,7 @@ export function MentorCalendarPage() {
                 {dayNames.map((day) => (
                   <div
                     key={day}
-                    className="pb-2 text-center text-xs font-semibold uppercase text-ink-400"
+                    className="pb-2 text-center text-xs font-semibold uppercase text-ink-400 dark:text-ink-500"
                   >
                     {day}
                   </div>
@@ -123,13 +123,13 @@ export function MentorCalendarPage() {
                       key={idx}
                       className={`min-h-[72px] rounded-lg border p-1.5 transition-colors ${
                         isToday
-                          ? 'border-brand-300 bg-brand-50/50'
-                          : 'border-ink-100 hover:border-ink-200'
+                          ? 'border-brand-300 bg-brand-50/50 dark:border-brand-700 dark:bg-brand-950/30'
+                          : 'border-ink-100 hover:border-ink-200 dark:border-ink-800 dark:hover:border-ink-700'
                       }`}
                     >
                       <div
                         className={`mb-1 text-xs font-semibold ${
-                          isToday ? 'text-brand-600' : 'text-ink-500'
+                          isToday ? 'text-brand-600 dark:text-brand-400' : 'text-ink-500 dark:text-ink-400'
                         }`}
                       >
                         {day}
@@ -148,7 +148,7 @@ export function MentorCalendarPage() {
                           );
                         })}
                         {dayEvents.length > 2 && (
-                          <p className="text-[10px] text-ink-400">
+                          <p className="text-[10px] text-ink-400 dark:text-ink-500">
                             +{dayEvents.length - 2} more
                           </p>
                         )}
@@ -159,11 +159,11 @@ export function MentorCalendarPage() {
               </div>
 
               {/* Legend */}
-              <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-ink-100 pt-3">
+              <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-ink-100 pt-3 dark:border-ink-800">
                 {Object.entries(eventTypeConfig).map(([key, config]) => (
                   <div key={key} className="flex items-center gap-1.5">
                     <span className={`h-2 w-2 rounded-full ${config.dot}`} />
-                    <span className="text-xs text-ink-500">{config.label}</span>
+                    <span className="text-xs text-ink-500 dark:text-ink-400">{config.label}</span>
                   </div>
                 ))}
               </div>
@@ -183,18 +183,18 @@ export function MentorCalendarPage() {
                   message="Activity from your groups will appear here."
                 />
               ) : (
-                <div className="divide-y divide-ink-50">
+                <div className="divide-y divide-ink-50 dark:divide-ink-800">
                   {calendarLatestActivity.map((item) => (
                     <div key={item.id} className="flex items-start gap-3 px-5 py-3.5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400">
                         <Clock className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-ink-700">
-                          <span className="font-semibold text-ink-900">{item.group}</span>{' '}
+                        <p className="text-sm text-ink-700 dark:text-ink-300">
+                          <span className="font-semibold text-ink-900 dark:text-ink-100">{item.group}</span>{' '}
                           {item.action}
                         </p>
-                        <p className="mt-0.5 text-xs text-ink-400">{item.time}</p>
+                        <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500">{item.time}</p>
                       </div>
                     </div>
                   ))}
@@ -214,10 +214,10 @@ export function MentorCalendarPage() {
                     <div key={i} className="flex items-center gap-3 px-5 py-3">
                       <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${config.dot}`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-ink-700 truncate">
+                        <p className="text-sm font-medium text-ink-700 truncate dark:text-ink-300">
                           {e.title}
                         </p>
-                        <p className="text-xs text-ink-400">
+                        <p className="text-xs text-ink-400 dark:text-ink-500">
                           {monthNames[month]} {e.day}, {year}
                         </p>
                       </div>

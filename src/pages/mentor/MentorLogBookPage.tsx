@@ -226,8 +226,8 @@ export function MentorLogBookPage({
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900">Log Book</h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Log Book</h1>
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             Log mentoring sessions, track attendance, and review past entries.
           </p>
         </div>
@@ -247,8 +247,8 @@ export function MentorLogBookPage({
             onClick={() => setSelectedGroupId(g.id)}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               selectedGroupId === g.id
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'bg-white text-ink-600 border border-ink-200 hover:bg-ink-50'
+                ? 'bg-brand-600 text-white shadow-sm dark:bg-brand-500'
+                : 'bg-white text-ink-600 border border-ink-200 hover:bg-ink-50 dark:bg-ink-900 dark:text-ink-300 dark:border-ink-700 dark:hover:bg-ink-800'
             }`}
           >
             {g.name}
@@ -291,17 +291,17 @@ export function MentorLogBookPage({
                   <Card key={entry.id}>
                     <button
                       onClick={() => setExpandedId(isExpanded ? null : entry.id)}
-                      className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-ink-50"
+                      className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-ink-50 dark:hover:bg-ink-800/50"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-sm font-bold text-brand-700">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-sm font-bold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
                           #{entry.entryNumber}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-display font-semibold text-ink-900">
+                          <p className="font-display font-semibold text-ink-900 dark:text-ink-100">
                             Session {entry.entryNumber}
                           </p>
-                          <p className="text-xs text-ink-400">
+                          <p className="text-xs text-ink-400 dark:text-ink-500">
                             {entry.date} · Last edited {entry.lastEditedAt}
                           </p>
                         </div>
@@ -318,7 +318,7 @@ export function MentorLogBookPage({
                           </Badge>
                         )}
                         <ChevronDown
-                          className={`h-5 w-5 text-ink-400 transition-transform ${
+                          className={`h-5 w-5 text-ink-400 transition-transform dark:text-ink-500 ${
                             isExpanded ? 'rotate-180' : ''
                           }`}
                         />
@@ -326,10 +326,10 @@ export function MentorLogBookPage({
                     </button>
 
                     {isExpanded && (
-                      <div className="border-t border-ink-100 px-5 py-4 space-y-4 animate-fade-in">
+                      <div className="border-t border-ink-100 px-5 py-4 space-y-4 animate-fade-in dark:border-ink-800">
                         {/* Attendance */}
                         <div>
-                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-400">
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-400 dark:text-ink-500">
                             Attendance
                           </p>
                           <div className="flex flex-wrap gap-2">
@@ -338,8 +338,8 @@ export function MentorLogBookPage({
                                 key={a.name}
                                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium ${
                                   a.present
-                                    ? 'bg-emerald-50 text-emerald-700'
-                                    : 'bg-rose-50 text-rose-700'
+                                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                                    : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
                                 }`}
                               >
                                 {a.present ? (
@@ -361,7 +361,7 @@ export function MentorLogBookPage({
                         </div>
 
                         {/* Edit action */}
-                        <div className="flex items-center justify-between border-t border-ink-100 pt-3">
+                        <div className="flex items-center justify-between border-t border-ink-100 pt-3 dark:border-ink-800">
                           <Button
                             variant="secondary"
                             size="sm"
@@ -375,14 +375,14 @@ export function MentorLogBookPage({
                           {hasEdits && (
                             <button
                               onClick={() => toggleHistory(entry.id)}
-                              className="flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700"
+                              className="flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
                             >
                               <History className="h-4 w-4" />
                               {historyExpanded.has(entry.id)
                                 ? 'Hide edit history'
                                 : `Show edit history (${entry.editHistory!.length})`}
                               <ChevronDown
-                                className={`h-4 w-4 transition-transform ${
+                                className={`h-4 w-4 transition-transform dark:text-ink-500 ${
                                   historyExpanded.has(entry.id) ? 'rotate-180' : ''
                                 }`}
                               />
@@ -395,9 +395,9 @@ export function MentorLogBookPage({
                             {entry.editHistory!.map((edit, i) => (
                               <div
                                 key={i}
-                                className="rounded-xl border border-dashed border-ink-200 bg-ink-50/50 p-4"
+                                className="rounded-xl border border-dashed border-ink-200 bg-ink-50/50 p-4 dark:border-ink-700 dark:bg-ink-800/30"
                               >
-                                <p className="mb-3 text-xs font-medium text-ink-400">
+                                <p className="mb-3 text-xs font-medium text-ink-400 dark:text-ink-500">
                                   Previous version · edited {edit.editedAt}
                                 </p>
                                 <div className="space-y-2.5">
@@ -423,7 +423,7 @@ export function MentorLogBookPage({
               <CardHeader title="Milestone Progress" subtitle={selectedGroup?.name ?? ''} />
               <CardBody className="p-0">
                 {selectedGroup ? (
-                  <div className="divide-y divide-ink-50">
+                  <div className="divide-y divide-ink-50 dark:divide-ink-800">
                     {selectedGroup.milestones.map((m) => {
                       const isComplete = m.status === 'complete';
                       return (
@@ -431,8 +431,8 @@ export function MentorLogBookPage({
                           <div
                             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
                               isComplete
-                                ? 'bg-brand-600 text-white'
-                                : 'bg-ink-100 text-ink-500'
+                                ? 'bg-brand-600 text-white dark:bg-brand-500'
+                                : 'bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400'
                             }`}
                           >
                             {isComplete ? (
@@ -444,12 +444,12 @@ export function MentorLogBookPage({
                           <div className="flex-1 min-w-0">
                             <p
                               className={`text-sm font-medium ${
-                                isComplete ? 'text-ink-500 line-through' : 'text-ink-800'
+                                isComplete ? 'text-ink-500 line-through dark:text-ink-600' : 'text-ink-800 dark:text-ink-100'
                               }`}
                             >
                               {m.title}
                             </p>
-                            <p className="mt-0.5 flex items-center gap-1 text-xs text-ink-400">
+                            <p className="mt-0.5 flex items-center gap-1 text-xs text-ink-400 dark:text-ink-500">
                               <CalendarClock className="h-3 w-3" />
                               Due {m.dueDate}
                             </p>
@@ -490,7 +490,7 @@ export function MentorLogBookPage({
             {/* Date/Time */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-ink-700">Date</label>
+                <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Date</label>
                 <input
                   type="date"
                   value={sessionDate}
@@ -499,7 +499,7 @@ export function MentorLogBookPage({
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-ink-700">Time</label>
+                <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Time</label>
                 <input
                   type="time"
                   value={sessionTime}
@@ -511,7 +511,7 @@ export function MentorLogBookPage({
 
             {/* Attendance grid */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-ink-700">
+              <label className="mb-2 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 Attendance
               </label>
               <div className="space-y-2">
@@ -520,11 +520,11 @@ export function MentorLogBookPage({
                   return (
                     <div
                       key={m.id}
-                      className="flex items-center justify-between rounded-lg border border-ink-200 px-3 py-2.5"
+                      className="flex items-center justify-between rounded-lg border border-ink-200 px-3 py-2.5 dark:border-ink-700"
                     >
                       <div>
-                        <p className="text-sm font-medium text-ink-800">{m.name}</p>
-                        <p className="text-xs text-ink-400">{m.rollNumber}</p>
+                        <p className="text-sm font-medium text-ink-800 dark:text-ink-100">{m.name}</p>
+                        <p className="text-xs text-ink-400 dark:text-ink-500">{m.rollNumber}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -533,8 +533,8 @@ export function MentorLogBookPage({
                           }
                           className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                             isPresent
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'text-ink-400 hover:bg-ink-50'
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                              : 'text-ink-400 hover:bg-ink-50 dark:text-ink-500 dark:hover:bg-ink-800'
                           }`}
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
@@ -546,8 +546,8 @@ export function MentorLogBookPage({
                           }
                           className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                             !isPresent
-                              ? 'bg-rose-100 text-rose-700'
-                              : 'text-ink-400 hover:bg-ink-50'
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
+                              : 'text-ink-400 hover:bg-ink-50 dark:text-ink-500 dark:hover:bg-ink-800'
                           }`}
                         >
                           <XCircle className="h-3.5 w-3.5" />
@@ -562,7 +562,7 @@ export function MentorLogBookPage({
 
             {/* Text areas */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 Points Discussed
               </label>
               <textarea
@@ -574,7 +574,7 @@ export function MentorLogBookPage({
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 Mentor Suggestions
               </label>
               <textarea
@@ -586,7 +586,7 @@ export function MentorLogBookPage({
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 Remarks
               </label>
               <textarea
@@ -599,7 +599,7 @@ export function MentorLogBookPage({
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 border-t border-ink-100 pt-4">
+            <div className="flex justify-end gap-3 border-t border-ink-100 pt-4 dark:border-ink-800">
               <Button
                 variant="secondary"
                 onClick={() => {
@@ -643,8 +643,8 @@ function LogField({
 }) {
   return (
     <div>
-      <p className={`font-semibold text-ink-700 ${compact ? 'text-xs' : 'text-sm'}`}>{label}</p>
-      <p className={`mt-1 text-ink-600 leading-relaxed ${compact ? 'text-xs' : 'text-sm'}`}>
+      <p className={`font-semibold text-ink-700 dark:text-ink-200 ${compact ? 'text-xs' : 'text-sm'}`}>{label}</p>
+      <p className={`mt-1 text-ink-600 leading-relaxed dark:text-ink-300 ${compact ? 'text-xs' : 'text-sm'}`}>
         {content}
       </p>
     </div>

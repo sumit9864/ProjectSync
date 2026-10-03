@@ -49,8 +49,8 @@ export function MentorMyGroupsPage({
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">My Groups</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">My Groups</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           All groups assigned to you for mentoring this semester.
         </p>
       </div>
@@ -80,8 +80,8 @@ export function MentorMyGroupsPage({
                   {/* Header */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-ink-400">{group.projectId}</p>
-                      <p className="mt-0.5 font-display text-lg font-bold text-ink-900 truncate">
+                      <p className="text-xs font-medium text-ink-400 dark:text-ink-500">{group.projectId}</p>
+                      <p className="mt-0.5 font-display text-lg font-bold text-ink-900 truncate dark:text-ink-100">
                         {group.name}
                       </p>
                     </div>
@@ -89,20 +89,20 @@ export function MentorMyGroupsPage({
                   </div>
 
                   {/* Description */}
-                  <p className="text-sm text-ink-600 line-clamp-2">{group.description}</p>
+                  <p className="text-sm text-ink-600 line-clamp-2 dark:text-ink-300">{group.description}</p>
 
                   {/* Members */}
                   <div className="flex items-center gap-1.5">
                     {group.members.map((m) => (
                       <div
                         key={m.id}
-                        className="flex h-8 w-8 items-center justify-center rounded-full bg-ink-200 text-xs font-semibold text-ink-600"
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-ink-200 text-xs font-semibold text-ink-600 dark:bg-ink-700 dark:text-ink-300"
                         title={m.name}
                       >
                         {m.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
                       </div>
                     ))}
-                    <span className="ml-1 text-xs text-ink-400">
+                    <span className="ml-1 text-xs text-ink-400 dark:text-ink-500">
                       {group.members.length} members
                     </span>
                   </div>
@@ -110,13 +110,13 @@ export function MentorMyGroupsPage({
                   {/* Milestone progress */}
                   <div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="flex items-center gap-1.5 text-ink-500">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-brand-500" />
+                      <span className="flex items-center gap-1.5 text-ink-500 dark:text-ink-400">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-brand-500 dark:text-brand-400" />
                         {completedMilestones}/{totalMilestones} milestones
                       </span>
-                      <span className="font-medium text-ink-600">{progress}%</span>
+                      <span className="font-medium text-ink-600 dark:text-ink-300">{progress}%</span>
                     </div>
-                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-100">
+                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all duration-500"
                         style={{ width: `${progress}%` }}
@@ -126,8 +126,8 @@ export function MentorMyGroupsPage({
 
                   {/* Topic version */}
                   {latestVersion && (
-                    <div className="flex items-center gap-2 text-xs text-ink-500">
-                      <Lightbulb className="h-3.5 w-3.5 text-ink-400" />
+                    <div className="flex items-center gap-2 text-xs text-ink-500 dark:text-ink-400">
+                      <Lightbulb className="h-3.5 w-3.5 text-ink-400 dark:text-ink-500" />
                       Current topic: v{latestVersion.version}
                       <Badge
                         color={
@@ -148,7 +148,7 @@ export function MentorMyGroupsPage({
                   )}
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 border-t border-ink-100 pt-3">
+                  <div className="flex items-center gap-2 border-t border-ink-100 pt-3 dark:border-ink-800">
                     <Button
                       variant="secondary"
                       size="sm"

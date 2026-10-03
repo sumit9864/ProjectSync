@@ -45,8 +45,8 @@ export function LogBookPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900">Log Book</h1>
-          <p className="mt-1 text-sm text-ink-500">
+          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Log Book</h1>
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
             Session entries logged by your mentor. View only — students cannot edit.
           </p>
         </div>
@@ -104,15 +104,15 @@ function LogEntryCard({
     <Card>
       <button
         onClick={onToggleExpand}
-        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-ink-50"
+        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-ink-50 dark:hover:bg-ink-800/50"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-sm font-bold text-brand-700">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-sm font-bold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
             #{entry.entryNumber}
           </div>
           <div className="min-w-0">
-            <p className="font-display font-semibold text-ink-900">Session {entry.entryNumber}</p>
-            <p className="text-xs text-ink-400">
+            <p className="font-display font-semibold text-ink-900 dark:text-ink-100">Session {entry.entryNumber}</p>
+            <p className="text-xs text-ink-400 dark:text-ink-500">
               {entry.date} · Last edited {entry.lastEditedAt}
             </p>
           </div>
@@ -129,16 +129,16 @@ function LogEntryCard({
             </Badge>
           )}
           <ChevronDown
-            className={`h-5 w-5 text-ink-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            className={`h-5 w-5 text-ink-400 transition-transform dark:text-ink-500 ${isExpanded ? 'rotate-180' : ''}`}
           />
         </div>
       </button>
 
       {isExpanded && (
-        <div className="border-t border-ink-100 px-5 py-4 space-y-4 animate-fade-in">
+        <div className="border-t border-ink-100 px-5 py-4 space-y-4 animate-fade-in dark:border-ink-800">
           {/* Attendance */}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-400">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-400 dark:text-ink-500">
               Attendance
             </p>
             <div className="flex flex-wrap gap-2">
@@ -147,8 +147,8 @@ function LogEntryCard({
                   key={a.name}
                   className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium ${
                     a.present
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : 'bg-rose-50 text-rose-700'
+                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                      : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
                   }`}
                 >
                   {a.present ? (
@@ -171,23 +171,23 @@ function LogEntryCard({
 
           {/* Edit history */}
           {hasEdits && (
-            <div className="border-t border-ink-100 pt-3">
+            <div className="border-t border-ink-100 pt-3 dark:border-ink-800">
               <button
                 onClick={onToggleHistory}
-                className="flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700"
+                className="flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
               >
                 <History className="h-4 w-4" />
                 {historyExpanded ? 'Hide edit history' : `Show edit history (${entry.editHistory!.length})`}
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform ${historyExpanded ? 'rotate-180' : ''}`}
+                  className={`h-4 w-4 transition-transform dark:text-ink-500 ${historyExpanded ? 'rotate-180' : ''}`}
                 />
               </button>
 
               {historyExpanded && (
                 <div className="mt-3 space-y-3 animate-fade-in">
                   {entry.editHistory!.map((edit, i) => (
-                    <div key={i} className="rounded-xl border border-dashed border-ink-200 bg-ink-50/50 p-4">
-                      <p className="mb-3 text-xs font-medium text-ink-400">
+                    <div key={i} className="rounded-xl border border-dashed border-ink-200 bg-ink-50/50 p-4 dark:border-ink-700 dark:bg-ink-800/30">
+                      <p className="mb-3 text-xs font-medium text-ink-400 dark:text-ink-500">
                         Previous version · edited {edit.editedAt}
                       </p>
                       <div className="space-y-2.5">
@@ -218,8 +218,8 @@ function LogField({
 }) {
   return (
     <div>
-      <p className={`font-semibold text-ink-700 ${compact ? 'text-xs' : 'text-sm'}`}>{label}</p>
-      <p className={`mt-1 text-ink-600 leading-relaxed ${compact ? 'text-xs' : 'text-sm'}`}>
+      <p className={`font-semibold text-ink-700 dark:text-ink-200 ${compact ? 'text-xs' : 'text-sm'}`}>{label}</p>
+      <p className={`mt-1 text-ink-600 leading-relaxed dark:text-ink-300 ${compact ? 'text-xs' : 'text-sm'}`}>
         {content}
       </p>
     </div>

@@ -67,8 +67,8 @@ export function MilestonesPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900">Milestones</h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Milestones</h1>
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           Track your project milestones and check in as you complete each one.
         </p>
       </div>
@@ -78,16 +78,16 @@ export function MilestonesPage() {
         <CardBody>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-ink-500">Overall progress</p>
-              <p className="mt-1 font-display text-2xl font-bold text-ink-900">
+              <p className="text-sm text-ink-500 dark:text-ink-400">Overall progress</p>
+              <p className="mt-1 font-display text-2xl font-bold text-ink-900 dark:text-ink-100">
                 {completed} of {total} complete
               </p>
             </div>
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-50">
-              <span className="font-display text-lg font-bold text-brand-600">{progress}%</span>
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 dark:bg-brand-950/50">
+              <span className="font-display text-lg font-bold text-brand-600 dark:text-brand-400">{progress}%</span>
             </div>
           </div>
-          <div className="mt-4 h-3 overflow-hidden rounded-full bg-ink-100">
+          <div className="mt-4 h-3 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
             <div
               className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all duration-500"
               style={{ width: `${progress}%` }}
@@ -107,7 +107,7 @@ export function MilestonesPage() {
               message="Your milestones will appear here once they are set up by your mentor."
             />
           ) : (
-            <div className="divide-y divide-ink-50">
+            <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {milestones.map((m) => {
                 const isComplete = m.status === 'complete';
                 const isExpanded = expandedId === m.id;
@@ -118,8 +118,8 @@ export function MilestonesPage() {
                       <div
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                           isComplete
-                            ? 'bg-brand-600 text-white'
-                            : 'bg-ink-100 text-ink-500'
+                            ? 'bg-brand-600 text-white dark:bg-brand-500'
+                            : 'bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400'
                         }`}
                       >
                         {isComplete ? (
@@ -134,13 +134,13 @@ export function MilestonesPage() {
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <p
                             className={`text-sm font-semibold ${
-                              isComplete ? 'text-ink-500 line-through' : 'text-ink-900'
+                              isComplete ? 'text-ink-500 line-through dark:text-ink-600' : 'text-ink-900 dark:text-ink-100'
                             }`}
                           >
                             {m.title}
                           </p>
                           <div className="flex items-center gap-2">
-                            <span className="flex items-center gap-1 text-xs text-ink-400">
+                            <span className="flex items-center gap-1 text-xs text-ink-400 dark:text-ink-500">
                               <CalendarClock className="h-3.5 w-3.5" />
                               Due {m.dueDate}
                             </span>
@@ -158,17 +158,17 @@ export function MilestonesPage() {
                                 onClick={() =>
                                   setExpandedId(isExpanded ? null : m.id)
                                 }
-                                className="ml-2 text-xs font-medium text-brand-600 hover:text-brand-700"
+                                className="ml-2 text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
                               >
                                 {isExpanded ? 'Hide note' : 'Show note'}
                               </button>
                             )}
                             {isExpanded && m.checkInNote && (
-                              <div className="mt-2 rounded-lg bg-brand-50/60 px-3.5 py-2.5">
-                                <p className="text-xs font-medium text-ink-400">
+                              <div className="mt-2 rounded-lg bg-brand-50/60 px-3.5 py-2.5 dark:bg-brand-950/30">
+                                <p className="text-xs font-medium text-ink-400 dark:text-ink-500">
                                   Checked in {m.checkedInAt}
                                 </p>
-                                <p className="mt-1 text-sm text-ink-600">{m.checkInNote}</p>
+                                <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">{m.checkInNote}</p>
                               </div>
                             )}
                           </div>
@@ -213,14 +213,14 @@ export function MilestonesPage() {
       >
         {checkInMilestone && (
           <div className="space-y-4">
-            <div className="rounded-lg bg-ink-50 px-4 py-3">
-              <p className="text-xs text-ink-400">Milestone {checkInMilestone.number}</p>
-              <p className="mt-0.5 font-display font-semibold text-ink-800">
+            <div className="rounded-lg bg-ink-50 px-4 py-3 dark:bg-ink-800/50">
+              <p className="text-xs text-ink-400 dark:text-ink-500">Milestone {checkInMilestone.number}</p>
+              <p className="mt-0.5 font-display font-semibold text-ink-800 dark:text-ink-100">
                 {checkInMilestone.title}
               </p>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 Check-in note
               </label>
               <textarea
@@ -230,11 +230,11 @@ export function MilestonesPage() {
                 placeholder="What did you accomplish for this milestone? Any notes for your mentor?"
                 className="input-field resize-none text-sm"
               />
-              <p className="mt-2 text-xs text-ink-400">
+              <p className="mt-2 text-xs text-ink-400 dark:text-ink-500">
                 This note will be visible to your mentor in the log book.
               </p>
             </div>
-            <div className="flex justify-end gap-3 border-t border-ink-100 pt-4">
+            <div className="flex justify-end gap-3 border-t border-ink-100 pt-4 dark:border-ink-800">
               <Button
                 variant="secondary"
                 onClick={() => {
