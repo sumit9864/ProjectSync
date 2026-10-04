@@ -124,24 +124,26 @@ export function AppShell({
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-ink-200/70 bg-white/80 px-4 backdrop-blur-md sm:px-6">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-ink-200/70 bg-white/80 px-4 backdrop-blur-md dark:border-ink-800 dark:bg-ink-900/80 sm:px-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileNavOpen(true)}
-              className="lg:hidden text-ink-600 hover:text-ink-900"
+              className="lg:hidden text-ink-600 hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
               aria-label="Open menu"
             >
               <Menu className="h-6 w-6" />
             </button>
             <div className="hidden sm:block">
-              <p className="text-xs font-medium text-ink-400">Final Year Project Management</p>
-              <p className="text-sm font-display font-semibold text-ink-800">
+              <p className="text-xs font-medium text-ink-400 dark:text-ink-500">Final Year Project Management</p>
+              <p className="text-sm font-display font-semibold text-ink-800 dark:text-ink-100">
                 {navItems.find((n) => n.id === currentPage)?.label}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+
             {/* Notifications */}
             <div className="relative" ref={notifRef}>
               <button
@@ -240,8 +242,9 @@ export function AppShell({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</div>
+        <main className="relative flex-1 overflow-y-auto">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-56 ambient-grid opacity-60" />
+          <div key={currentPage} className="relative mx-auto max-w-6xl px-4 py-6 motion-page sm:px-6 sm:py-8">{children}</div>
         </main>
       </div>
     </div>
@@ -283,7 +286,7 @@ function SidebarContent({
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                className={`motion-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                 active
                   ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-brand-300'
                   : 'text-ink-600 hover:bg-ink-50 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-200'

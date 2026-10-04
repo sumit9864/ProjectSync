@@ -57,7 +57,7 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 px-4 py-8 dark:bg-black">
       {/* Background decoration — same visual language as the old landing */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-brand-600/20 blur-3xl dark:bg-brand-600/10" />
+        <div className="absolute -left-40 -top-40 h-96 w-96 animate-pulse rounded-full bg-brand-600/20 blur-3xl dark:bg-brand-600/10" />
         <div className="absolute -right-40 top-1/3 h-96 w-96 rounded-full bg-sky-600/10 blur-3xl dark:bg-sky-600/5" />
         <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-emerald-600/10 blur-3xl dark:bg-emerald-600/5" />
         <div
@@ -77,7 +77,7 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
       <div className="relative z-10 w-full max-w-md">
         {/* Logo + branding */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 shadow-lg shadow-brand-600/30">
+          <div className="motion-press mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 shadow-lg shadow-brand-600/30 transition-transform duration-300 hover:rotate-3 hover:scale-105">
             <Target className="h-7 w-7 text-white" />
           </div>
           <h1 className="font-display text-2xl font-bold text-white sm:text-3xl">FYPM Hub</h1>
