@@ -9,6 +9,8 @@ import {
   Lightbulb,
   CheckCircle2,
   AlertCircle,
+  CalendarClock,
+  Activity,
 } from 'lucide-react';
 import { Card, CardHeader, CardBody, Button, Badge, Skeleton, EmptyState } from '@/components/ui';
 import type { MentorPageId } from '@/components/MentorShell';
@@ -58,19 +60,20 @@ export function MentorOverviewPage({
     group.milestones.filter((m) => m.status === 'complete').length;
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">
+    <div className="dashboard-canvas motion-page space-y-7">
+      <div className="motion-stagger">
+        <p className="section-kicker">Mentor workspace</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight text-ink-900 dark:text-ink-100">
           Welcome back, {mentorUser.name.split(' ').slice(0, 2).join(' ')}
         </h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-500 dark:text-ink-400">
           You have {pendingReviews.length} topic {pendingReviews.length === 1 ? 'review' : 'reviews'} waiting and{' '}
           {mentorStats.assignedGroups} active groups.
         </p>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="motion-stagger grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={<Users className="h-5 w-5" />}
           label="Assigned Groups"
@@ -101,9 +104,40 @@ export function MentorOverviewPage({
         />
       </div>
 
+      <Card className="surface-glow motion-lift border-brand-200/70 dark:border-brand-900/60">
+        <CardBody>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/60 dark:text-brand-400">
+                <CalendarClock className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="section-kicker">Next best action</p>
+                <h2 className="mt-1 font-display text-lg font-semibold text-ink-900 dark:text-ink-100">
+                  {pendingReviews.length > 0 ? `Review ${pendingReviews[0].name}` : 'Keep groups moving'}
+                </h2>
+                <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+                  {pendingReviews.length > 0
+                    ? 'A topic decision is blocking the next project milestone.'
+                    : 'Check recent activity and follow up with any quiet group.'}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => pendingReviews.length > 0 ? onOpenReview(pendingReviews[0].id) : onNavigate('logbook')}
+            >
+              {pendingReviews.length > 0 ? 'Open review' : 'View activity'}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Reviews waiting */}
-        <Card className="lg:col-span-2">
+        <Card className="surface-glow motion-lift lg:col-span-2">
           <CardHeader
             title="Reviews Waiting for You"
             subtitle="Click a group to open it in the Review Queue"
@@ -124,7 +158,7 @@ export function MentorOverviewPage({
                     <button
                       key={group.id}
                       onClick={() => onOpenReview(group.id)}
-                      className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-ink-50 dark:hover:bg-ink-800/50"
+                      className="activity-row focus-ring flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
@@ -296,7 +330,7 @@ function StatCard({
     emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400',
   };
   return (
-    <Card className="transition-shadow hover:shadow-cardhover">
+    <Card className="motion-lift">
       <CardBody>
         <div className="flex items-center gap-3">
           <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${accents[accent]}`}>

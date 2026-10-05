@@ -73,16 +73,17 @@ export function AdminOverviewPage({
     }));
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Program Overview</h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+    <div className="dashboard-canvas motion-page space-y-7">
+      <div className="motion-stagger">
+        <p className="section-kicker">Admin workspace</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight text-ink-900 dark:text-ink-100">Program Overview</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-500 dark:text-ink-400">
           Final-year project pipeline at a glance · {activeGroups} groups · {adminMentors.length} mentors
         </p>
       </div>
 
       {/* Stat row */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="motion-stagger grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={<Users className="h-5 w-5" />}
           label="Active Groups"
@@ -115,7 +116,7 @@ export function AdminOverviewPage({
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Pipeline stage chart */}
-        <Card>
+        <Card className="pipeline-card surface-glow motion-lift">
           <CardHeader title="Groups by Pipeline Stage" subtitle="Current distribution across the program" />
           <CardBody>
             <div className="space-y-4">
@@ -123,8 +124,14 @@ export function AdminOverviewPage({
                 const count = stageCounts[stage];
                 const pct = Math.round((count / maxStageCount) * 100);
                 return (
-                  <div key={stage}>
-                    <div className="flex items-center justify-between mb-1.5">
+                  <button
+                    key={stage}
+                    type="button"
+                    className="pipeline-stage focus-ring w-full rounded-lg text-left"
+                    onClick={() => onNavigate('pipeline')}
+                    aria-label={`Open ${pipelineStageLabels[stage]} pipeline details`}
+                  >
+                    <div className="mb-1.5 flex items-center justify-between">
                       <span className="text-sm font-medium text-ink-700 dark:text-ink-200">
                         {pipelineStageLabels[stage]}
                       </span>
@@ -136,7 +143,7 @@ export function AdminOverviewPage({
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -158,7 +165,7 @@ export function AdminOverviewPage({
                 {attentionItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between gap-3 px-5 py-4"
+                    className="activity-row flex items-center justify-between gap-3 px-5 py-4"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
@@ -212,7 +219,7 @@ export function AdminOverviewPage({
           ) : (
             <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {auditEvents.slice(0, 6).map((event) => (
-                <div key={event.id} className="flex items-start gap-3 px-5 py-3.5">
+                <div key={event.id} className="activity-row flex items-start gap-3 px-5 py-3.5">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400">
                     <Activity className="h-4 w-4" />
                   </div>
@@ -259,7 +266,7 @@ function StatCard({
     emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400',
   };
   return (
-    <Card className="transition-shadow hover:shadow-cardhover dark:hover:shadow-cardhover-dark">
+    <Card className="motion-lift">
       <CardBody>
         <div className="flex items-center gap-3">
           <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${accents[accent]}`}>

@@ -262,6 +262,25 @@ export function OverviewPage({
         </CardBody>
       </Card>
 
+      <Card className="timeline-card">
+        <CardHeader title="Project timeline" subtitle="The next moments that shape your delivery" action={<Badge color="info"><Clock className="h-3.5 w-3.5" /> Live plan</Badge>} />
+        <CardBody>
+          <div className="grid gap-3 md:grid-cols-3">
+            {upcomingDeadlines.slice(0, 3).map((deadline, index) => (
+              <button key={deadline.id} type="button" onClick={() => onNavigate(deadline.page as PageId)} className="timeline-item focus-ring group rounded-xl bg-ink-50/80 p-4 text-left transition-colors hover:bg-brand-50/70 dark:bg-ink-800/50 dark:hover:bg-brand-950/30">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-700 dark:text-brand-300">{index === 0 ? 'Next' : `Step ${index + 1}`}</span>
+                  <Badge color={deadline.daysLeft <= 7 ? 'warning' : 'neutral'}>{deadline.daysLeft}d</Badge>
+                </div>
+                <p className="mt-3 text-sm font-semibold text-ink-900 dark:text-ink-100">{deadline.title}</p>
+                <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{deadline.date}</p>
+                <div className="mt-4 h-1 overflow-hidden rounded-full bg-ink-200 dark:bg-ink-700"><div className={`h-full rounded-full ${index === 0 ? 'w-3/4 bg-amber-500' : 'w-1/2 bg-brand-500'}`} /></div>
+              </button>
+            ))}
+          </div>
+        </CardBody>
+      </Card>
+
       {/* Activity + Deadlines */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="motion-lift">

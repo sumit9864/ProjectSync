@@ -1,5 +1,5 @@
 import { type ReactNode, useState, useEffect, useRef } from 'react';
-import { Target, Bell, Menu, X, LogOut, ChevronRight } from 'lucide-react';
+import { Target, Bell, Menu, X, LogOut, ChevronRight, Search, Command, ArrowRight } from 'lucide-react';
 import { Avatar } from '@/components/ui';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Notification } from '@/types';
@@ -48,11 +48,24 @@ export function AppShell({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
   const [notifications, setNotifications] = useState(initialNotifications);
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandOpen((value) => !value);
+      }
+      if (e.key === 'Escape') setCommandOpen(false);
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -143,6 +156,17 @@ export function AppShell({
 
           <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+
+            <button
+              type="button"
+              onClick={() => setCommandOpen(true)}
+              className="hidden items-center gap-2 rounded-lg border border-ink-200/70 px-2.5 py-2 text-xs text-ink-400 transition-colors hover:border-brand-300 hover:text-brand-700 dark:border-ink-700 dark:hover:border-brand-700 dark:hover:text-brand-300 sm:flex"
+              aria-label="Open command palette"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search</span>
+              <kbd className="rounded bg-ink-100 px-1.5 py-0.5 font-mono text-[10px] dark:bg-ink-800">⌘K</kbd>
+            </button>
 
             {/* Notifications */}
             <div className="relative" ref={notifRef}>
@@ -240,6 +264,24 @@ export function AppShell({
             </div>
           </div>
         </header>
+
+        {commandOpen && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center bg-ink-950/20 px-4 pt-[12vh] backdrop-blur-sm" role="presentation" onMouseDown={() => setCommandOpen(false)}>
+            <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-ink-200/70 dark:bg-ink-900 dark:ring-ink-700" role="dialog" aria-modal="true" aria-label="Command palette" onMouseDown={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-3 border-b border-ink-100 px-4 py-3 dark:border-ink-800">
+                <Command className="h-4 w-4 text-brand-600 dark:text-brand-400" />
+                <input autoFocus className="min-w-0 flex-1 bg-transparent text-sm text-ink-900 outline-none placeholder:text-ink-400 dark:text-ink-100" placeholder="Jump to a workspace section..." aria-label="Search workspace" />
+                <kbd className="rounded-md bg-ink-100 px-2 py-1 font-mono text-[10px] text-ink-500 dark:bg-ink-800 dark:text-ink-400">ESC</kbd>
+              </div>
+              <div className="p-2">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  return <button key={item.id} type="button" onClick={() => { handleNavigate(item.id); setCommandOpen(false); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-800 dark:text-ink-200 dark:hover:bg-brand-950/40 dark:hover:text-brand-200"><Icon className="h-4 w-4 text-ink-400" /><span className="flex-1">{item.label}</span><ArrowRight className="h-4 w-4 text-ink-300" /></button>;
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Page Content */}
         <main className="relative flex-1 overflow-y-auto">
