@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
-import { Card, CardHeader, CardBody, Button, Badge, Skeleton } from '@/components/ui';
+import { Card, CardHeader, CardBody, Button, Badge, Skeleton, AnimatedNumber } from '@/components/ui';
 import type { StudentPageId as PageId } from '@/components/StudentShell';
 import {
   projectProgress,
@@ -52,6 +52,8 @@ export function OverviewPage({
   const [loading, setLoading] = useState(true);
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'at-risk' | 'week'>('all');
+  const [draggedStage, setDraggedStage] = useState<string | null>(null);
+  const [dropStage, setDropStage] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 600);
@@ -217,10 +219,16 @@ export function OverviewPage({
                 <div key={stage.key} className="flex items-center sm:flex-1">
                   <button
                     type="button"
-                    aria-label={`Open details for ${stage.label}`}
+                    draggable
+                    aria-label={`Open details for ${stage.label}. Drag to reorder the pipeline.`}
                     aria-pressed={selectedStage === stage.key}
                     onClick={() => setSelectedStage(selectedStage === stage.key ? null : stage.key)}
-                    className={`focus-ring pipeline-stage flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left sm:flex-1 ${isCurrent ? 'pipeline-stage--current' : ''} ${done ? 'bg-brand-50 dark:bg-brand-950/40' : isCurrent ? 'bg-amber-50 dark:bg-amber-950/40' : 'bg-ink-50 dark:bg-ink-800/50'}`}
+                    onDragStart={() => setDraggedStage(stage.key)}
+                    onDragOver={(event) => { event.preventDefault(); setDropStage(stage.key); }}
+                    onDragLeave={() => setDropStage(null)}
+                    onDrop={(event) => { event.preventDefault(); setDropStage(null); setDraggedStage(null); setSelectedStage(stage.key); }}
+                    onDragEnd={() => { setDraggedStage(null); setDropStage(null); }}
+                    className={`focus-ring pipeline-stage flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left sm:flex-1 ${isCurrent ? 'pipeline-stage--current' : ''} ${dropStage === stage.key && draggedStage !== stage.key ? 'drop-target' : ''} ${done ? 'bg-brand-50 dark:bg-brand-950/40' : isCurrent ? 'bg-amber-50 dark:bg-amber-950/40' : 'bg-ink-50 dark:bg-ink-800/50'}`}
                   >
                     {done ? (
                       <CheckCircle2 className="h-5 w-5 text-brand-600 dark:text-brand-400" />
@@ -236,13 +244,14 @@ export function OverviewPage({
                       <p className="text-xs text-ink-400 dark:text-ink-500">
                         {done ? 'Complete' : isCurrent ? 'In progress' : 'Pending'}
                       </p>
+                      <span className="sr-only">Status is {done ? 'complete' : isCurrent ? 'in progress' : 'pending'}. Press Enter to open details.</span>
                     </div>
                     <ChevronDown
                       className={`ml-auto h-4 w-4 shrink-0 transition-transform sm:hidden ${selectedStage === stage.key ? 'rotate-180' : ''}`}
                     />
                   </button>
                   {idx < pipelineStages.length - 1 && (
-                    <div className={`pipeline-connector mx-1 hidden h-px flex-1 sm:block ${done ? 'bg-brand-300 dark:bg-brand-800' : 'bg-ink-200 dark:bg-ink-700'}`} />
+                    <div className={`pipeline-connector ${isCurrent || (done && idx + 1 === completedStages.length) ? 'pipeline-connector--active' : ''} mx-1 hidden h-px flex-1 sm:block ${done ? 'bg-brand-300 dark:bg-brand-800' : 'bg-ink-200 dark:bg-ink-700'}`} />
                   )}
                 </div>
               );
@@ -415,9 +424,10 @@ function HealthMetric({
         <span className="text-xs font-medium text-ink-500 dark:text-ink-400">{label}</span>
         <span className="tabular-nums font-display text-lg font-bold text-ink-900 dark:text-ink-100">{value}{suffix}</span>
       </div>
-      <div className="progress-track mt-2" aria-label={`${label}: ${value}${suffix}`} role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={suffix === '%' ? 100 : 10}>
-        <div className={`progress-fill h-full rounded-full ${toneClass}`} style={{ width: `${width}%` }} />
-      </div>
+<div className="progress-track mt-2" aria-label={`${label}: ${value}${suffix}`} role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={suffix === '%' ? 100 : 10}>
+  <span className="sr-only">{label}: {value}{suffix}</span>
+  <div className={`progress-fill h-full rounded-full ${toneClass}`} style={{ width: `${width}%` }} aria-hidden="true" />
+  </div>
     </div>
   );
 }
@@ -450,7 +460,7 @@ function StatCard({
           </div>
           <div className="min-w-0">
             <p className="text-xs font-medium text-ink-400 dark:text-ink-500">{label}</p>
-            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900 dark:text-ink-100">{value}</p>
+            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900 dark:text-ink-100">{/^\d+$/.test(value) ? <AnimatedNumber value={Number(value)} /> : value}</p>
           </div>
         </div>
         <p className="mt-3 text-xs text-ink-400 dark:text-ink-500">{sublabel}</p>

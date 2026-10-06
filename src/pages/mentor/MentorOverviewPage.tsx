@@ -12,7 +12,7 @@ import {
   CalendarClock,
   Activity,
 } from 'lucide-react';
-import { Card, CardHeader, CardBody, Button, Badge, Skeleton, EmptyState } from '@/components/ui';
+import { Card, CardHeader, CardBody, Button, Badge, Skeleton, EmptyState, AnimatedNumber } from '@/components/ui';
 import type { MentorPageId } from '@/components/MentorShell';
 import {
   mentorUser,
@@ -248,7 +248,7 @@ export function MentorOverviewPage({
               const milestoneCount = getMilestoneCount(group);
               const latestVersion = group.topicVersions[0];
               return (
-                <Card key={group.id} className="transition-shadow hover:shadow-cardhover">
+                <Card key={group.id} className="preview-card">
                   <CardBody>
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
@@ -338,7 +338,7 @@ function StatCard({
           </div>
           <div className="min-w-0">
             <p className="text-xs font-medium text-ink-400 dark:text-ink-500">{label}</p>
-            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900 dark:text-ink-100">{value}</p>
+            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900 dark:text-ink-100">{/^\d+$/.test(value) ? <AnimatedNumber value={Number(value)} /> : value}</p>
           </div>
         </div>
         <p className="mt-3 text-xs text-ink-400 dark:text-ink-500">{sublabel}</p>

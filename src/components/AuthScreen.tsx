@@ -54,24 +54,18 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
   const { showToast } = useToast();
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 px-4 py-8 dark:bg-black">
+    <div className="auth-shell relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-50 px-4 py-8 text-ink-800 dark:bg-ink-950 dark:text-ink-100">
       {/* Background decoration — same visual language as the old landing */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-40 -top-40 h-96 w-96 animate-pulse rounded-full bg-brand-600/20 blur-3xl dark:bg-brand-600/10" />
-        <div className="absolute -right-40 top-1/3 h-96 w-96 rounded-full bg-sky-600/10 blur-3xl dark:bg-sky-600/5" />
-        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-emerald-600/10 blur-3xl dark:bg-emerald-600/5" />
-        <div
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-            backgroundSize: '32px 32px',
-          }}
-        />
+        <div className="absolute -left-40 -top-40 h-96 w-96 animate-pulse rounded-full bg-brand-300/30 blur-3xl dark:bg-brand-600/15" />
+        <div className="absolute -right-40 top-1/3 h-96 w-96 rounded-full bg-sky-300/25 blur-3xl dark:bg-sky-600/10" />
+        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-emerald-300/20 blur-3xl dark:bg-emerald-600/10" />
+        <div className="auth-grid absolute inset-0 opacity-70 dark:opacity-45" />
       </div>
 
       {/* Theme toggle — top right */}
       <div className="absolute right-4 top-4 z-20">
-        <ThemeToggle theme={theme} onToggle={onToggleTheme} className="text-ink-400 hover:bg-white/10 dark:text-ink-500 dark:hover:bg-white/5" />
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} className="text-ink-500 hover:bg-white/70 dark:text-ink-400 dark:hover:bg-ink-800/70" />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
@@ -80,8 +74,8 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
           <div className="motion-press mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 shadow-lg shadow-brand-600/30 transition-transform duration-300 hover:rotate-3 hover:scale-105">
             <Target className="h-7 w-7 text-white" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-white sm:text-3xl">FYPM Hub</h1>
-          <p className="mt-1.5 text-sm text-ink-400">
+          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white sm:text-3xl">FYPM Hub</h1>
+          <p className="mt-1.5 text-sm text-ink-500 dark:text-ink-400">
             Final-Year Project Management
           </p>
         </div>

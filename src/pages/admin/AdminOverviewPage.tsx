@@ -8,7 +8,7 @@ import {
   ArrowRight,
   Activity,
 } from 'lucide-react';
-import { Card, CardHeader, CardBody, Skeleton, EmptyState } from '@/components/ui';
+import { Card, CardHeader, CardBody, Skeleton, EmptyState, AnimatedNumber } from '@/components/ui';
 import type { AdminPageId } from '@/components/AdminShell';
 import {
   adminGroups,
@@ -274,7 +274,7 @@ function StatCard({
           </div>
           <div className="min-w-0">
             <p className="text-xs font-medium text-ink-400 dark:text-ink-500">{label}</p>
-            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900 dark:text-ink-100">{value}</p>
+            <p className="mt-0.5 truncate font-display text-lg font-bold text-ink-900 dark:text-ink-100">{/^\d+$/.test(value) ? <AnimatedNumber value={Number(value)} /> : value}</p>
           </div>
         </div>
         <p className="mt-3 text-xs text-ink-400 dark:text-ink-500">{sublabel}</p>

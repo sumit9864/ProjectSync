@@ -1,4 +1,23 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
+
+export function AnimatedNumber({ value, duration = 800 }: { value: number; duration?: number }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const start = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(value * eased));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [duration, value]);
+
+  return <span className="tabular-nums">{displayValue}</span>;
+}
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
