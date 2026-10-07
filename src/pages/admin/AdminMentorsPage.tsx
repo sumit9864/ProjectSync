@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Card, CardHeader, CardBody, Button, Badge, Avatar, Skeleton, EmptyState } from '@/components/ui';
 import { useToast } from '@/components/Toast';
-import { adminMentors, type AdminMentor } from '@/data/adminData';
+import { adminMentors, MAX_MENTOR_GROUPS, type AdminMentor } from '@/data/adminData';
 
 const avatarColors = [
   'bg-brand-600',
@@ -30,7 +30,7 @@ export function AdminMentorsPage() {
   const [name, setName] = useState('');
   const [domain, setDomain] = useState('');
   const [email, setEmail] = useState('');
-  const [capacity, setCapacity] = useState('5');
+  const [capacity, setCapacity] = useState(String(MAX_MENTOR_GROUPS));
 
   // Bulk add
   const [bulkText, setBulkText] = useState('');
@@ -53,7 +53,7 @@ export function AdminMentorsPage() {
       name: name.trim(),
       domain: domain.trim() || 'Unspecified',
       email: email.trim(),
-      capacity: parseInt(capacity, 10) || 5,
+      capacity: Math.min(MAX_MENTOR_GROUPS, Math.max(1, parseInt(capacity, 10) || MAX_MENTOR_GROUPS)),
       currentLoad: 0,
       avatarColor: avatarColors[mentors.length % avatarColors.length],
     };
@@ -62,7 +62,7 @@ export function AdminMentorsPage() {
     setName('');
     setDomain('');
     setEmail('');
-    setCapacity('5');
+    setCapacity(String(MAX_MENTOR_GROUPS));
   };
 
   const parseBulk = () => {
@@ -82,7 +82,7 @@ export function AdminMentorsPage() {
         name: n,
         email: em,
         domain: dom,
-        capacity: parseInt(cap, 10) || 5,
+        capacity: Math.min(MAX_MENTOR_GROUPS, Math.max(1, parseInt(cap, 10) || MAX_MENTOR_GROUPS)),
         currentLoad: 0,
         avatarColor: avatarColors[(mentors.length + parsed.length) % avatarColors.length],
       });
@@ -164,13 +164,13 @@ export function AdminMentorsPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Capacity</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Maximum groups (3)</label>
               <input
                 type="number"
                 value={capacity}
                 onChange={(e) => setCapacity(e.target.value)}
                 min="1"
-                max="20"
+                max={MAX_MENTOR_GROUPS}
                 className="input-field w-24"
               />
             </div>

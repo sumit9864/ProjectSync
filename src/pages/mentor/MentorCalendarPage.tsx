@@ -48,7 +48,6 @@ export function MentorCalendarPage() {
   const eventsByDay = new Map<number, typeof mentorCalendarEvents>();
   mentorCalendarEvents.forEach((e) => {
     const existing = eventsByDay.get(e.day) ?? [];
-    existing.push(e);
     eventsByDay.set(e.day, [...existing, e]);
   });
 
@@ -173,7 +172,7 @@ export function MentorCalendarPage() {
 
         {/* Latest activity side panel */}
         <div className="lg:col-span-1">
-          <Card className="lg:sticky lg:top-0">
+          <Card className="self-start">
             <CardHeader title="Latest Activity" subtitle="Across all your groups" />
             <CardBody className="p-0">
               {calendarLatestActivity.length === 0 ? (

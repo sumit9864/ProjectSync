@@ -518,10 +518,10 @@ export const mentorNotifications: Notification[] = [
 ];
 
 export const mentorStats = {
-  assignedGroups: 4,
+  assignedGroups: 3,
   pendingReviews: 2,
   avgResponseTime: '1.5 days',
-  capacity: { current: 4, max: 6, spaces: 2 },
+  capacity: { current: 3, max: 3, spaces: 0 },
 };
 
 export const reviewWeekProgress = {

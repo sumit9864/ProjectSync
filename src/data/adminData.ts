@@ -1,5 +1,7 @@
 import type { Notification } from '@/types';
 
+export const MAX_MENTOR_GROUPS = 3;
+
 export const adminUser = {
   name: 'Dr. Priya Krishnan',
   email: 'priya.krishnan@university.edu',
@@ -103,14 +105,14 @@ export const topicStatusLabel: Record<AdminGroup['topicStatus'], string> = {
 };
 
 export const adminMentors: AdminMentor[] = [
-  { id: 'mentor-1', name: 'Dr. Eliza Mathews', domain: 'Applied Machine Learning', email: 'eliza.mathews@university.edu', capacity: 6, currentLoad: 4, avatarColor: 'bg-brand-600' },
-  { id: 'mentor-2', name: 'Dr. Vikram Reddy', domain: 'Natural Language Processing', email: 'vikram.reddy@university.edu', capacity: 5, currentLoad: 3, avatarColor: 'bg-sky-600' },
-  { id: 'mentor-3', name: 'Prof. Sarah Chen', domain: 'Computer Vision', email: 'sarah.chen@university.edu', capacity: 4, currentLoad: 4, avatarColor: 'bg-violet-600' },
-  { id: 'mentor-4', name: 'Dr. Arjun Patel', domain: 'Cloud & Distributed Systems', email: 'arjun.patel@university.edu', capacity: 6, currentLoad: 2, avatarColor: 'bg-amber-600' },
-  { id: 'mentor-5', name: 'Dr. Meera Iyer', domain: 'Cybersecurity', email: 'meera.iyer@university.edu', capacity: 5, currentLoad: 3, avatarColor: 'bg-rose-600' },
-  { id: 'mentor-6', name: 'Dr. James OConnor', domain: 'Internet of Things', email: 'james.oconnor@university.edu', capacity: 5, currentLoad: 5, avatarColor: 'bg-emerald-600' },
-  { id: 'mentor-7', name: 'Dr. Fatima Al-Zahra', domain: 'Human-Computer Interaction', email: 'fatima.alzahra@university.edu', capacity: 4, currentLoad: 1, avatarColor: 'bg-cyan-600' },
-  { id: 'mentor-8', name: 'Dr. Ken Watanabe', domain: 'Blockchain & Web3', email: 'ken.watanabe@university.edu', capacity: 4, currentLoad: 2, avatarColor: 'bg-indigo-600' },
+  { id: 'mentor-1', name: 'Dr. Eliza Mathews', domain: 'Applied Machine Learning', email: 'eliza.mathews@university.edu', capacity: 3, currentLoad: 2, avatarColor: 'bg-brand-600' },
+  { id: 'mentor-2', name: 'Dr. Vikram Reddy', domain: 'Natural Language Processing', email: 'vikram.reddy@university.edu', capacity: 3, currentLoad: 2, avatarColor: 'bg-sky-600' },
+  { id: 'mentor-3', name: 'Prof. Sarah Chen', domain: 'Computer Vision', email: 'sarah.chen@university.edu', capacity: 3, currentLoad: 1, avatarColor: 'bg-violet-600' },
+  { id: 'mentor-4', name: 'Dr. Arjun Patel', domain: 'Cloud & Distributed Systems', email: 'arjun.patel@university.edu', capacity: 3, currentLoad: 1, avatarColor: 'bg-amber-600' },
+  { id: 'mentor-5', name: 'Dr. Meera Iyer', domain: 'Cybersecurity', email: 'meera.iyer@university.edu', capacity: 3, currentLoad: 2, avatarColor: 'bg-rose-600' },
+  { id: 'mentor-6', name: 'Dr. James OConnor', domain: 'Internet of Things', email: 'james.oconnor@university.edu', capacity: 3, currentLoad: 1, avatarColor: 'bg-emerald-600' },
+  { id: 'mentor-7', name: 'Dr. Fatima Al-Zahra', domain: 'Human-Computer Interaction', email: 'fatima.alzahra@university.edu', capacity: 3, currentLoad: 1, avatarColor: 'bg-cyan-600' },
+  { id: 'mentor-8', name: 'Dr. Ken Watanabe', domain: 'Blockchain & Web3', email: 'ken.watanabe@university.edu', capacity: 3, currentLoad: 2, avatarColor: 'bg-indigo-600' },
 ];
 
 export const adminGroups: AdminGroup[] = [

@@ -11,6 +11,7 @@ import { Card, CardHeader, CardBody, Button, Badge, Skeleton, EmptyState } from 
 import { useToast } from '@/components/Toast';
 import {
   adminMentors,
+  MAX_MENTOR_GROUPS,
   adminGroups,
   extensions as initialExtensions,
   controlWindows,
@@ -107,7 +108,7 @@ export function AdminControlsPage() {
   };
 
   const updateCapacity = (mentorId: string, newCap: number) => {
-    if (newCap < 0 || newCap > 20) return;
+    if (newCap < 0 || newCap > MAX_MENTOR_GROUPS) return;
     setMentors((prev) =>
       prev.map((m) => (m.id === mentorId ? { ...m, capacity: newCap } : m))
     );
@@ -311,7 +312,7 @@ export function AdminControlsPage() {
       <Card>
         <CardHeader
           title="Mentor Capacity"
-          subtitle="Set the maximum group load per mentor"
+          subtitle="Each mentor can supervise a maximum of 3 groups"
         />
         <CardBody className="p-0">
           {mentors.length === 0 ? (
@@ -346,6 +347,8 @@ export function AdminControlsPage() {
                       <input
                         type="number"
                         value={m.capacity}
+                        min={m.currentLoad}
+                        max={MAX_MENTOR_GROUPS}
                         onChange={(e) =>
                           updateCapacity(m.id, parseInt(e.target.value, 10) || 0)
                         }
@@ -353,6 +356,7 @@ export function AdminControlsPage() {
                       />
                       <button
                         onClick={() => updateCapacity(m.id, m.capacity + 1)}
+                        disabled={m.capacity >= MAX_MENTOR_GROUPS}
                         className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-100 text-ink-500 hover:bg-ink-200 transition-colors dark:bg-ink-800 dark:text-ink-400 dark:hover:bg-ink-700"
                         aria-label="Increase capacity"
                       >

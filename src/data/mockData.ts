@@ -109,7 +109,7 @@ export const notifications: Notification[] = [
   },
   {
     id: 'n4',
-    title: 'Welcome to FYPM Hub',
+    title: 'Welcome to ProjectSync',
     body: 'Your final-year project workspace is ready. Start by completing your group registration.',
     time: '3d ago',
     read: true,

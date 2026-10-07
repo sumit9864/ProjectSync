@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import {
-  Target,
   Eye,
   EyeOff,
   Mail,
@@ -72,11 +71,11 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
         {/* Logo + branding */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="motion-press mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 shadow-lg shadow-brand-600/30 transition-transform duration-300 hover:rotate-3 hover:scale-105">
-            <Target className="h-7 w-7 text-white" />
+            <svg viewBox="0 0 64 64" className="h-7 w-7 text-white" aria-hidden="true"><path d="M20 18v28M20 46c0-11 8-16 17-16 7 0 9-5 9-12" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="20" cy="18" r="7" fill="currentColor" /><circle cx="46" cy="18" r="7" fill="currentColor" /><circle cx="20" cy="46" r="7" fill="currentColor" /></svg>
           </div>
-          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white sm:text-3xl">FYPM Hub</h1>
+          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white sm:text-3xl">ProjectSync</h1>
           <p className="mt-1.5 text-sm text-ink-500 dark:text-ink-400">
-            Final-Year Project Management
+            Final-year project workspace
           </p>
         </div>
 

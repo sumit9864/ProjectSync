@@ -1,5 +1,5 @@
 import { type ReactNode, useState, useEffect, useRef } from 'react';
-import { Target, Bell, Menu, X, LogOut, ChevronRight, Search, Command, ArrowRight } from 'lucide-react';
+import { Bell, Menu, X, LogOut, ChevronRight, Search, Command, ArrowRight } from 'lucide-react';
 import { Avatar } from '@/components/ui';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Notification } from '@/types';
@@ -137,7 +137,7 @@ export function AppShell({
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-ink-200/70 bg-white/80 px-4 backdrop-blur-md dark:border-ink-800 dark:bg-ink-900/80 sm:px-6">
+        <header className="relative z-40 flex h-16 shrink-0 items-center justify-between gap-3 overflow-visible border-b border-ink-200/70 bg-white/80 px-4 backdrop-blur-md dark:border-ink-800 dark:bg-ink-900/80 sm:px-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileNavOpen(true)}
@@ -147,7 +147,7 @@ export function AppShell({
               <Menu className="h-6 w-6" />
             </button>
             <div className="hidden sm:block">
-              <p className="text-xs font-medium text-ink-400 dark:text-ink-500">Final Year Project Management</p>
+              <p className="text-xs font-medium text-ink-400 dark:text-ink-500">ProjectSync</p>
               <p className="text-sm font-display font-semibold text-ink-800 dark:text-ink-100">
                 {navItems.find((n) => n.id === currentPage)?.label}
               </p>
@@ -185,7 +185,7 @@ export function AppShell({
               </button>
 
               {notifOpen && (
-                <div className="absolute right-0 top-12 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-ink-200 bg-white shadow-xl animate-scale-in dark:border-ink-700 dark:bg-ink-900">
+                <div className="absolute right-0 top-12 z-[60] w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-ink-200 bg-white shadow-xl animate-scale-in dark:border-ink-700 dark:bg-ink-900">
                   <div className="flex items-center justify-between border-b border-ink-100 px-4 py-3 dark:border-ink-800">
                     <h4 className="font-display font-semibold text-ink-900 dark:text-ink-100">Notifications</h4>
                     {unreadCount > 0 && (
@@ -244,7 +244,7 @@ export function AppShell({
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-12 w-56 rounded-xl border border-ink-200 bg-white shadow-xl animate-scale-in dark:border-ink-700 dark:bg-ink-900">
+                <div className="absolute right-0 top-12 z-[70] w-56 rounded-xl border border-ink-200 bg-white shadow-xl animate-scale-in dark:border-ink-700 dark:bg-ink-900">
                   <div className="border-b border-ink-100 px-4 py-3 dark:border-ink-800">
                     <p className="text-sm font-semibold text-ink-900 dark:text-ink-100">{user.name}</p>
                     <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">{user.email}</p>
@@ -284,7 +284,7 @@ export function AppShell({
         )}
 
         {/* Page Content */}
-        <main className="relative flex-1 overflow-y-auto">
+        <main className="relative z-0 flex-1 overflow-y-auto">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-56 ambient-grid opacity-60" />
           <div key={currentPage} className="relative mx-auto max-w-6xl px-4 py-6 motion-page sm:px-6 sm:py-8">{children}</div>
         </main>
@@ -312,10 +312,10 @@ function SidebarContent({
     <>
       <div className="flex items-center gap-3 px-5 py-5 border-b border-ink-100 dark:border-ink-800">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
-          <Target className="h-5 w-5" />
+          <svg viewBox="0 0 64 64" className="h-5 w-5" aria-hidden="true"><path d="M20 18v28M20 46c0-11 8-16 17-16 7 0 9-5 9-12" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="20" cy="18" r="7" fill="currentColor" /><circle cx="46" cy="18" r="7" fill="currentColor" /><circle cx="20" cy="46" r="7" fill="currentColor" /></svg>
         </div>
         <div>
-          <p className="font-display text-base font-bold text-ink-900 dark:text-ink-100">FYPM Hub</p>
+          <p className="font-display text-base font-bold text-ink-900 dark:text-ink-100">ProjectSync</p>
           <p className="text-xs text-ink-400 dark:text-ink-500">{workspaceLabel}</p>
         </div>
       </div>

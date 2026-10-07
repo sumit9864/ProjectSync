@@ -13,6 +13,7 @@ import {
   adminGroups,
   adminMentors,
   allocationHistory,
+  MAX_MENTOR_GROUPS,
   type AllocationResult,
   type AllocationHistoryEntry,
   type AdminGroup,
@@ -129,6 +130,10 @@ export function AdminAllocationPage() {
     const mentor = mentors.find((m) => m.id === selectedMentorId);
     const group = groups.find((g) => g.id === selectedGroupId);
     if (!mentor || !group) return;
+    if (mentor.currentLoad >= MAX_MENTOR_GROUPS) {
+      showToast(`${mentor.name} already has the maximum of ${MAX_MENTOR_GROUPS} groups.`, 'error');
+      return;
+    }
 
     setGroups((prev) =>
       prev.map((g) =>
@@ -275,7 +280,7 @@ export function AdminAllocationPage() {
                 className="input-field"
               >
                 <option value="">Select a mentor...</option>
-                {mentors.map((m) => (
+                {mentors.filter((m) => m.currentLoad < MAX_MENTOR_GROUPS).map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name} — {m.currentLoad}/{m.capacity} ({m.domain})
                   </option>
