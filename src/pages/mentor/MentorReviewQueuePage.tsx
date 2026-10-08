@@ -508,38 +508,42 @@ function ReviewDetail({
             </Badge>
           }
         />
-        <CardBody className="space-y-4">
-          <div className="space-y-4">
-            {group.discussion.map((msg) => (
-              <div key={msg.id} className="flex items-start gap-3">
-                <Avatar name={msg.author} color={msg.avatarColor} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-ink-800 dark:text-ink-100">{msg.author}</span>
-                    <Badge color={msg.role === 'Mentor' ? 'brand' : 'neutral'}>{msg.role}</Badge>
-                    <span className="text-xs text-ink-400 dark:text-ink-500">{msg.time}</span>
+        <CardBody className="space-y-4 bg-gradient-to-b from-ink-50/40 to-white dark:from-ink-950/30 dark:to-ink-900">
+          <div className="space-y-3 rounded-xl border border-ink-100/80 bg-white/70 p-4 dark:border-ink-800 dark:bg-ink-900/50">
+            {group.discussion.map((msg) => {
+              const isStudent = msg.role === 'Student';
+              return (
+                <div key={msg.id} className={`flex items-end gap-2 ${isStudent ? 'justify-end' : 'justify-start'}`}>
+                  {!isStudent && <Avatar name={msg.author} color={msg.avatarColor} size="sm" />}
+                  <div className={`flex max-w-[85%] flex-col ${isStudent ? 'items-end' : 'items-start'}`}>
+                    <div className={`mb-1 flex items-center gap-2 px-1 ${isStudent ? 'flex-row-reverse' : ''}`}>
+                      <span className="text-xs font-semibold text-ink-600 dark:text-ink-300">{msg.author}</span>
+                      <span className="text-[11px] text-ink-400 dark:text-ink-500">{msg.time}</span>
+                    </div>
+                    <div className={`px-4 py-2.5 text-sm leading-relaxed shadow-sm ${isStudent ? 'rounded-2xl rounded-br-sm bg-brand-600 text-white dark:bg-brand-700' : 'rounded-2xl rounded-bl-sm border border-ink-100 bg-ink-50 text-ink-700 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-200'}`}>
+                      {msg.body}
+                    </div>
                   </div>
-                  <p className="mt-1.5 rounded-lg bg-ink-50 px-3.5 py-2.5 text-sm text-ink-700 leading-relaxed dark:bg-ink-800/50 dark:text-ink-300">
-                    {msg.body}
-                  </p>
+                  {isStudent && <Avatar name={msg.author} color={msg.avatarColor} size="sm" />}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Reply box */}
           <div className="border-t border-ink-100 pt-4 dark:border-ink-800">
-            <div className="flex items-start gap-3">
+            <div className="flex items-end gap-2">
               <Avatar name={mentorUser.name} color={mentorUser.avatarColor} size="sm" />
-              <div className="flex-1">
+              <div className="flex max-w-[85%] flex-1 flex-col items-start">
+                <span className="mb-1 px-1 text-xs font-semibold text-ink-600 dark:text-ink-300">{mentorUser.name}</span>
                 <textarea
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
                   rows={2}
                   placeholder="Write a reply..."
-                  className="input-field resize-none text-sm"
+                  className="input-field w-full resize-none rounded-2xl rounded-bl-sm border-ink-100 bg-ink-50 text-sm dark:border-ink-700 dark:bg-ink-800"
                 />
-                <div className="mt-2 flex justify-end">
+                <div className="mt-2 flex w-full justify-end">
                   <Button size="sm" onClick={onReply} disabled={!reply.trim()}>
                     <Send className="h-3.5 w-3.5" />
                     Post reply
