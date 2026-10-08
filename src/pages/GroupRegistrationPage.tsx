@@ -46,7 +46,28 @@ export function GroupRegistrationPage() {
   const [errors, setErrors] = useState<Errors>({ memberErrors: [] });
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [step, setStep] = useState(1);
+  const [summaryStep, setSummaryStep] = useState(0);
   const { showToast } = useToast();
+
+  const memberComplete = (member: MemberRow) => Boolean(member.name.trim() && member.rollNumber.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(member.email.trim()) && member.elective);
+  const completedMembers = members.filter(memberComplete).length;
+  const selectedElective = members[0]?.elective || 'Not selected';
+  const stepLabels = ['Project identity', 'Team members', 'Review & submit'];
+  const goToNextStep = () => {
+    if (step === 1 && (!groupName.trim() || !description.trim() || !selectedElective || selectedElective === 'Not selected')) {
+      validate();
+      showToast('Complete the project identity fields first.', 'error');
+      return;
+    }
+    if (step === 2 && (members.length < 3 || completedMembers !== members.length)) {
+      validate();
+      showToast('Complete every team member before continuing.', 'error');
+      return;
+    }
+    setSummaryStep((current) => Math.max(current, step + 1));
+    setStep((current) => Math.min(3, current + 1));
+  };
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
@@ -202,23 +223,18 @@ export function GroupRegistrationPage() {
       </Card>
 
       {submitted && (
-        <Card className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-800/60 dark:bg-emerald-950/30">
-          <CardBody className="flex items-center gap-3">
-            <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            <div>
-              <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">Registration complete</p>
-              <p className="text-sm text-emerald-700 dark:text-emerald-400/90">
-                Your group "{groupName}" is now registered with {members.length} members.
-              </p>
-            </div>
-          </CardBody>
-        </Card>
+        <Card className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-800/60 dark:bg-emerald-950/30"><CardBody><div className="flex items-center gap-3"><CheckCircle2 className="h-6 w-6 text-emerald-600" /><div><p className="font-display text-lg font-bold text-emerald-900 dark:text-emerald-100">Registration complete</p><p className="text-sm text-emerald-700 dark:text-emerald-300">{groupName} is registered with {members.length} members.</p></div></div><div className="mt-8 grid gap-6 md:grid-cols-3">{['Registered', 'Mentor assigned', 'Topic approval'].map((label, index) => <div key={label} className="relative flex gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white"><CheckCircle2 className="h-5 w-5" /></div><div><p className="font-semibold text-ink-900 dark:text-ink-100">{label}</p><p className="mt-1 text-xs text-ink-500">{index === 0 ? 'Completed today' : index === 1 ? 'Coordinator next step' : 'Prepare your proposal'}</p></div></div>)}</div></CardBody></Card>
       )}
 
       {registrationWindow.open && !submitted && (
         <>
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between rounded-2xl border border-ink-100 bg-white p-3 shadow-sm dark:border-ink-800 dark:bg-ink-900">
+                {stepLabels.map((label, index) => { const number = index + 1; return <button key={label} onClick={() => number < step && setStep(number)} className="flex min-w-0 items-center gap-2 text-left" disabled={number > step}><span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${number < step ? 'bg-emerald-100 text-emerald-700' : number === step ? 'bg-brand-600 text-white' : 'bg-ink-100 text-ink-400 dark:bg-ink-800'}`}>{number < step ? <CheckCircle2 className="h-4 w-4" /> : number}</span><span className={`hidden text-xs font-semibold sm:block ${number === step ? 'text-brand-700 dark:text-brand-300' : 'text-ink-500'}`}>{label}</span>{number < 3 && <span className="mx-1 hidden h-px w-4 bg-ink-200 sm:block dark:bg-ink-700" />}</button>; })}
+              </div>
           {/* Project Identity */}
-          <Card>
+          {step === 1 && <Card>
             <CardHeader
               title="Project Identity"
               subtitle="Basic information about your project group"
@@ -285,10 +301,10 @@ export function GroupRegistrationPage() {
                 )}
               </div>
             </CardBody>
-          </Card>
+          </Card>}
 
           {/* Team Members */}
-          <Card>
+          {step === 2 && <Card>
             <CardHeader
               title="Team Members"
               subtitle="Add 3 to 4 members including yourself"
@@ -320,6 +336,9 @@ export function GroupRegistrationPage() {
                         {idx + 1}
                       </span>
                       <span className="text-sm font-medium text-ink-600 dark:text-ink-300">Member {idx + 1}</span>
+                      <span className={`flex items-center gap-1 text-xs font-medium ${memberComplete(member) ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                        {memberComplete(member) ? <><CheckCircle2 className="h-3.5 w-3.5" />Complete</> : 'In progress'}
+                      </span>
                     </div>
                     {members.length > 3 && (
                       <button
@@ -378,8 +397,13 @@ export function GroupRegistrationPage() {
                 </div>
               ))}
             </CardBody>
-          </Card>
+          </Card>}
 
+          {/* Review & submit */}
+          {step === 3 && <>
+          <Card className="border-brand-200 bg-brand-50/40 dark:border-brand-800/60 dark:bg-brand-950/20">
+            <CardBody><p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700 dark:text-brand-300">Final review</p><h2 className="mt-2 font-display text-xl font-bold text-ink-900 dark:text-ink-100">Ready to register {groupName || 'your group'}?</h2><div className="mt-4 grid gap-3 sm:grid-cols-2"><div><p className="text-xs text-ink-500">Elective</p><p className="font-semibold text-ink-800 dark:text-ink-100">{selectedElective}</p></div><div><p className="text-xs text-ink-500">Team members</p><p className="font-semibold text-ink-800 dark:text-ink-100">{members.length} members</p></div></div></CardBody>
+          </Card>
           {/* One-way action warning */}
           <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800/60 dark:bg-amber-950/30">
             <CardBody className="flex items-start gap-3">
@@ -394,15 +418,20 @@ export function GroupRegistrationPage() {
             </CardBody>
           </Card>
 
-          <div className="flex justify-end gap-3">
-            <Button variant="secondary" onClick={() => showToast('Draft discarded.', 'info')}>
+          <div className="flex justify-between gap-3">
+            <Button variant="secondary" onClick={() => setStep((current) => Math.max(1, current - 1))}>Back</Button>
+            <div className="flex gap-3"><Button variant="secondary" onClick={() => showToast('Draft discarded.', 'info')}>
               Discard
             </Button>
             <Button onClick={handleSubmitClick}>
               <Lock className="h-4 w-4" />
               Submit Registration
-            </Button>
+            </Button></div>
+          </div></>}
+          {step < 3 && <div className="flex items-center justify-between gap-3"><Button variant="secondary" onClick={() => setStep((current) => Math.max(1, current - 1))} disabled={step === 1}>Back</Button><Button onClick={goToNextStep}>Continue to {stepLabels[step]}</Button></div>}
           </div>
+          <aside className="h-fit rounded-2xl border border-ink-100 bg-white p-5 shadow-sm dark:border-ink-800 dark:bg-ink-900"><p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700 dark:text-brand-300">Registration summary</p>{summaryStep === 0 ? <p className="mt-5 text-sm leading-6 text-ink-500 dark:text-ink-400">Your completed project details will appear here as you move through the setup.</p> : <dl className="mt-4 space-y-4"><div><dt className="text-xs text-ink-500">Group name</dt><dd className="mt-1 font-semibold text-ink-900 dark:text-ink-100">{groupName}</dd></div><div><dt className="text-xs text-ink-500">Elective</dt><dd className="mt-1 font-semibold text-ink-900 dark:text-ink-100">{selectedElective}</dd></div>{summaryStep >= 3 && <><div><dt className="text-xs text-ink-500">Team members</dt><dd className="mt-1 font-semibold text-ink-900 dark:text-ink-100">{members.length} members</dd><ul className="mt-2 space-y-1 text-xs text-ink-500">{members.map((member) => <li key={member.id}>{member.name || 'Unnamed member'}</li>)}</ul></div><div className="border-t border-ink-100 pt-4 dark:border-ink-800"><dt className="text-xs text-ink-500">Validation</dt><dd className={`mt-1 flex items-center gap-1.5 font-semibold ${completedMembers === members.length ? 'text-emerald-600' : 'text-amber-600'}`}>{completedMembers === members.length ? <><CheckCircle2 className="h-4 w-4" />Ready to review</> : 'More details needed'}</dd></div></>}</dl>}</aside>
+        </div>
         </>
       )}
 
