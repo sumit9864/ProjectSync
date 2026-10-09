@@ -203,43 +203,18 @@ export function AdminAllocationPage() {
             </p>
           )}
 
-          {/* Results */}
-          {results && (
-            <div className="rounded-xl border border-ink-100 dark:border-ink-800 bg-ink-50/50 dark:bg-ink-900/50 p-4 space-y-3">
-              <p className="text-sm font-semibold text-ink-700 dark:text-ink-200">Round {round} Results</p>
-              {results.length === 0 ? (
-                <p className="text-sm text-ink-400 dark:text-ink-500">No unassigned groups to process.</p>
-              ) : (
-                <div className="divide-y divide-ink-100 dark:divide-ink-800">
-                  {results.map((r) => (
-                    <div key={r.groupId} className="flex items-center justify-between gap-3 py-2.5">
-                      <div className="flex items-center gap-3 min-w-0">
-                        {r.status === 'assigned' ? (
-                          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500 dark:text-emerald-400" />
-                        ) : (
-                          <XCircle className="h-5 w-5 shrink-0 text-rose-400" />
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-ink-800 truncate dark:text-ink-100">
-                            {r.groupName}
-                          </p>
-                          <p className="text-xs text-ink-400 truncate dark:text-ink-500">
-                            {r.projectId} · {r.reason}
-                            {r.matchedMentorName && ` · ${r.matchedMentorName}`}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge color={r.status === 'assigned' ? 'success' : 'error'}>
-                        {r.status === 'assigned' ? 'Assigned' : 'Unassigned'}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+
         </CardBody>
       </Card>
+
+      {results && (
+        <Card>
+          <CardHeader title="Allocation Results" subtitle={`Results from Round ${round}`} />
+          <CardBody className="p-0">
+            {results.length === 0 ? <p className="p-5 text-sm text-ink-400 dark:text-ink-500">No unassigned groups to process.</p> : <div className="divide-y divide-ink-100 dark:divide-ink-800">{results.map((r) => <div key={r.groupId} className="flex items-center justify-between gap-3 px-5 py-3"><div className="flex min-w-0 items-center gap-3">{r.status === 'assigned' ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" /> : <XCircle className="h-5 w-5 shrink-0 text-rose-400" />}<div className="min-w-0"><p className="truncate text-sm font-semibold text-ink-800 dark:text-ink-100">{r.groupName}</p><p className="truncate text-xs text-ink-400 dark:text-ink-500">{r.projectId} · {r.reason}{r.matchedMentorName && ` · ${r.matchedMentorName}`}</p></div></div><Badge color={r.status === 'assigned' ? 'success' : 'error'}>{r.status === 'assigned' ? 'Assigned' : 'Unassigned'}</Badge></div>)}</div>}
+          </CardBody>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Manual assignment */}

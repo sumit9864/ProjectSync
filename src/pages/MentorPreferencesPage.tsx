@@ -4,7 +4,6 @@ import {
   Plus,
   Trash2,
   Eye,
-  GitCompare,
   Clock,
   CheckCircle2,
   Briefcase,
@@ -30,8 +29,6 @@ export function MentorPreferencesPage() {
     submittedAt: 'Sep 22, 2026 · 3:45 PM',
   });
   const [profileMentor, setProfileMentor] = useState<Mentor | null>(null);
-  const [compareIds, setCompareIds] = useState<string[]>([]);
-  const [compareOpen, setCompareOpen] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -88,17 +85,6 @@ export function MentorPreferencesPage() {
         now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
     });
     showToast(`Round ${round} preferences submitted.`, 'success');
-  };
-
-  const toggleCompare = (mentorId: string) => {
-    setCompareIds((prev) => {
-      if (prev.includes(mentorId)) return prev.filter((id) => id !== mentorId);
-      if (prev.length >= 2) {
-        showToast('You can compare 2 mentors at a time.', 'info');
-        return prev;
-      }
-      return [...prev, mentorId];
-    });
   };
 
   const shortlistedMentors = shortlist
@@ -236,43 +222,12 @@ export function MentorPreferencesPage() {
         </CardBody>
       </Card>
 
-      {/* Compare bar */}
-      {compareIds.length > 0 && (
-        <Card className="border-brand-200 bg-brand-50/40 dark:border-brand-800/60 dark:bg-brand-950/30">
-          <CardBody className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <GitCompare className="h-5 w-5 text-brand-600 dark:text-brand-400" />
-              <p className="text-sm text-ink-700 dark:text-ink-300">
-                {compareIds.length} mentor{compareIds.length > 1 ? 's' : ''} selected for comparison
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setCompareIds([])}
-              >
-                Clear
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setCompareOpen(true)}
-                disabled={compareIds.length !== 2}
-              >
-                Compare side-by-side
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
       {/* Mentor List */}
       <div>
         <h2 className="mb-3 font-display text-lg font-semibold text-ink-900 dark:text-ink-100">Available Mentors</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {allMentors.map((mentor) => {
             const inShortlist = shortlist.includes(mentor.id);
-            const inCompare = compareIds.includes(mentor.id);
             const full = mentor.currentLoad >= mentor.capacity;
             return (
               <Card key={mentor.id} className="transition-shadow hover:shadow-cardhover">
@@ -335,17 +290,6 @@ export function MentorPreferencesPage() {
                             </>
                           )}
                         </Button>
-                        <button
-                          onClick={() => toggleCompare(mentor.id)}
-                          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                            inCompare
-                              ? 'bg-brand-100 text-brand-700 dark:bg-brand-950/50 dark:text-brand-300'
-                              : 'text-ink-500 hover:bg-ink-100 dark:text-ink-400 dark:hover:bg-ink-800'
-                          }`}
-                        >
-                          <GitCompare className="h-3.5 w-3.5" />
-                          {inCompare ? 'Selected' : 'Compare'}
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -427,63 +371,7 @@ export function MentorPreferencesPage() {
         )}
       </Modal>
 
-      {/* Compare Modal */}
-      <Modal
-        open={compareOpen}
-        onClose={() => setCompareOpen(false)}
-        title="Compare Mentors"
-        maxWidth="max-w-3xl"
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {compareIds.map((id) => {
-            const mentor = allMentors.find((m) => m.id === id);
-            if (!mentor) return null;
-            return (
-              <div key={id} className="rounded-xl border border-ink-200 p-4 dark:border-ink-700">
-                <div className="flex items-center gap-3">
-                  <Avatar name={mentor.name} color={mentor.avatarColor} size="md" />
-                  <div>
-                    <p className="font-display font-semibold text-ink-900 dark:text-ink-100">{mentor.name}</p>
-                    <p className="text-xs text-brand-600 dark:text-brand-400">{mentor.domain}</p>
-                  </div>
-                </div>
-                <p className="mt-3 text-sm text-ink-600 dark:text-ink-300">{mentor.focus}</p>
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-ink-400 dark:text-ink-500">Load</span>
-                      <span className="font-medium text-ink-600 dark:text-ink-300">
-                        {mentor.currentLoad}/{mentor.capacity}
-                      </span>
-                    </div>
-                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
-                      <div
-                        className="h-full rounded-full bg-brand-500"
-                        style={{ width: `${(mentor.currentLoad / mentor.capacity) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-ink-400 dark:text-ink-500">Past projects</p>
-                    <p className="text-sm text-ink-600 dark:text-ink-300">{mentor.pastProjects.length} guided</p>
-                  </div>
-                </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="mt-4 w-full"
-                  onClick={() => {
-                    addToShortlist(mentor.id);
-                  }}
-                  disabled={shortlist.includes(mentor.id) || shortlist.length >= 3}
-                >
-                  {shortlist.includes(mentor.id) ? 'Already shortlisted' : 'Add to shortlist'}
-                </Button>
-              </div>
-            );
-          })}
-        </div>
-      </Modal>
+
     </div>
   );
 }

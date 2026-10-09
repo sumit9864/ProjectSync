@@ -5,13 +5,10 @@ import {
   Clock,
   CalendarPlus,
   Trash2,
-  Users,
 } from 'lucide-react';
 import { Card, CardHeader, CardBody, Button, Badge, Skeleton, EmptyState } from '@/components/ui';
 import { useToast } from '@/components/Toast';
 import {
-  adminMentors,
-  MAX_MENTOR_GROUPS,
   adminGroups,
   extensions as initialExtensions,
   controlWindows,
@@ -25,8 +22,6 @@ export function AdminControlsPage() {
   const [mockTime, setMockTime] = useState(mockCurrentTime);
   const [timeInput, setTimeInput] = useState('');
   const [extList, setExtList] = useState<Extension[]>(initialExtensions);
-  const [mentors, setMentors] = useState(adminMentors.map((m) => ({ ...m })));
-
   // Extension form state
   const [extGroupId, setExtGroupId] = useState('');
   const [extOffset, setExtOffset] = useState('7');
@@ -107,13 +102,6 @@ export function AdminControlsPage() {
     showToast('Extension revoked.', 'info');
   };
 
-  const updateCapacity = (mentorId: string, newCap: number) => {
-    if (newCap < 0 || newCap > MAX_MENTOR_GROUPS) return;
-    setMentors((prev) =>
-      prev.map((m) => (m.id === mentorId ? { ...m, capacity: newCap } : m))
-    );
-  };
-
   if (loading) {
     return (
       <div className="space-y-4">
@@ -141,7 +129,7 @@ export function AdminControlsPage() {
       <div>
         <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Controls</h1>
         <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
-          Manage windows, deadlines, extensions, and mentor capacity.
+          Manage windows, deadlines, and extensions.
         </p>
       </div>
 
@@ -308,68 +296,6 @@ export function AdminControlsPage() {
         </CardBody>
       </Card>
 
-      {/* Mentor capacity */}
-      <Card>
-        <CardHeader
-          title="Mentor Capacity"
-          subtitle="Each mentor can supervise a maximum of 3 groups"
-        />
-        <CardBody className="p-0">
-          {mentors.length === 0 ? (
-            <EmptyState
-              icon={<Users className="h-7 w-7" />}
-              title="No mentors"
-              message="Add mentors to manage their capacity."
-            />
-          ) : (
-            <div className="divide-y divide-ink-50 dark:divide-ink-800">
-              {mentors.map((m) => (
-                <div
-                  key={m.id}
-                  className="flex items-center justify-between gap-3 px-5 py-4"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{m.name}</p>
-                    <p className="text-xs text-ink-400 truncate dark:text-ink-500">{m.domain}</p>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <Badge color={m.currentLoad >= m.capacity ? 'error' : 'info'}>
-                      {m.currentLoad}/{m.capacity}
-                    </Badge>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => updateCapacity(m.id, m.capacity - 1)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-100 text-ink-500 hover:bg-ink-200 transition-colors dark:bg-ink-800 dark:text-ink-400 dark:hover:bg-ink-700"
-                        aria-label="Decrease capacity"
-                      >
-                        –
-                      </button>
-                      <input
-                        type="number"
-                        value={m.capacity}
-                        min={m.currentLoad}
-                        max={MAX_MENTOR_GROUPS}
-                        onChange={(e) =>
-                          updateCapacity(m.id, parseInt(e.target.value, 10) || 0)
-                        }
-                        className="h-7 w-12 rounded-lg border border-ink-200 dark:border-ink-700 text-center text-sm font-semibold text-ink-800 dark:text-ink-100 focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
-                      />
-                      <button
-                        onClick={() => updateCapacity(m.id, m.capacity + 1)}
-                        disabled={m.capacity >= MAX_MENTOR_GROUPS}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-100 text-ink-500 hover:bg-ink-200 transition-colors dark:bg-ink-800 dark:text-ink-400 dark:hover:bg-ink-700"
-                        aria-label="Increase capacity"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardBody>
-      </Card>
     </div>
   );
 }
