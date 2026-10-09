@@ -1,29 +1,21 @@
 import { useEffect, useState } from 'react';
 import {
-  ToggleLeft,
-  ToggleRight,
-  Clock,
   CalendarPlus,
   Trash2,
 } from 'lucide-react';
 import { Card, CardHeader, CardBody, Button, Badge, Skeleton, EmptyState } from '@/components/ui';
 import { useToast } from '@/components/Toast';
 import {
-  adminGroups,
   extensions as initialExtensions,
   controlWindows,
-  mockCurrentTime,
   type Extension,
 } from '@/data/adminData';
 
 export function AdminControlsPage() {
   const [loading, setLoading] = useState(true);
   const [windows, setWindows] = useState(controlWindows);
-  const [mockTime, setMockTime] = useState(mockCurrentTime);
-  const [timeInput, setTimeInput] = useState('');
   const [extList, setExtList] = useState<Extension[]>(initialExtensions);
   // Extension form state
-  const [extGroupId, setExtGroupId] = useState('');
   const [extOffset, setExtOffset] = useState('7');
   const [extReason, setExtReason] = useState('');
 
@@ -34,40 +26,12 @@ export function AdminControlsPage() {
     return () => clearTimeout(t);
   }, []);
 
-  const toggleWindow = (key: 'registration' | 'round1' | 'round2') => {
-    setWindows((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], open: !prev[key].open },
-    }));
-    showToast(
-      `${key === 'registration' ? 'Registration' : key === 'round1' ? 'Round 1' : 'Round 2'} window ${windows[key].open ? 'closed' : 'opened'}.`,
-      'success'
-    );
-  };
-
-  const applyMockTime = () => {
-    if (!timeInput.trim()) {
-      showToast('Enter a datetime first.', 'error');
-      return;
-    }
-    const d = new Date(timeInput);
-    if (isNaN(d.getTime())) {
-      showToast('Invalid datetime.', 'error');
-      return;
-    }
-    const formatted =
-      d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-      ' · ' +
-      d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    setMockTime(formatted);
-    showToast(`Mock time set to ${formatted}.`, 'success');
+  const updateWindow = (key: 'registration' | 'round1' | 'round2', field: 'opensOn' | 'closesOn', value: string) => {
+    setWindows((prev) => ({ ...prev, [key]: { ...prev[key], [field]: value } }));
+    showToast('Schedule updated.', 'success');
   };
 
   const grantExtension = () => {
-    if (!extGroupId) {
-      showToast('Select a group.', 'error');
-      return;
-    }
     const offset = parseInt(extOffset, 10);
     if (isNaN(offset) || offset <= 0) {
       showToast('Enter a valid number of days.', 'error');
@@ -77,13 +41,10 @@ export function AdminControlsPage() {
       showToast('Provide a reason for the extension.', 'error');
       return;
     }
-    const group = adminGroups.find((g) => g.id === extGroupId);
-    if (!group) return;
-
     const newExt: Extension = {
       id: `ext-${Date.now()}`,
-      groupId: group.id,
-      groupName: group.name,
+      groupId: 'all',
+      groupName: 'All groups',
       offsetDays: offset,
       reason: extReason.trim(),
       grantedAt:
@@ -91,8 +52,7 @@ export function AdminControlsPage() {
       grantedBy: 'Dr. Priya Krishnan',
     };
     setExtList((prev) => [newExt, ...prev]);
-    showToast(`Extension granted to ${group.name}: +${offset} days.`, 'success');
-    setExtGroupId('');
+    showToast(`Extension granted to all groups: +${offset} days.`, 'success');
     setExtOffset('7');
     setExtReason('');
   };
@@ -136,7 +96,7 @@ export function AdminControlsPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Windows */}
         <Card>
-          <CardHeader title="Windows" subtitle="Toggle registration and preference rounds" />
+          <CardHeader title="Windows" subtitle="Edit dates and times for any phase, whether upcoming or active" />
           <CardBody className="space-y-4">
             {windowEntries.map(({ key, label }) => (
               <div
@@ -149,85 +109,23 @@ export function AdminControlsPage() {
                     {windows[key].opensOn} — {windows[key].closesOn}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Badge color={windows[key].open ? 'success' : 'neutral'}>
-                    {windows[key].open ? 'Open' : 'Closed'}
-                  </Badge>
-                  <button
-                    onClick={() => toggleWindow(key)}
-                    className="text-ink-400 hover:text-brand-600 transition-colors dark:text-ink-500 dark:hover:text-brand-400"
-                    aria-label={`Toggle ${label}`}
-                  >
-                    {windows[key].open ? (
-                      <ToggleRight className="h-7 w-7 text-brand-500 dark:text-brand-400" />
-                    ) : (
-                      <ToggleLeft className="h-7 w-7" />
-                    )}
-                  </button>
+                <div className="grid min-w-0 shrink-0 gap-2 sm:grid-cols-2">
+                  <label className="text-xs text-ink-500"><span className="mb-1 block font-medium">Starts</span><input type="text" value={windows[key].opensOn} onChange={(e) => updateWindow(key, 'opensOn', e.target.value)} className="input-field text-xs" aria-label={`${label} start date and time`} /></label>
+                  <label className="text-xs text-ink-500"><span className="mb-1 block font-medium">Closes</span><input type="text" value={windows[key].closesOn} onChange={(e) => updateWindow(key, 'closesOn', e.target.value)} className="input-field text-xs" aria-label={`${label} closing date and time`} /></label>
                 </div>
               </div>
             ))}
           </CardBody>
         </Card>
 
-        {/* Mock clock */}
-        <Card>
-          <CardHeader
-            title="Mock Clock"
-            subtitle="Demo window auto-close and deadline behavior"
-          />
-          <CardBody className="space-y-4">
-            <div className="flex items-center gap-3 rounded-lg bg-ink-50 dark:bg-ink-900/50 px-4 py-3">
-              <Clock className="h-5 w-5 text-ink-400 dark:text-ink-500" />
-              <div>
-                <p className="text-xs font-medium text-ink-400 dark:text-ink-500">Current mock time</p>
-                <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{mockTime}</p>
-              </div>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
-                Set mock datetime
-              </label>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <input
-                  type="datetime-local"
-                  value={timeInput}
-                  onChange={(e) => setTimeInput(e.target.value)}
-                  className="input-field flex-1"
-                />
-                <Button variant="secondary" onClick={applyMockTime}>
-                  Apply
-                </Button>
-              </div>
-              <p className="mt-2 text-xs text-ink-400 dark:text-ink-500">
-                In a real deployment, window auto-close and deadlines would use the server clock.
-                This control is for demonstration only.
-              </p>
-            </div>
-          </CardBody>
-        </Card>
+
       </div>
 
       {/* Extensions */}
       <Card>
-        <CardHeader title="Extended Deadlines" subtitle="Grant deadline extensions to specific groups" />
+        <CardHeader title="Extended Deadlines" subtitle="Grant a deadline extension across all groups" />
         <CardBody className="space-y-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Group</label>
-              <select
-                value={extGroupId}
-                onChange={(e) => setExtGroupId(e.target.value)}
-                className="input-field"
-              >
-                <option value="">Select...</option>
-                {adminGroups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
                 Offset (days)

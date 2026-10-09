@@ -180,4 +180,3 @@ export const controlWindows = {
   round2: { open: false, closesOn: 'Oct 17, 2026 · 11:59 PM', opensOn: 'Oct 7, 2026 · 9:00 AM' },
 };
 
-export const mockCurrentTime = 'Sep 27, 2026 · 3:45 PM';

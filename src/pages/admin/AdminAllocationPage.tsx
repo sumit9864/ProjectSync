@@ -165,56 +165,21 @@ export function AdminAllocationPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Mentor Allocation</h1>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
-          Run FCFS allocation rounds or manually assign mentors as exceptions.
-        </p>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Mentor Allocation</h1>
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
+            Run FCFS allocation or manually assign mentors as exceptions.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="sr-only" htmlFor="allocation-round">Allocation round</label>
+          <select id="allocation-round" value={round} onChange={(e) => setRound(Number(e.target.value) as 1 | 2)} className="input-field w-auto text-sm">
+            <option value="1">Round 1</option><option value="2">Round 2</option>
+          </select>
+          <Button onClick={runRound}><Play className="h-4 w-4" />Run round</Button>
+        </div>
       </div>
-
-      {/* Round selector + run */}
-      <Card>
-        <CardHeader title="Allocation Rounds" subtitle="Simulate first-come-first-served mentor matching" />
-        <CardBody className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              {([1, 2] as const).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRound(r)}
-                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
-                    round === r
-                      ? 'bg-brand-600 text-white shadow-sm'
-                      : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'
-                  }`}
-                >
-                  Round {r}
-                </button>
-              ))}
-            </div>
-            <Button onClick={runRound} disabled={unassignedGroups.length === 0}>
-              <Play className="h-4 w-4" />
-              Run Round {round}
-            </Button>
-          </div>
-          {unassignedGroups.length === 0 && (
-            <p className="text-sm text-ink-400 dark:text-ink-500">
-              All groups already have mentors assigned.
-            </p>
-          )}
-
-
-        </CardBody>
-      </Card>
-
-      {results && (
-        <Card>
-          <CardHeader title="Allocation Results" subtitle={`Results from Round ${round}`} />
-          <CardBody className="p-0">
-            {results.length === 0 ? <p className="p-5 text-sm text-ink-400 dark:text-ink-500">No unassigned groups to process.</p> : <div className="divide-y divide-ink-100 dark:divide-ink-800">{results.map((r) => <div key={r.groupId} className="flex items-center justify-between gap-3 px-5 py-3"><div className="flex min-w-0 items-center gap-3">{r.status === 'assigned' ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" /> : <XCircle className="h-5 w-5 shrink-0 text-rose-400" />}<div className="min-w-0"><p className="truncate text-sm font-semibold text-ink-800 dark:text-ink-100">{r.groupName}</p><p className="truncate text-xs text-ink-400 dark:text-ink-500">{r.projectId} · {r.reason}{r.matchedMentorName && ` · ${r.matchedMentorName}`}</p></div></div><Badge color={r.status === 'assigned' ? 'success' : 'error'}>{r.status === 'assigned' ? 'Assigned' : 'Unassigned'}</Badge></div>)}</div>}
-          </CardBody>
-        </Card>
-      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Manual assignment */}
@@ -314,6 +279,13 @@ export function AdminAllocationPage() {
           </CardBody>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader title="Allocation Results" subtitle={results ? `Results from Round ${round}` : 'Results will appear here after an allocation run'} />
+        <CardBody className="p-0">
+          {!results ? <p className="p-5 text-sm text-ink-500 dark:text-ink-400">No allocation results have been declared yet. Run an allocation round when matching is ready.</p> : results.length === 0 ? <p className="p-5 text-sm text-ink-400 dark:text-ink-500">No unassigned groups to process.</p> : <div className="divide-y divide-ink-100 dark:divide-ink-800">{results.map((r) => <div key={r.groupId} className="flex items-center justify-between gap-3 px-5 py-3"><div className="flex min-w-0 items-center gap-3">{r.status === 'assigned' ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" /> : <XCircle className="h-5 w-5 shrink-0 text-rose-400" />}<div className="min-w-0"><p className="truncate text-sm font-semibold text-ink-800 dark:text-ink-100">{r.groupName}</p><p className="truncate text-xs text-ink-400 dark:text-ink-500">{r.projectId} · {r.reason}{r.matchedMentorName && ` · ${r.matchedMentorName}`}</p></div></div><Badge color={r.status === 'assigned' ? 'success' : 'error'}>{r.status === 'assigned' ? 'Assigned' : 'Unassigned'}</Badge></div>)}</div>}
+        </CardBody>
+      </Card>
     </div>
   );
 }
