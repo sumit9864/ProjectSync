@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Archive, BookOpen } from 'lucide-react';
+import { Search, Archive, BookOpen, Library, Sparkles, GraduationCap } from 'lucide-react';
 import { Card, CardBody, Badge, Skeleton, EmptyState } from '@/components/ui';
 import { archiveEntries, type ArchiveEntry } from '@/data/adminData';
 
@@ -15,6 +15,8 @@ export function AdminArchivePage() {
 
   const years = Array.from(new Set(archiveEntries.map((e) => e.year))).sort().reverse();
 
+  const mentorCount = new Set(archiveEntries.map((entry) => entry.mentor)).size;
+  const electiveCount = new Set(archiveEntries.map((entry) => entry.elective)).size;
   const filtered = archiveEntries.filter((e) => {
     const matchesSearch =
       e.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -45,8 +47,12 @@ export function AdminArchivePage() {
         </p>
       </div>
 
-      <Card>
-        <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[{ label: 'Completed projects', value: archiveEntries.length, icon: Library }, { label: 'Mentors represented', value: mentorCount, icon: GraduationCap }, { label: 'Electives covered', value: electiveCount, icon: Sparkles }].map(({ label, value, icon: Icon }) => <Card key={label} className="border-brand-100 bg-brand-50/30 dark:border-brand-900/50 dark:bg-brand-950/20"><CardBody className="flex items-center justify-between p-4"><div><p className="text-xs font-medium text-ink-500 dark:text-ink-400">{label}</p><p className="mt-1 font-display text-2xl font-bold text-ink-900 dark:text-ink-100">{value}</p></div><Icon className="h-5 w-5 text-brand-600 dark:text-brand-400" /></CardBody></Card>)}
+      </div>
+
+      <Card className="border-ink-100/80 bg-white/90 dark:border-ink-800 dark:bg-ink-900/90">
+        <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
             <input
@@ -70,6 +76,8 @@ export function AdminArchivePage() {
         </CardBody>
       </Card>
 
+      <div className="flex items-end justify-between gap-3"><div><p className="text-sm font-semibold text-ink-800 dark:text-ink-100">Project library</p><p className="mt-1 text-xs text-ink-500">{filtered.length} of {archiveEntries.length} projects shown</p></div><span className="hidden text-xs text-ink-400 sm:block">Curated academic work</span></div>
+
       {filtered.length === 0 ? (
         <Card>
           <EmptyState
@@ -91,14 +99,14 @@ export function AdminArchivePage() {
 
 function ArchiveCard({ entry }: { entry: ArchiveEntry }) {
   return (
-    <Card className="transition-shadow hover:shadow-cardhover dark:hover:shadow-cardhover-dark">
+    <Card className="group overflow-hidden border-ink-100/80 transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-cardhover dark:border-ink-800 dark:hover:border-brand-800 dark:hover:shadow-cardhover-dark">
       <CardBody>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-xs font-medium text-ink-400 dark:text-ink-500">
               {entry.year} · {entry.group}
             </p>
-            <p className="mt-0.5 font-display font-semibold text-ink-900 dark:text-ink-100 leading-snug">
+            <p className="mt-0.5 font-display text-lg font-semibold leading-snug text-ink-900 transition-colors group-hover:text-brand-700 dark:text-ink-100 dark:group-hover:text-brand-300">
               {entry.title}
             </p>
           </div>

@@ -24,8 +24,8 @@ export type AdminPageId =
 const navItems: NavItem[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'pipeline', label: 'Pipeline', icon: GitBranch },
-  { id: 'allocation', label: 'Allocation', icon: Users },
   { id: 'controls', label: 'Controls', icon: Settings },
+  { id: 'allocation', label: 'Results', icon: Users },
   { id: 'audit', label: 'Audit Log', icon: ScrollText },
   { id: 'archive', label: 'Archive', icon: Archive },
   { id: 'mentors', label: 'Mentors', icon: UserPlus },

@@ -34,6 +34,7 @@ function App() {
   const [reviewGroupId, setReviewGroupId] = useState<string | null>(null);
   const [logBookGroupId, setLogBookGroupId] = useState<string | null>(null);
   const [adminPage, setAdminPage] = useState<AdminPageId>('overview');
+  const [hasAllocationResults, setHasAllocationResults] = useState(false);
 
   const handleExit = () => {
     signOut();
@@ -64,8 +65,8 @@ function App() {
         >
           {adminPage === 'overview' && <AdminOverviewPage onNavigate={setAdminPage} />}
           {adminPage === 'pipeline' && <AdminPipelinePage />}
-          {adminPage === 'allocation' && <AdminAllocationPage />}
-          {adminPage === 'controls' && <AdminControlsPage />}
+          {adminPage === 'allocation' && <AdminAllocationPage onRoundRun={() => setHasAllocationResults(true)} />}
+          {adminPage === 'controls' && <AdminControlsPage hasResults={hasAllocationResults} onViewResults={() => setAdminPage('allocation')} />}
           {adminPage === 'audit' && <AdminAuditLogPage />}
           {adminPage === 'archive' && <AdminArchivePage />}
           {adminPage === 'mentors' && <AdminMentorsPage />}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download, ScrollText, Search } from 'lucide-react';
+import { Download, ScrollText, Search, Activity, ShieldCheck, Users, Clock3 } from 'lucide-react';
 import { Card, CardBody, Button, Badge, Skeleton, EmptyState } from '@/components/ui';
 import { auditEvents } from '@/data/adminData';
 
@@ -12,6 +12,8 @@ export function AdminAuditLogPage() {
     return () => clearTimeout(t);
   }, []);
 
+  const systemEvents = auditEvents.filter((event) => event.actor === 'System').length;
+  const activeGroups = new Set(auditEvents.map((event) => event.group)).size;
   const filtered = auditEvents.filter(
     (e) =>
       e.description.toLowerCase().includes(search.toLowerCase()) ||
@@ -59,8 +61,16 @@ export function AdminAuditLogPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardBody>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          { label: 'Total events', value: auditEvents.length, icon: Activity },
+          { label: 'System events', value: systemEvents, icon: ShieldCheck },
+          { label: 'Groups manually assigned', value: activeGroups, icon: Users },
+        ].map(({ label, value, icon: Icon }) => <Card key={label} className="border-brand-100 bg-brand-50/30 dark:border-brand-900/50 dark:bg-brand-950/20"><CardBody className="flex items-center justify-between p-4"><div><p className="text-xs font-medium text-ink-500 dark:text-ink-400">{label}</p><p className="mt-1 font-display text-2xl font-bold text-ink-900 dark:text-ink-100">{value}</p></div><Icon className="h-5 w-5 text-brand-600 dark:text-brand-400" /></CardBody></Card>)}
+      </div>
+
+      <Card className="border-ink-100/80 bg-white/90 dark:border-ink-800 dark:bg-ink-900/90">
+        <CardBody className="p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400 dark:text-ink-500" />
             <input
@@ -74,7 +84,8 @@ export function AdminAuditLogPage() {
         </CardBody>
       </Card>
 
-      <Card>
+      <Card className="overflow-hidden border-ink-100/80 dark:border-ink-800">
+        <CardBody className="border-b border-ink-100 bg-ink-50/50 px-5 py-3 dark:border-ink-800 dark:bg-ink-950/30"><div className="flex items-center justify-between"><div><p className="text-sm font-semibold text-ink-800 dark:text-ink-100">Activity stream</p><p className="text-xs text-ink-500">Newest events appear first</p></div><Badge color="success"><span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />Live log</Badge></div></CardBody>
         <CardBody className="p-0">
           {filtered.length === 0 ? (
             <EmptyState
@@ -85,7 +96,7 @@ export function AdminAuditLogPage() {
           ) : (
             <div className="divide-y divide-ink-50 dark:divide-ink-800">
               {filtered.map((event) => (
-                <div key={event.id} className="flex items-start gap-3 px-5 py-4">
+                <div key={event.id} className="group relative flex items-start gap-4 px-5 py-4 transition-colors hover:bg-brand-50/40 dark:hover:bg-brand-950/20">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400">
                     <ScrollText className="h-4.5 w-4.5" />
                   </div>

@@ -1,291 +1,72 @@
 import { useEffect, useState } from 'react';
-import {
-  Play,
-  CheckCircle2,
-  XCircle,
-  History,
-  UserPlus,
-  Lock,
-} from 'lucide-react';
-import { Card, CardHeader, CardBody, Button, Badge, Skeleton, EmptyState } from '@/components/ui';
+import { CheckCircle2, CircleDashed, Play, Users, XCircle } from 'lucide-react';
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, Skeleton } from '@/components/ui';
 import { useToast } from '@/components/Toast';
-import {
-  adminGroups,
-  adminMentors,
-  allocationHistory,
-  MAX_MENTOR_GROUPS,
-  type AllocationResult,
-  type AllocationHistoryEntry,
-  type AdminGroup,
-  type AdminMentor,
-} from '@/data/adminData';
+import { adminGroups, adminMentors, MAX_MENTOR_GROUPS, type AdminGroup, type AdminMentor, type AllocationResult } from '@/data/adminData';
 
-export function AdminAllocationPage() {
+type Props = { onRoundRun?: () => void };
+
+type RoundResults = Record<1 | 2, AllocationResult[] | null>;
+
+export function AdminAllocationPage({ onRoundRun }: Props) {
   const [loading, setLoading] = useState(true);
-  const [round, setRound] = useState<1 | 2>(1);
-  const [results, setResults] = useState<AllocationResult[] | null>(null);
-  const [history, setHistory] = useState<AllocationHistoryEntry[]>(allocationHistory);
   const [groups, setGroups] = useState<AdminGroup[]>(adminGroups);
   const [mentors, setMentors] = useState<AdminMentor[]>(adminMentors);
-
-  // Manual assignment state
-  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
-  const [selectedMentorId, setSelectedMentorId] = useState<string>('');
-
+  const [roundResults, setRoundResults] = useState<RoundResults>({ 1: null, 2: null });
   const { showToast } = useToast();
 
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
-  }, []);
+  useEffect(() => { const timer = setTimeout(() => setLoading(false), 400); return () => clearTimeout(timer); }, []);
 
-  const unassignedGroups = groups.filter((g) => g.mentorId === null);
-
-  const runRound = () => {
-    const mentorLoad: Record<string, number> = {};
-    mentors.forEach((m) => {
-      mentorLoad[m.id] = m.currentLoad;
-    });
-
-    const resultsList: AllocationResult[] = [];
+  const runRound = (round: 1 | 2) => {
+    const mentorLoad: Record<string, number> = Object.fromEntries(mentors.map((mentor) => [mentor.id, mentor.currentLoad]));
+    const results: AllocationResult[] = [];
     const updatedGroups = [...groups];
     const updatedMentors = [...mentors];
 
-    unassignedGroups.forEach((g) => {
-      let matched = false;
-      for (const pref of g.preferences) {
-        const mentor = mentors.find((m) => m.id === pref.mentorId);
-        if (!mentor) continue;
-        if (mentorLoad[mentor.id] < mentor.capacity) {
-          mentorLoad[mentor.id]++;
-          resultsList.push({
-            groupId: g.id,
-            groupName: g.name,
-            projectId: g.projectId,
-            matchedRank: pref.rank,
-            matchedMentorId: mentor.id,
-            matchedMentorName: mentor.name,
-            status: 'assigned',
-            reason: `Matched at preference rank ${pref.rank}`,
-          });
-          const gIdx = updatedGroups.findIndex((ug) => ug.id === g.id);
-          if (gIdx >= 0) {
-            updatedGroups[gIdx] = {
-              ...updatedGroups[gIdx],
-              mentorId: mentor.id,
-              mentorName: mentor.name,
-              stage: 'mentor_assigned',
-            };
-          }
-          const mIdx = updatedMentors.findIndex((um) => um.id === mentor.id);
-          if (mIdx >= 0) {
-            updatedMentors[mIdx] = { ...updatedMentors[mIdx], currentLoad: mentorLoad[mentor.id] };
-          }
-          matched = true;
-          break;
-        }
-      }
-      if (!matched) {
-        resultsList.push({
-          groupId: g.id,
-          groupName: g.name,
-          projectId: g.projectId,
-          matchedRank: null,
-          matchedMentorId: null,
-          matchedMentorName: null,
-          status: 'unassigned',
-          reason: 'No capacity found across all preferences',
-        });
+    groups.filter((group) => group.mentorId === null).forEach((group) => {
+      const preference = group.preferences.find((item) => {
+        const mentor = mentors.find((candidate) => candidate.id === item.mentorId);
+        return mentor && mentorLoad[mentor.id] < mentor.capacity;
+      });
+      const mentor = preference ? mentors.find((candidate) => candidate.id === preference.mentorId) : null;
+      if (mentor && preference) {
+        mentorLoad[mentor.id] += 1;
+        results.push({ groupId: group.id, groupName: group.name, projectId: group.projectId, matchedRank: preference.rank, matchedMentorId: mentor.id, matchedMentorName: mentor.name, status: 'assigned', reason: `Matched at preference rank ${preference.rank}` });
+        const groupIndex = updatedGroups.findIndex((item) => item.id === group.id);
+        if (groupIndex >= 0) updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], mentorId: mentor.id, mentorName: mentor.name, stage: 'mentor_assigned' };
+        const mentorIndex = updatedMentors.findIndex((item) => item.id === mentor.id);
+        if (mentorIndex >= 0) updatedMentors[mentorIndex] = { ...updatedMentors[mentorIndex], currentLoad: mentorLoad[mentor.id] };
+      } else {
+        results.push({ groupId: group.id, groupName: group.name, projectId: group.projectId, matchedRank: null, matchedMentorId: null, matchedMentorName: null, status: 'unassigned', reason: 'No capacity found across all preferences' });
       }
     });
 
-    setResults(resultsList);
+    setRoundResults((current) => ({ ...current, [round]: results }));
     setGroups(updatedGroups);
     setMentors(updatedMentors);
-
-    const assigned = resultsList.filter((r) => r.status === 'assigned').length;
-    const unassigned = resultsList.filter((r) => r.status === 'unassigned').length;
-
-    setHistory((prev) => [
-      {
-        id: `ah-${Date.now()}`,
-        round,
-        runAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-          ' · ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-        assigned,
-        unassigned,
-        runBy: 'Dr. Priya Krishnan',
-      },
-      ...prev,
-    ]);
-
-    showToast(`Round ${round} complete: ${assigned} assigned, ${unassigned} unassigned.`, 'success');
+    onRoundRun?.();
+    showToast(`Round ${round} complete: ${results.filter((item) => item.status === 'assigned').length} assigned.`, 'success');
   };
 
-  const forceAssign = () => {
-    if (!selectedGroupId || !selectedMentorId) {
-      showToast('Select both a group and a mentor.', 'error');
-      return;
-    }
-    const mentor = mentors.find((m) => m.id === selectedMentorId);
-    const group = groups.find((g) => g.id === selectedGroupId);
-    if (!mentor || !group) return;
-    if (mentor.currentLoad >= MAX_MENTOR_GROUPS) {
-      showToast(`${mentor.name} already has the maximum of ${MAX_MENTOR_GROUPS} groups.`, 'error');
-      return;
-    }
+  if (loading) return <div className="flex flex-col gap-4"><Skeleton className="h-10 w-48 rounded-xl" /><Skeleton className="h-36 w-full rounded-2xl" /><Skeleton className="h-80 w-full rounded-2xl" /></div>;
 
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.id === selectedGroupId
-          ? { ...g, mentorId: mentor.id, mentorName: mentor.name, stage: 'mentor_assigned' }
-          : g
-      )
-    );
-    setMentors((prev) =>
-      prev.map((m) =>
-        m.id === selectedMentorId ? { ...m, currentLoad: m.currentLoad + 1 } : m
-      )
-    );
+  const totalResults = Object.values(roundResults).reduce((sum, results) => sum + (results?.length ?? 0), 0);
+  const resultCount = (round: 1 | 2) => roundResults[round]?.length ?? 0;
 
-    showToast(`${mentor.name} assigned to ${group.name}.`, 'success');
-    setSelectedGroupId('');
-    setSelectedMentorId('');
-  };
+  return <main className="flex flex-col gap-6 animate-fade-in">
+    <header className="flex flex-col justify-between gap-5 rounded-3xl border border-brand-100 bg-white p-6 shadow-sm shadow-brand-900/5 dark:border-brand-900/50 dark:bg-ink-900 sm:flex-row sm:items-end">
+      <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300">Allocation workspace</p><h1 className="mt-2 font-display text-3xl font-bold text-ink-900 dark:text-ink-100">Results</h1><p className="mt-2 max-w-xl text-sm leading-6 text-ink-500 dark:text-ink-400">Run a preview round and inspect how each group matched against mentor capacity and preferences.</p></div>
+      <div className="flex items-center gap-2 rounded-2xl bg-brand-50 p-2 dark:bg-brand-950/30"><div className="px-3"><p className="text-[11px] font-bold uppercase tracking-wider text-brand-700 dark:text-brand-300">Declared results</p><p className="mt-0.5 text-xl font-bold text-brand-950 dark:text-brand-100">{totalResults}</p></div><Users className="mr-2 h-5 w-5 text-brand-600" /></div>
+    </header>
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-40 rounded-md" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-      </div>
-    );
-  }
+    <section className="grid gap-4 md:grid-cols-2" aria-label="Run allocation rounds">
+      {([1, 2] as const).map((round) => <Card key={round} className={round === 1 ? 'border-brand-200 dark:border-brand-800/70' : 'border-ink-200 dark:border-ink-700'}><CardBody className="flex items-center justify-between gap-4 p-5"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700 dark:text-brand-300">Round {round}</p><h2 className="mt-1 font-display text-lg font-bold text-ink-900 dark:text-ink-100">Run round {round}</h2><p className="mt-1 text-sm text-ink-500 dark:text-ink-400">Preview matches using current mentor capacity.</p></div><Button onClick={() => runRound(round)}><Play className="h-4 w-4" />Run</Button></CardBody></Card>)}
+    </section>
 
-  return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-ink-100">Mentor Allocation</h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
-            Run FCFS allocation or manually assign mentors as exceptions.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="sr-only" htmlFor="allocation-round">Allocation round</label>
-          <select id="allocation-round" value={round} onChange={(e) => setRound(Number(e.target.value) as 1 | 2)} className="input-field w-auto text-sm">
-            <option value="1">Round 1</option><option value="2">Round 2</option>
-          </select>
-          <Button onClick={runRound}><Play className="h-4 w-4" />Run round</Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Manual assignment */}
-        <Card className="border-amber-200 dark:border-amber-800/60">
-          <CardHeader
-            title="Manual Assignment"
-            subtitle="Exception path — override allocation results"
-          />
-          <CardBody className="space-y-4">
-            <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-950/60 dark:text-amber-400">
-              <Lock className="h-3.5 w-3.5" />
-              Use only when FCFS rounds cannot place a group.
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
-                Unassigned Group
-              </label>
-              <select
-                value={selectedGroupId}
-                onChange={(e) => setSelectedGroupId(e.target.value)}
-                className="input-field"
-              >
-                <option value="">Select a group...</option>
-                {unassignedGroups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name} ({g.projectId})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">Mentor</label>
-              <select
-                value={selectedMentorId}
-                onChange={(e) => setSelectedMentorId(e.target.value)}
-                className="input-field"
-              >
-                <option value="">Select a mentor...</option>
-                {mentors.filter((m) => m.currentLoad < MAX_MENTOR_GROUPS).map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name} — {m.currentLoad}/{m.capacity} ({m.domain})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <Button
-              variant="secondary"
-              onClick={forceAssign}
-              disabled={!selectedGroupId || !selectedMentorId}
-            >
-              <UserPlus className="h-4 w-4" />
-              Force Assign
-            </Button>
-          </CardBody>
-        </Card>
-
-        {/* Allocation history */}
-        <Card>
-          <CardHeader title="Allocation History" subtitle="Past round executions" />
-          <CardBody className="p-0">
-            {history.length === 0 ? (
-              <EmptyState
-                icon={<History className="h-7 w-7" />}
-                title="No rounds run yet"
-                message="Run your first allocation round to see results here."
-              />
-            ) : (
-              <div className="divide-y divide-ink-50 dark:divide-ink-800">
-                {history.map((h) => (
-                  <div key={h.id} className="flex items-center justify-between gap-3 px-5 py-4">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400">
-                        <History className="h-4.5 w-4.5" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">
-                          Round {h.round}
-                        </p>
-                        <p className="text-xs text-ink-400 truncate dark:text-ink-500">
-                          {h.runAt} · by {h.runBy}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Badge color="success">{h.assigned} assigned</Badge>
-                      {h.unassigned > 0 && (
-                        <Badge color="warning">{h.unassigned} unassigned</Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardBody>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader title="Allocation Results" subtitle={results ? `Results from Round ${round}` : 'Results will appear here after an allocation run'} />
-        <CardBody className="p-0">
-          {!results ? <p className="p-5 text-sm text-ink-500 dark:text-ink-400">No allocation results have been declared yet. Run an allocation round when matching is ready.</p> : results.length === 0 ? <p className="p-5 text-sm text-ink-400 dark:text-ink-500">No unassigned groups to process.</p> : <div className="divide-y divide-ink-100 dark:divide-ink-800">{results.map((r) => <div key={r.groupId} className="flex items-center justify-between gap-3 px-5 py-3"><div className="flex min-w-0 items-center gap-3">{r.status === 'assigned' ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" /> : <XCircle className="h-5 w-5 shrink-0 text-rose-400" />}<div className="min-w-0"><p className="truncate text-sm font-semibold text-ink-800 dark:text-ink-100">{r.groupName}</p><p className="truncate text-xs text-ink-400 dark:text-ink-500">{r.projectId} · {r.reason}{r.matchedMentorName && ` · ${r.matchedMentorName}`}</p></div></div><Badge color={r.status === 'assigned' ? 'success' : 'error'}>{r.status === 'assigned' ? 'Assigned' : 'Unassigned'}</Badge></div>)}</div>}
-        </CardBody>
-      </Card>
-    </div>
-  );
+    <Card className="overflow-hidden border-brand-100 dark:border-brand-900/50"><CardHeader title="Allocation results" subtitle="Each round stays separate so you can compare outcomes without losing context." /><CardBody className="flex flex-col gap-6 p-5">
+      {([1, 2] as const).map((round) => { const results = roundResults[round]; return <section key={round} className="overflow-hidden rounded-2xl border border-ink-100 dark:border-ink-800"><div className="flex flex-col justify-between gap-2 border-b border-ink-100 bg-ink-50/60 px-4 py-3 dark:border-ink-800 dark:bg-ink-950/40 sm:flex-row sm:items-center"><div><h2 className="font-semibold text-ink-900 dark:text-ink-100">Round {round} results</h2><p className="text-xs text-ink-500 dark:text-ink-400">{results ? `${results.length} groups evaluated` : 'No results declared yet'}</p></div>{results && <Badge color="info">Declared</Badge>}</div>{!results ? <div className="flex items-center gap-3 px-4 py-7"><CircleDashed className="h-5 w-5 text-ink-400" /><p className="text-sm text-ink-500 dark:text-ink-400">Round {round} has not been run yet. Use the button above to generate a preview.</p></div> : results.length === 0 ? <EmptyState icon={<Users className="h-6 w-6" />} title="No groups evaluated" message="There are no unassigned groups in this round." /> : <div className="divide-y divide-ink-100 dark:divide-ink-800">{results.map((result) => <div key={result.groupId} className="flex flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:justify-between"><div className="flex min-w-0 items-start gap-3"><div className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full ${result.status === 'assigned' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'}`}>{result.status === 'assigned' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}</div><div className="min-w-0"><p className="truncate text-sm font-semibold text-ink-900 dark:text-ink-100">{result.projectId} · {result.groupName}</p><div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-500 dark:text-ink-400"><span>{result.matchedRank ? `Matched preference ${result.matchedRank}` : 'No capacity found'}</span><span aria-hidden="true">·</span><span>{result.matchedMentorName ?? 'No mentor matched'}</span></div></div></div><Badge color={result.status === 'assigned' ? 'success' : 'error'}>{result.status === 'assigned' ? 'Assigned' : 'Unassigned'}</Badge></div>)}</div>}</section>; })}
+    </CardBody></Card>
+  </main>;
 }
+
+export default AdminAllocationPage;
