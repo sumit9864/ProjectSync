@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { demoUsers, type AuthRole } from '@/data/demoUsers';
-
-export type AuthSession = {
-  email: string;
-  name: string;
-  role: AuthRole;
-};
+import { demoUsers } from '@/data/demoUsers';
+import type { AuthSession } from '@/types';
 
 const STORAGE_KEY = 'fypm-auth-session';
 
@@ -32,11 +27,19 @@ function saveSession(session: AuthSession | null) {
 }
 
 export function useAuth() {
-  const [session, setSession] = useState<AuthSession | null>(() => loadSession());
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    saveSession(session);
-  }, [session]);
+    setSession(loadSession());
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (hydrated) {
+      saveSession(session);
+    }
+  }, [session, hydrated]);
 
   const signIn = useCallback(
     (email: string, password: string): { success: boolean; session?: AuthSession } => {
@@ -62,5 +65,5 @@ export function useAuth() {
     setSession(null);
   }, []);
 
-  return { session, signIn, signOut };
+  return { session, signIn, signOut, hydrated };
 }

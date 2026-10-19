@@ -1,3 +1,9 @@
+/**
+ * MOCK DATA — Student workspace
+ * ----------------------------
+ * This file contains static data used while the backend is not yet connected.
+ * When the backend is ready, this data will be replaced by API calls.
+ */
 import type {
   Mentor,
   GroupMember,
@@ -323,13 +329,15 @@ export const topicVersions: TopicVersion[] = [
     version: 2,
     submittedAt: 'Sep 25, 2026 · 4:30 PM',
     status: 'changes_requested',
-    feedback: 'Strengthen the feasibility section — specify dataset size and compute requirements. Also clarify how your approach differs from the 2024 JHU arrhythmia paper.',
+    feedback:
+      'Strengthen the feasibility section — specify dataset size and compute requirements. Also clarify how your approach differs from the 2024 JHU arrhythmia paper.',
   },
   {
     version: 1,
     submittedAt: 'Sep 18, 2026 · 11:15 AM',
     status: 'changes_requested',
-    feedback: 'Problem statement is too broad. Narrow it to a specific cardiovascular condition and target population.',
+    feedback:
+      'Problem statement is too broad. Narrow it to a specific cardiovascular condition and target population.',
   },
 ];
 
@@ -425,10 +433,8 @@ export const logBookEntries: LogBookEntry[] = [
     editHistory: [
       {
         editedAt: 'Sep 24, 2026 · 5:00 PM',
-        pointsDiscussed:
-          'Reviewed topic draft. Discussed the problem area and possible datasets.',
-        mentorSuggestions:
-          'Narrow the problem scope. Add more detail to the feasibility section.',
+        pointsDiscussed: 'Reviewed topic draft. Discussed the problem area and possible datasets.',
+        mentorSuggestions: 'Narrow the problem scope. Add more detail to the feasibility section.',
         remarks: 'Good start, needs more focus.',
       },
     ],
@@ -447,7 +453,8 @@ export const logBookEntries: LogBookEntry[] = [
       'Initial mentor introduction meeting. Discussed team interests in health-tech ML. Reviewed the elective syllabus alignment. Explored three potential project directions: ECG monitoring, sleep staging, and medication adherence.',
     mentorSuggestions:
       'ECG monitoring has the strongest novelty and feasibility combination. Begin literature survey of transformer-based approaches for time-series medical data. Prepare a one-page problem statement for the next session.',
-    remarks: 'Enthusiastic team. Good mix of ML and systems skills. Next session: bring a draft problem statement.',
+    remarks:
+      'Enthusiastic team. Good mix of ML and systems skills. Next session: bring a draft problem statement.',
   },
   {
     id: 'lb3',

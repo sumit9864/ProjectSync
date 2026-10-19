@@ -26,16 +26,23 @@ function applyTheme(mode: ThemeMode) {
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
+  const [theme, setTheme] = useState<ThemeMode>('light');
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setTheme(getInitialTheme());
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     applyTheme(theme);
+    if (!hydrated) return;
     try {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch {
       // ignore
     }
-  }, [theme]);
+  }, [theme, hydrated]);
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));

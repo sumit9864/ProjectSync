@@ -12,10 +12,10 @@ import {
   Users,
   ShieldCheck,
 } from 'lucide-react';
-import { useToast } from '@/components/Toast';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { demoUsers, type AuthRole } from '@/data/demoUsers';
-import type { AuthSession } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/Toast';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { demoUsers } from '@/data/demoUsers';
+import type { AuthRole, AuthSession } from '@/types';
 import type { ThemeMode } from '@/hooks/useTheme';
 
 type AuthScreenProps = {
@@ -33,15 +33,18 @@ const roleIcons: Record<AuthRole, typeof GraduationCap> = {
 };
 
 const roleLabels: Record<AuthRole, string> = {
-  student: 'Student',
-  mentor: 'Mentor',
-  admin: 'Admin',
+  student: 'Team Leader',
+  mentor: 'Project Guide',
+  admin: 'Project Coordinator',
 };
 
 const roleAccents: Record<AuthRole, string> = {
-  student: 'bg-brand-50 text-brand-600 border-brand-200 dark:bg-brand-950/60 dark:text-brand-400 dark:border-brand-800/60',
-  mentor: 'bg-sky-50 text-sky-600 border-sky-200 dark:bg-sky-950/60 dark:text-sky-400 dark:border-sky-800/60',
-  admin: 'bg-violet-50 text-violet-600 border-violet-200 dark:bg-violet-950/60 dark:text-violet-400 dark:border-violet-800/60',
+  student:
+    'bg-brand-50 text-brand-600 border-brand-200 dark:bg-brand-950/60 dark:text-brand-400 dark:border-brand-800/60',
+  mentor:
+    'bg-sky-50 text-sky-600 border-sky-200 dark:bg-sky-950/60 dark:text-sky-400 dark:border-sky-800/60',
+  admin:
+    'bg-violet-50 text-violet-600 border-violet-200 dark:bg-violet-950/60 dark:text-violet-400 dark:border-violet-800/60',
 };
 
 function isValidEmail(email: string): boolean {
@@ -54,7 +57,7 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
 
   return (
     <div className="auth-shell relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-50 px-4 py-8 text-ink-800 dark:bg-ink-950 dark:text-ink-100">
-      {/* Background decoration — same visual language as the old landing */}
+      {/* Background decoration â€” same visual language as the old landing */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-40 -top-40 h-96 w-96 animate-pulse rounded-full bg-brand-300/30 blur-3xl dark:bg-brand-600/15" />
         <div className="absolute -right-40 top-1/3 h-96 w-96 rounded-full bg-sky-300/25 blur-3xl dark:bg-sky-600/10" />
@@ -62,18 +65,36 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
         <div className="auth-grid absolute inset-0 opacity-70 dark:opacity-45" />
       </div>
 
-      {/* Theme toggle — top right */}
+      {/* Theme toggle â€” top right */}
       <div className="absolute right-4 top-4 z-20">
-        <ThemeToggle theme={theme} onToggle={onToggleTheme} className="text-ink-500 hover:bg-white/70 dark:text-ink-400 dark:hover:bg-ink-800/70" />
+        <ThemeToggle
+          theme={theme}
+          onToggle={onToggleTheme}
+          className="text-ink-500 hover:bg-white/70 dark:text-ink-400 dark:hover:bg-ink-800/70"
+        />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
         {/* Logo + branding */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="motion-press mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 shadow-lg shadow-brand-600/30 transition-transform duration-300 hover:rotate-3 hover:scale-105">
-            <svg viewBox="0 0 64 64" className="h-7 w-7 text-white" aria-hidden="true"><path d="M20 18v28M20 46c0-11 8-16 17-16 7 0 9-5 9-12" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="20" cy="18" r="7" fill="currentColor" /><circle cx="46" cy="18" r="7" fill="currentColor" /><circle cx="20" cy="46" r="7" fill="currentColor" /></svg>
+            <svg viewBox="0 0 64 64" className="h-7 w-7 text-white" aria-hidden="true">
+              <path
+                d="M20 18v28M20 46c0-11 8-16 17-16 7 0 9-5 9-12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle cx="20" cy="18" r="7" fill="currentColor" />
+              <circle cx="46" cy="18" r="7" fill="currentColor" />
+              <circle cx="20" cy="46" r="7" fill="currentColor" />
+            </svg>
           </div>
-          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white sm:text-3xl">ProjectSync</h1>
+          <h1 className="font-display text-2xl font-bold text-ink-900 dark:text-white sm:text-3xl">
+            ProjectSync
+          </h1>
           <p className="mt-1.5 text-sm text-ink-500 dark:text-ink-400">
             Final-year project workspace
           </p>
@@ -107,7 +128,11 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
 
           <div className="p-6 sm:p-7">
             {mode === 'signin' ? (
-              <SignInForm onSignIn={onSignIn} showToast={showToast} onSwitchToSignUp={() => setMode('signup')} />
+              <SignInForm
+                onSignIn={onSignIn}
+                showToast={showToast}
+                onSwitchToSignUp={() => setMode('signup')}
+              />
             ) : (
               <SignUpForm onSwitchToSignIn={() => setMode('signin')} />
             )}
@@ -118,7 +143,7 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
   );
 }
 
-// ─── Sign In ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Sign In â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SignInForm({
   onSignIn,
@@ -197,7 +222,10 @@ function SignInForm({
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {/* Email */}
       <div>
-        <label htmlFor="signin-email" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
+        <label
+          htmlFor="signin-email"
+          className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200"
+        >
           Email
         </label>
         <div className="relative">
@@ -217,13 +245,18 @@ function SignInForm({
             autoComplete="email"
           />
         </div>
-        {emailError && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{emailError}</p>}
+        {emailError && (
+          <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{emailError}</p>
+        )}
       </div>
 
       {/* Password */}
       <div>
         <div className="mb-1.5 flex items-center justify-between">
-          <label htmlFor="signin-password" className="block text-sm font-medium text-ink-700 dark:text-ink-200">
+          <label
+            htmlFor="signin-password"
+            className="block text-sm font-medium text-ink-700 dark:text-ink-200"
+          >
             Password
           </label>
           <button
@@ -258,7 +291,9 @@ function SignInForm({
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        {passwordError && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{passwordError}</p>}
+        {passwordError && (
+          <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{passwordError}</p>
+        )}
       </div>
 
       {/* Auth error */}
@@ -306,13 +341,9 @@ function SignInForm({
   );
 }
 
-// ─── Sign Up ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Sign Up â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function SignUpForm({
-  onSwitchToSignIn,
-}: {
-  onSwitchToSignIn: () => void;
-}) {
+function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -361,8 +392,8 @@ function SignUpForm({
           Self-registration isn't available yet
         </h3>
         <p className="mt-2 max-w-xs text-sm text-ink-500 leading-relaxed dark:text-ink-400">
-          This demo doesn't support creating new accounts. Please use one of the
-          demo accounts to explore the workspace.
+          This demo doesn't support creating new accounts. Please use one of the demo accounts to
+          explore the workspace.
         </p>
         <button
           onClick={() => {
@@ -382,7 +413,10 @@ function SignUpForm({
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {/* Full name */}
       <div>
-        <label htmlFor="signup-name" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
+        <label
+          htmlFor="signup-name"
+          className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200"
+        >
           Full Name
         </label>
         <div className="relative">
@@ -401,12 +435,17 @@ function SignUpForm({
             autoComplete="name"
           />
         </div>
-        {errors.name && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.name}</p>}
+        {errors.name && (
+          <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.name}</p>
+        )}
       </div>
 
       {/* Email */}
       <div>
-        <label htmlFor="signup-email" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
+        <label
+          htmlFor="signup-email"
+          className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200"
+        >
           Email
         </label>
         <div className="relative">
@@ -424,12 +463,17 @@ function SignUpForm({
             autoComplete="email"
           />
         </div>
-        {errors.email && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.email}</p>}
+        {errors.email && (
+          <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.email}</p>
+        )}
       </div>
 
       {/* Password */}
       <div>
-        <label htmlFor="signup-password" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
+        <label
+          htmlFor="signup-password"
+          className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200"
+        >
           Password
         </label>
         <div className="relative">
@@ -455,12 +499,17 @@ function SignUpForm({
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        {errors.password && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.password}</p>}
+        {errors.password && (
+          <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.password}</p>
+        )}
       </div>
 
       {/* Confirm password */}
       <div>
-        <label htmlFor="signup-confirm" className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">
+        <label
+          htmlFor="signup-confirm"
+          className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200"
+        >
           Confirm Password
         </label>
         <div className="relative">
@@ -479,7 +528,9 @@ function SignUpForm({
           />
         </div>
         {errors.confirmPassword && (
-          <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{errors.confirmPassword}</p>
+          <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">
+            {errors.confirmPassword}
+          </p>
         )}
       </div>
 
@@ -506,16 +557,14 @@ function SignUpForm({
   );
 }
 
-// ─── Demo Accounts Helper ─────────────────────────────────────────────────
+// â”€â”€â”€ Demo Accounts Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function DemoAccountsHelper({
-  onFill,
-}: {
-  onFill: (email: string, password: string) => void;
-}) {
+function DemoAccountsHelper({ onFill }: { onFill: (email: string, password: string) => void }) {
   return (
-      <div className="border-t border-ink-100 pt-4 dark:border-ink-800">
-      <p className="mb-2.5 text-xs font-medium text-ink-400 dark:text-ink-500">Demo accounts — click to pre-fill</p>
+    <div className="border-t border-ink-100 pt-4 dark:border-ink-800">
+      <p className="mb-2.5 text-xs font-medium text-ink-400 dark:text-ink-500">
+        Demo accounts â€” click to pre-fill
+      </p>
       <div className="space-y-1.5">
         {demoUsers.map((user) => {
           const Icon = roleIcons[user.role];
@@ -532,7 +581,9 @@ function DemoAccountsHelper({
                 <Icon className="h-3.5 w-3.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-ink-700 dark:text-ink-200">{roleLabels[user.role]}</p>
+                <p className="text-xs font-semibold text-ink-700 dark:text-ink-200">
+                  {roleLabels[user.role]}
+                </p>
                 <p className="truncate text-xs text-ink-400 dark:text-ink-500">{user.email}</p>
               </div>
             </button>

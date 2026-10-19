@@ -1,9 +1,10 @@
-import type {
-  Notification,
-  Milestone,
-  LogBookEntry,
-  DiscussionMessage,
-} from '@/types';
+/**
+ * MOCK DATA — Mentor workspace
+ * ----------------------------
+ * This file contains static data used while the backend is not yet connected.
+ * When the backend is ready, this data will be replaced by API calls.
+ */
+import type { Notification, Milestone, LogBookEntry, DiscussionMessage } from '@/types';
 
 export const mentorUser = {
   name: 'Dr. Eliza Mathews',
@@ -52,15 +53,49 @@ export const mentorGroups: MentorGroup[] = [
       'A transformer-based early-warning system for cardiovascular anomalies using wearable ECG data.',
     status: 'topic_changes_requested',
     members: [
-      { id: 'm1', name: 'Aarav Sharma', rollNumber: 'CS21B1042', email: 'aarav.sharma@university.edu' },
+      {
+        id: 'm1',
+        name: 'Aarav Sharma',
+        rollNumber: 'CS21B1042',
+        email: 'aarav.sharma@university.edu',
+      },
       { id: 'm2', name: 'Priya Nair', rollNumber: 'CS21B1055', email: 'priya.nair@university.edu' },
-      { id: 'm3', name: 'Rohan Kapoor', rollNumber: 'CS21B1067', email: 'rohan.kapoor@university.edu' },
+      {
+        id: 'm3',
+        name: 'Rohan Kapoor',
+        rollNumber: 'CS21B1067',
+        email: 'rohan.kapoor@university.edu',
+      },
     ],
     milestones: [
-      { id: 'ms1', number: 1, title: 'Literature Review & Problem Statement', dueDate: 'Oct 22, 2026', status: 'incomplete' },
-      { id: 'ms2', number: 2, title: 'System Design & Architecture Document', dueDate: 'Nov 15, 2026', status: 'incomplete' },
-      { id: 'ms3', number: 3, title: 'Prototype Implementation & Mid-Review', dueDate: 'Jan 18, 2027', status: 'incomplete' },
-      { id: 'ms4', number: 4, title: 'Final Evaluation & Demo', dueDate: 'Mar 30, 2027', status: 'incomplete' },
+      {
+        id: 'ms1',
+        number: 1,
+        title: 'Literature Review & Problem Statement',
+        dueDate: 'Oct 22, 2026',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms2',
+        number: 2,
+        title: 'System Design & Architecture Document',
+        dueDate: 'Nov 15, 2026',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms3',
+        number: 3,
+        title: 'Prototype Implementation & Mid-Review',
+        dueDate: 'Jan 18, 2027',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms4',
+        number: 4,
+        title: 'Final Evaluation & Demo',
+        dueDate: 'Mar 30, 2027',
+        status: 'incomplete',
+      },
     ],
     topicVersions: [
       {
@@ -70,7 +105,8 @@ export const mentorGroups: MentorGroup[] = [
         feedback:
           'Strengthen the feasibility section — specify dataset size and compute requirements. Also clarify how your approach differs from the 2024 JHU arrhythmia paper.',
         fields: {
-          workingTitle: 'Transformer-Based Early Warning System for Atrial Fibrillation using Wearable ECG',
+          workingTitle:
+            'Transformer-Based Early Warning System for Atrial Fibrillation using Wearable ECG',
           existingWork:
             'Prior work includes the 2024 JHU arrhythmia benchmark (CNN-based, 12-lead), the PhysioNet AF Challenge winner (LSTM, lead I), and two consumer-app approaches from Apple Watch and Fitbit studies. All focus on post-hoc detection rather than real-time on-device early warning.',
           problemIdentified:
@@ -143,12 +179,15 @@ export const mentorGroups: MentorGroup[] = [
           'Reviewed v2 topic draft. Discussed narrowing the problem to atrial fibrillation specifically. Explored using MIT-BIH AFDB as primary dataset.',
         mentorSuggestions:
           'Add a concrete false-positive rate target. Clarify the distinction between your approach and the JHU benchmark.',
-        remarks: 'Strong direction. Topic is close to approval — one more revision should be ready for sign-off.',
+        remarks:
+          'Strong direction. Topic is close to approval — one more revision should be ready for sign-off.',
         editHistory: [
           {
             editedAt: 'Sep 24, 2026 · 5:00 PM',
-            pointsDiscussed: 'Reviewed topic draft. Discussed the problem area and possible datasets.',
-            mentorSuggestions: 'Narrow the problem scope. Add more detail to the feasibility section.',
+            pointsDiscussed:
+              'Reviewed topic draft. Discussed the problem area and possible datasets.',
+            mentorSuggestions:
+              'Narrow the problem scope. Add more detail to the feasibility section.',
             remarks: 'Good start, needs more focus.',
           },
         ],
@@ -165,7 +204,8 @@ export const mentorGroups: MentorGroup[] = [
         ],
         pointsDiscussed:
           'Initial mentor introduction meeting. Discussed team interests in health-tech ML. Explored three potential project directions.',
-        mentorSuggestions: 'ECG monitoring has the strongest novelty and feasibility combination. Begin literature survey.',
+        mentorSuggestions:
+          'ECG monitoring has the strongest novelty and feasibility combination. Begin literature survey.',
         remarks: 'Enthusiastic team. Good mix of ML and systems skills.',
       },
       {
@@ -178,8 +218,10 @@ export const mentorGroups: MentorGroup[] = [
           { name: 'Priya Nair', present: true },
           { name: 'Rohan Kapoor', present: true },
         ],
-        pointsDiscussed: 'Kickoff meeting. Introduced the FYPM workflow, timeline, and milestone expectations.',
-        mentorSuggestions: 'Use Round 1 preferences strategically — rank mentors whose domain aligns with your top project idea.',
+        pointsDiscussed:
+          'Kickoff meeting. Introduced the FYPM workflow, timeline, and milestone expectations.',
+        mentorSuggestions:
+          'Use Round 1 preferences strategically — rank mentors whose domain aligns with your top project idea.',
         remarks: 'Welcome aboard. Looking forward to working with the team this year.',
       },
     ],
@@ -194,15 +236,49 @@ export const mentorGroups: MentorGroup[] = [
       'Federated learning framework for privacy-preserving patient risk scoring across hospital networks.',
     status: 'topic_pending',
     members: [
-      { id: 'm4', name: 'Sneha Gupta', rollNumber: 'CS21B1071', email: 'sneha.gupta@university.edu' },
-      { id: 'm5', name: 'Arjun Mehta', rollNumber: 'CS21B1083', email: 'arjun.mehta@university.edu' },
+      {
+        id: 'm4',
+        name: 'Sneha Gupta',
+        rollNumber: 'CS21B1071',
+        email: 'sneha.gupta@university.edu',
+      },
+      {
+        id: 'm5',
+        name: 'Arjun Mehta',
+        rollNumber: 'CS21B1083',
+        email: 'arjun.mehta@university.edu',
+      },
       { id: 'm6', name: 'Kavya Rao', rollNumber: 'CS21B1094', email: 'kavya.rao@university.edu' },
     ],
     milestones: [
-      { id: 'ms1', number: 1, title: 'Literature Review & Problem Statement', dueDate: 'Oct 22, 2026', status: 'incomplete' },
-      { id: 'ms2', number: 2, title: 'System Design & Architecture Document', dueDate: 'Nov 15, 2026', status: 'incomplete' },
-      { id: 'ms3', number: 3, title: 'Prototype Implementation & Mid-Review', dueDate: 'Jan 18, 2027', status: 'incomplete' },
-      { id: 'ms4', number: 4, title: 'Final Evaluation & Demo', dueDate: 'Mar 30, 2027', status: 'incomplete' },
+      {
+        id: 'ms1',
+        number: 1,
+        title: 'Literature Review & Problem Statement',
+        dueDate: 'Oct 22, 2026',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms2',
+        number: 2,
+        title: 'System Design & Architecture Document',
+        dueDate: 'Nov 15, 2026',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms3',
+        number: 3,
+        title: 'Prototype Implementation & Mid-Review',
+        dueDate: 'Jan 18, 2027',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms4',
+        number: 4,
+        title: 'Final Evaluation & Demo',
+        dueDate: 'Mar 30, 2027',
+        status: 'incomplete',
+      },
     ],
     topicVersions: [
       {
@@ -245,8 +321,10 @@ export const mentorGroups: MentorGroup[] = [
           { name: 'Arjun Mehta', present: true },
           { name: 'Kavya Rao', present: true },
         ],
-        pointsDiscussed: 'Kickoff meeting. Discussed team interest in federated learning and privacy-preserving ML.',
-        mentorSuggestions: 'Explore Flower framework and MIMIC-III dataset. Focus on the schema heterogeneity problem.',
+        pointsDiscussed:
+          'Kickoff meeting. Discussed team interest in federated learning and privacy-preserving ML.',
+        mentorSuggestions:
+          'Explore Flower framework and MIMIC-III dataset. Focus on the schema heterogeneity problem.',
         remarks: 'Good start. The privacy angle is timely and well-motivated.',
       },
     ],
@@ -261,24 +339,68 @@ export const mentorGroups: MentorGroup[] = [
       'Retrieval-augmented generation pipeline for domain-specific legal document summarization in Indic languages.',
     status: 'topic_approved',
     members: [
-      { id: 'm7', name: 'Vikram Singh', rollNumber: 'CS21B1102', email: 'vikram.singh@university.edu' },
-      { id: 'm8', name: 'Ananya Iyer', rollNumber: 'CS21B1115', email: 'ananya.iyer@university.edu' },
-      { id: 'm9', name: 'Karthik Reddy', rollNumber: 'CS21B1127', email: 'karthik.reddy@university.edu' },
+      {
+        id: 'm7',
+        name: 'Vikram Singh',
+        rollNumber: 'CS21B1102',
+        email: 'vikram.singh@university.edu',
+      },
+      {
+        id: 'm8',
+        name: 'Ananya Iyer',
+        rollNumber: 'CS21B1115',
+        email: 'ananya.iyer@university.edu',
+      },
+      {
+        id: 'm9',
+        name: 'Karthik Reddy',
+        rollNumber: 'CS21B1127',
+        email: 'karthik.reddy@university.edu',
+      },
     ],
     milestones: [
-      { id: 'ms1', number: 1, title: 'Literature Review & Problem Statement', dueDate: 'Oct 22, 2026', status: 'complete', checkInNote: 'Comprehensive survey of 30+ papers on RAG and Indic NLP. Problem statement finalized.', checkedInAt: 'Oct 18, 2026 · 11:00 AM' },
-      { id: 'ms2', number: 2, title: 'System Design & Architecture Document', dueDate: 'Nov 15, 2026', status: 'incomplete' },
-      { id: 'ms3', number: 3, title: 'Prototype Implementation & Mid-Review', dueDate: 'Jan 18, 2027', status: 'incomplete' },
-      { id: 'ms4', number: 4, title: 'Final Evaluation & Demo', dueDate: 'Mar 30, 2027', status: 'incomplete' },
+      {
+        id: 'ms1',
+        number: 1,
+        title: 'Literature Review & Problem Statement',
+        dueDate: 'Oct 22, 2026',
+        status: 'complete',
+        checkInNote:
+          'Comprehensive survey of 30+ papers on RAG and Indic NLP. Problem statement finalized.',
+        checkedInAt: 'Oct 18, 2026 · 11:00 AM',
+      },
+      {
+        id: 'ms2',
+        number: 2,
+        title: 'System Design & Architecture Document',
+        dueDate: 'Nov 15, 2026',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms3',
+        number: 3,
+        title: 'Prototype Implementation & Mid-Review',
+        dueDate: 'Jan 18, 2027',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms4',
+        number: 4,
+        title: 'Final Evaluation & Demo',
+        dueDate: 'Mar 30, 2027',
+        status: 'incomplete',
+      },
     ],
     topicVersions: [
       {
         version: 3,
         submittedAt: 'Sep 20, 2026 · 2:00 PM',
         status: 'approved',
-        feedback: 'Excellent work. The retrieval strategy is well-justified and the evaluation plan is rigorous. Approved.',
+        feedback:
+          'Excellent work. The retrieval strategy is well-justified and the evaluation plan is rigorous. Approved.',
         fields: {
-          workingTitle: 'Indic-Legal-RAG: Retrieval-Augmented Summarization for Indian Legal Documents',
+          workingTitle:
+            'Indic-Legal-RAG: Retrieval-Augmented Summarization for Indian Legal Documents',
           existingWork:
             'Prior work includes IN-LEGAL-BERT for Indian legal text classification and the ILDC dataset for legal judgment prediction. RAG approaches have been explored for English legal text but not for multi-lingual Indic legal documents.',
           problemIdentified:
@@ -295,11 +417,14 @@ export const mentorGroups: MentorGroup[] = [
         version: 2,
         submittedAt: 'Sep 10, 2026 · 1:00 PM',
         status: 'changes_requested',
-        feedback: 'Add a concrete evaluation plan with human evaluation. The citation-grounding idea is great — flesh it out more.',
+        feedback:
+          'Add a concrete evaluation plan with human evaluation. The citation-grounding idea is great — flesh it out more.',
         fields: {
           workingTitle: 'Legal Document Summarization for Indian Courts',
-          existingWork: 'IN-LEGAL-BERT and ILDC dataset exist. RAG has been used for English legal text.',
-          problemIdentified: 'Indian legal documents exist in many languages with no summarization tool.',
+          existingWork:
+            'IN-LEGAL-BERT and ILDC dataset exist. RAG has been used for English legal text.',
+          problemIdentified:
+            'Indian legal documents exist in many languages with no summarization tool.',
           proposedDifference: 'We build a multi-lingual RAG pipeline using IndicBERT.',
           innovation: 'Cross-lingual retrieval and citation-grounded summarization.',
           feasibility: 'We have access to legal datasets and GPU compute.',
@@ -357,8 +482,10 @@ export const mentorGroups: MentorGroup[] = [
           { name: 'Ananya Iyer', present: true },
           { name: 'Karthik Reddy', present: true },
         ],
-        pointsDiscussed: 'Topic v3 approved. Discussed next steps for the system design milestone. Reviewed the proposed architecture for the retrieval index.',
-        mentorSuggestions: 'Start with the retrieval index design. Use FAISS for vector storage. Share a draft architecture document before the next session.',
+        pointsDiscussed:
+          'Topic v3 approved. Discussed next steps for the system design milestone. Reviewed the proposed architecture for the retrieval index.',
+        mentorSuggestions:
+          'Start with the retrieval index design. Use FAISS for vector storage. Share a draft architecture document before the next session.',
         remarks: 'Great progress. This group is ahead of schedule.',
       },
       {
@@ -371,8 +498,10 @@ export const mentorGroups: MentorGroup[] = [
           { name: 'Ananya Iyer', present: true },
           { name: 'Karthik Reddy', present: false },
         ],
-        pointsDiscussed: 'Reviewed v2 feedback. Discussed how to incorporate the evaluation plan and expand the citation-grounding section.',
-        mentorSuggestions: 'Include both automatic metrics (ROUGE, BERTScore) and human evaluation by law students. Use the citation-grounding as your main novelty claim.',
+        pointsDiscussed:
+          'Reviewed v2 feedback. Discussed how to incorporate the evaluation plan and expand the citation-grounding section.',
+        mentorSuggestions:
+          'Include both automatic metrics (ROUGE, BERTScore) and human evaluation by law students. Use the citation-grounding as your main novelty claim.',
         remarks: 'On the right track. v3 should be ready for approval.',
       },
       {
@@ -385,8 +514,10 @@ export const mentorGroups: MentorGroup[] = [
           { name: 'Ananya Iyer', present: true },
           { name: 'Karthik Reddy', present: true },
         ],
-        pointsDiscussed: 'Discussed the initial topic idea. Explored the legal NLP landscape and available datasets.',
-        mentorSuggestions: 'Narrow to Indian legal documents specifically. Look at the ILDC dataset. Consider multi-lingual support as a differentiator.',
+        pointsDiscussed:
+          'Discussed the initial topic idea. Explored the legal NLP landscape and available datasets.',
+        mentorSuggestions:
+          'Narrow to Indian legal documents specifically. Look at the ILDC dataset. Consider multi-lingual support as a differentiator.',
         remarks: 'Promising direction. Needs more specificity.',
       },
       {
@@ -400,7 +531,8 @@ export const mentorGroups: MentorGroup[] = [
           { name: 'Karthik Reddy', present: true },
         ],
         pointsDiscussed: 'Kickoff meeting. Introduced FYPM workflow and timeline.',
-        mentorSuggestions: 'Explore legal NLP and RAG literature. Bring a rough topic idea to the next session.',
+        mentorSuggestions:
+          'Explore legal NLP and RAG literature. Bring a rough topic idea to the next session.',
         remarks: 'Enthusiastic team with good NLP background.',
       },
     ],
@@ -415,14 +547,48 @@ export const mentorGroups: MentorGroup[] = [
       'Edge-deployed real-time pothole detection and road quality mapping using smartphone cameras.',
     status: 'topic_pending',
     members: [
-      { id: 'm10', name: 'Riya Desai', rollNumber: 'CS21B1138', email: 'riya.desai@university.edu' },
-      { id: 'm11', name: 'Aditya Verma', rollNumber: 'CS21B1149', email: 'aditya.verma@university.edu' },
+      {
+        id: 'm10',
+        name: 'Riya Desai',
+        rollNumber: 'CS21B1138',
+        email: 'riya.desai@university.edu',
+      },
+      {
+        id: 'm11',
+        name: 'Aditya Verma',
+        rollNumber: 'CS21B1149',
+        email: 'aditya.verma@university.edu',
+      },
     ],
     milestones: [
-      { id: 'ms1', number: 1, title: 'Literature Review & Problem Statement', dueDate: 'Oct 22, 2026', status: 'incomplete' },
-      { id: 'ms2', number: 2, title: 'System Design & Architecture Document', dueDate: 'Nov 15, 2026', status: 'incomplete' },
-      { id: 'ms3', number: 3, title: 'Prototype Implementation & Mid-Review', dueDate: 'Jan 18, 2027', status: 'incomplete' },
-      { id: 'ms4', number: 4, title: 'Final Evaluation & Demo', dueDate: 'Mar 30, 2027', status: 'incomplete' },
+      {
+        id: 'ms1',
+        number: 1,
+        title: 'Literature Review & Problem Statement',
+        dueDate: 'Oct 22, 2026',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms2',
+        number: 2,
+        title: 'System Design & Architecture Document',
+        dueDate: 'Nov 15, 2026',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms3',
+        number: 3,
+        title: 'Prototype Implementation & Mid-Review',
+        dueDate: 'Jan 18, 2027',
+        status: 'incomplete',
+      },
+      {
+        id: 'ms4',
+        number: 4,
+        title: 'Final Evaluation & Demo',
+        dueDate: 'Mar 30, 2027',
+        status: 'incomplete',
+      },
     ],
     topicVersions: [
       {
@@ -472,8 +638,10 @@ export const mentorGroups: MentorGroup[] = [
           { name: 'Riya Desai', present: true },
           { name: 'Aditya Verma', present: true },
         ],
-        pointsDiscussed: 'Kickoff meeting. Discussed interest in computer vision and edge computing for civic problems.',
-        mentorSuggestions: 'The pothole detection idea has strong practical impact. Focus on the sensor-fusion angle as your differentiator.',
+        pointsDiscussed:
+          'Kickoff meeting. Discussed interest in computer vision and edge computing for civic problems.',
+        mentorSuggestions:
+          'The pothole detection idea has strong practical impact. Focus on the sensor-fusion angle as your differentiator.',
         remarks: 'Small but capable team. Good complement of CV and mobile dev skills.',
       },
     ],
@@ -530,7 +698,11 @@ export const reviewWeekProgress = {
   label: 'This week',
 };
 
-export const mentorCalendarEvents: { day: number; title: string; type: 'review' | 'session' | 'deadline' }[] = [
+export const mentorCalendarEvents: {
+  day: number;
+  title: string;
+  type: 'review' | 'session' | 'deadline';
+}[] = [
   { day: 3, title: 'Mentor Preference Round 1 Deadline', type: 'deadline' },
   { day: 8, title: 'Neural Knights — Review Session', type: 'session' },
   { day: 14, title: 'Topic Studio Submission Deadline', type: 'deadline' },
@@ -540,10 +712,31 @@ export const mentorCalendarEvents: { day: number; title: string; type: 'review' 
   { day: 30, title: 'GitHub Repo Connection Deadline', type: 'deadline' },
 ];
 
-export const calendarLatestActivity: { id: string; group: string; action: string; time: string }[] = [
-  { id: 'ca1', group: 'Data Dynamos', action: 'submitted topic v1 for review', time: '11 hours ago' },
-  { id: 'ca2', group: 'Neural Knights', action: 'replied in discussion thread', time: '1 day ago' },
-  { id: 'ca3', group: 'Vision Vanguards', action: 'submitted topic v1 for review', time: '4 days ago' },
-  { id: 'ca4', group: 'Code Crafters', action: 'completed Milestone 1', time: '6 days ago' },
-  { id: 'ca5', group: 'Neural Knights', action: 'submitted topic v2 for review', time: '2 days ago' },
-];
+export const calendarLatestActivity: { id: string; group: string; action: string; time: string }[] =
+  [
+    {
+      id: 'ca1',
+      group: 'Data Dynamos',
+      action: 'submitted topic v1 for review',
+      time: '11 hours ago',
+    },
+    {
+      id: 'ca2',
+      group: 'Neural Knights',
+      action: 'replied in discussion thread',
+      time: '1 day ago',
+    },
+    {
+      id: 'ca3',
+      group: 'Vision Vanguards',
+      action: 'submitted topic v1 for review',
+      time: '4 days ago',
+    },
+    { id: 'ca4', group: 'Code Crafters', action: 'completed Milestone 1', time: '6 days ago' },
+    {
+      id: 'ca5',
+      group: 'Neural Knights',
+      action: 'submitted topic v2 for review',
+      time: '2 days ago',
+    },
+  ];

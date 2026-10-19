@@ -1,4 +1,10 @@
-export type AuthRole = 'student' | 'mentor' | 'admin';
+/**
+ * MOCK DATA — Demo Users
+ * ----------------------------
+ * This file contains static demo users for testing.
+ * When the backend is ready, these will be replaced by real auth logic.
+ */
+import type { AuthRole } from '@/types';
 
 export type DemoUser = {
   email: string;
@@ -9,21 +15,21 @@ export type DemoUser = {
 
 export const demoUsers: DemoUser[] = [
   {
-    email: 'aarav.sharma@university.edu',
-    password: 'Student@123',
-    name: 'Aarav Sharma',
-    role: 'student',
+    email: 'coordinator@projectsync.edu',
+    password: 'Coordinator@123',
+    name: 'Project Coordinator',
+    role: 'admin',
   },
   {
-    email: 'eliza.mathews@university.edu',
-    password: 'Mentor@123',
-    name: 'Dr. Eliza Mathews',
+    email: 'guide@projectsync.edu',
+    password: 'Guide@123',
+    name: 'Project Guide',
     role: 'mentor',
   },
   {
-    email: 'priya.krishnan@university.edu',
-    password: 'Admin@123',
-    name: 'Dr. Priya Krishnan',
-    role: 'admin',
+    email: 'leader@projectsync.edu',
+    password: 'Leader@123',
+    name: 'Team Leader',
+    role: 'student',
   },
 ];
