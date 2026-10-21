@@ -1,15 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { Clock, CheckCircle2, AlertCircle, Send, Save, Lock, MessageSquare } from 'lucide-react';
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-  Badge,
-  Avatar,
-  Skeleton,
-  PageHeader,
-} from '@/components/ui/ui';
+import { useState, useRef, useEffect } from 'react';
+import { Lock } from 'lucide-react';
+import { Badge, PageHeader, Skeleton } from '@/components/ui/ui';
 import { useToast } from '@/components/ui/Toast';
 import {
   topicDraft,
@@ -19,15 +10,9 @@ import {
   assignedMentor,
 } from '@/data/mockData';
 import type { TopicStatus } from '@/types';
-
-const statusConfig: Record<
-  string,
-  { label: string; color: 'warning' | 'success' | 'error'; icon: typeof Clock }
-> = {
-  pending: { label: 'Waiting on mentor review', color: 'warning', icon: Clock },
-  approved: { label: 'Topic approved', color: 'success', icon: CheckCircle2 },
-  changes_requested: { label: 'Changes requested by mentor', color: 'error', icon: AlertCircle },
-};
+import { TopicForm } from './topic/TopicForm';
+import { TopicDiscussion } from './topic/TopicDiscussion';
+import { TopicVersionHistory } from './topic/TopicVersionHistory';
 
 export function TopicStudioPage() {
   const [loading, setLoading] = useState(true);
@@ -62,6 +47,16 @@ export function TopicStudioPage() {
     };
   }, [draft]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-40 rounded-md" />
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-96 w-full rounded-xl" />
+      </div>
+    );
+  }
+
   const updateField = (field: keyof typeof draft, value: string) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
   };
@@ -74,7 +69,7 @@ export function TopicStudioPage() {
         version: versions.length + 1,
         submittedAt:
           now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-          ' Â· ' +
+          ' · ' +
           now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
         status: 'pending' as TopicStatus,
       };
@@ -97,7 +92,7 @@ export function TopicStudioPage() {
         body: reply.trim(),
         time:
           now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-          ' Â· ' +
+          ' · ' +
           now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
       },
     ]);
@@ -105,60 +100,8 @@ export function TopicStudioPage() {
     showToast('Reply posted.', 'success');
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-40 rounded-md" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-96 w-full rounded-xl" />
-      </div>
-    );
-  }
-
-  const statusInfo = statusConfig[currentStatus];
-  const StatusIcon = statusInfo.icon;
-
-  const fields: { key: keyof typeof draft; label: string; placeholder: string; rows: number }[] = [
-    {
-      key: 'workingTitle',
-      label: 'Working Title',
-      placeholder: 'A concise title for your project',
-      rows: 1,
-    },
-    {
-      key: 'existingWork',
-      label: 'Existing Work',
-      placeholder: 'What has already been done in this area?',
-      rows: 3,
-    },
-    {
-      key: 'problemIdentified',
-      label: 'Problem Identified',
-      placeholder: 'What specific problem are you solving?',
-      rows: 3,
-    },
-    {
-      key: 'proposedDifference',
-      label: 'Proposed Difference',
-      placeholder: 'How is your approach different from existing work?',
-      rows: 3,
-    },
-    {
-      key: 'innovation',
-      label: 'Innovation',
-      placeholder: 'What is the novel contribution?',
-      rows: 3,
-    },
-    {
-      key: 'feasibility',
-      label: 'Feasibility',
-      placeholder: 'Why is this achievable in the given timeline?',
-      rows: 3,
-    },
-  ];
-
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="animate-fade-in space-y-6">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <PageHeader
           title="Topic Studio"
@@ -172,234 +115,32 @@ export function TopicStudioPage() {
         )}
       </div>
 
-      {/* Decision status callout */}
-      <Card
-        className={
-          statusInfo.color === 'warning'
-            ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800/60 dark:bg-amber-950/30'
-            : statusInfo.color === 'success'
-              ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-800/60 dark:bg-emerald-950/30'
-              : 'border-rose-200 bg-rose-50/50 dark:border-rose-800/60 dark:bg-rose-950/30'
-        }
-      >
-        <CardBody className="flex items-start gap-3 p-5">
-          <div
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-              statusInfo.color === 'warning'
-                ? 'bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400'
-                : statusInfo.color === 'success'
-                  ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400'
-                  : 'bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400'
-            }`}
-          >
-            <StatusIcon className="h-5 w-5" />
-          </div>
-          <div className="flex-1">
-            <p className="font-display font-semibold text-ink-900 dark:text-ink-100">
-              {statusInfo.label}
-            </p>
-            {currentStatus === 'changes_requested' && versions[0]?.feedback && (
-              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
-                <span className="font-medium">Mentor feedback:</span> {versions[0].feedback}
-              </p>
-            )}
-            {currentStatus === 'approved' && (
-              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
-                Your topic is approved. You can no longer edit it.
-              </p>
-            )}
-          </div>
-        </CardBody>
-      </Card>
+      <TopicForm
+        draft={draft}
+        savedDraft={savedDraft}
+        isApproved={isApproved}
+        currentStatus={currentStatus}
+        versions={versions}
+        submitting={submitting}
+        hasUnsavedChanges={hasUnsavedChanges}
+        onUpdateField={updateField}
+        onRevert={() => {
+          setDraft(savedDraft);
+          showToast('Reverted to last saved version.', 'info');
+        }}
+        onSubmit={handleSubmit}
+      />
 
-      {/* Topic form */}
-      <Card className="overflow-hidden border-brand-100/80 bg-white shadow-sm shadow-brand-900/5 dark:border-brand-900/50 dark:bg-ink-900">
-        <CardHeader
-          title="Topic Details"
-          subtitle={`Current draft â€” version ${versions.length + 1}`}
-          action={
-            <div className="flex items-center gap-2">
-              {hasUnsavedChanges ? (
-                <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
-                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse-dot" />
-                  Unsaved changes
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  All changes saved
-                </span>
-              )}
-            </div>
-          }
-        />
-        <CardBody className="space-y-5">
-          {fields.map((field) => (
-            <div
-              key={field.key}
-              className="rounded-xl border border-brand-100/70 bg-white p-4 shadow-sm shadow-brand-900/[0.03] dark:border-brand-900/50 dark:bg-ink-900/60"
-            >
-              <label className="mb-1.5 block text-sm font-semibold text-ink-800 dark:text-ink-100">
-                {field.label}
-              </label>
-              {field.rows === 1 ? (
-                <input
-                  type="text"
-                  value={draft[field.key]}
-                  onChange={(e) => updateField(field.key, e.target.value)}
-                  disabled={isApproved}
-                  placeholder={field.placeholder}
-                  className="input-field border-0 bg-transparent px-0 shadow-none focus:ring-0 disabled:bg-transparent disabled:text-ink-500"
-                />
-              ) : (
-                <textarea
-                  value={draft[field.key]}
-                  onChange={(e) => updateField(field.key, e.target.value)}
-                  disabled={isApproved}
-                  rows={field.rows}
-                  placeholder={field.placeholder}
-                  className="input-field resize-none border-0 bg-transparent px-0 shadow-none focus:ring-0 disabled:bg-transparent disabled:text-ink-500"
-                />
-              )}
-            </div>
-          ))}
+      <TopicVersionHistory versions={versions} />
 
-          {!isApproved && (
-            <div className="flex justify-end gap-3 border-t border-ink-100 pt-4 dark:border-ink-800">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setDraft(savedDraft);
-                  showToast('Reverted to last saved version.', 'info');
-                }}
-                disabled={!hasUnsavedChanges}
-              >
-                Revert
-              </Button>
-              <Button onClick={handleSubmit} disabled={submitting || hasUnsavedChanges}>
-                {submitting ? (
-                  <>
-                    <Save className="h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4" />
-                    Submit for review
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-        </CardBody>
-      </Card>
-
-      {/* Version history */}
-      <Card>
-        <CardHeader title="Version History" subtitle="All past submissions and their status" />
-        <CardBody className="p-0">
-          <div className="divide-y divide-ink-50 dark:divide-ink-800">
-            {versions.length === 0 ? (
-              <p className="px-5 py-8 text-center text-sm text-ink-400 dark:text-ink-500">
-                No submissions yet. Submit your topic for review to see versions here.
-              </p>
-            ) : (
-              versions.map((v) => {
-                const vStatus = statusConfig[v.status];
-                return (
-                  <div key={v.version} className="flex items-start gap-3 px-5 py-4">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-xs font-semibold text-ink-600 dark:bg-ink-800 dark:text-ink-300">
-                      v{v.version}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <Badge color={vStatus.color}>{vStatus.label}</Badge>
-                        <span className="text-xs text-ink-400 dark:text-ink-500">
-                          {v.submittedAt}
-                        </span>
-                      </div>
-                      {v.feedback && (
-                        <p className="mt-2 rounded-lg bg-ink-50 px-3 py-2 text-sm text-ink-600 dark:bg-ink-800/50 dark:text-ink-300">
-                          {v.feedback}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Discussion thread */}
-      <Card>
-        <CardHeader
-          title="Discussion"
-          subtitle={`Conversation with ${assignedMentor.name}`}
-          action={
-            <Badge color="brand">
-              <MessageSquare className="h-3.5 w-3.5" />
-              {messages.length} messages
-            </Badge>
-          }
-        />
-        <CardBody className="space-y-4 bg-gradient-to-b from-ink-50/50 to-white dark:from-ink-950/40 dark:to-ink-900">
-          <div className="space-y-4 rounded-xl border border-ink-100/80 bg-white/70 p-4 dark:border-ink-800 dark:bg-ink-900/50">
-            {messages.map((msg) => {
-              const isStudent = msg.role === 'Student';
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex items-end gap-2 ${isStudent ? 'justify-end' : 'justify-start'}`}
-                >
-                  {!isStudent && <Avatar name={msg.author} color={msg.avatarColor} size="sm" />}
-                  <div
-                    className={`flex max-w-[85%] flex-col ${isStudent ? 'items-end' : 'items-start'}`}
-                  >
-                    <div
-                      className={`mb-1 flex items-center gap-2 px-1 ${isStudent ? 'flex-row-reverse' : ''}`}
-                    >
-                      <span className="text-xs font-semibold text-ink-600 dark:text-ink-300">
-                        {msg.author}
-                      </span>
-                      <span className="text-[11px] text-ink-400 dark:text-ink-500">{msg.time}</span>
-                    </div>
-                    <div
-                      className={`relative px-4 py-2.5 text-sm leading-relaxed shadow-sm ${isStudent ? 'rounded-2xl rounded-br-sm bg-brand-600 text-white dark:bg-brand-700' : 'rounded-2xl rounded-bl-sm border border-ink-100 bg-ink-50 text-ink-700 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-200'}`}
-                    >
-                      {msg.body}
-                    </div>
-                  </div>
-                  {isStudent && <Avatar name={msg.author} color={msg.avatarColor} size="sm" />}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Reply box */}
-          <div className="border-t border-ink-100 pt-4 dark:border-ink-800">
-            <div className="flex items-start gap-3">
-              <Avatar name={currentUser.name} color={currentUser.avatarColor} size="sm" />
-              <div className="flex-1">
-                <textarea
-                  value={reply}
-                  onChange={(e) => setReply(e.target.value)}
-                  rows={2}
-                  placeholder="Write a reply..."
-                  className="input-field resize-none text-sm"
-                />
-                <div className="mt-2 flex justify-end">
-                  <Button size="sm" onClick={handleReply} disabled={!reply.trim()}>
-                    <Send className="h-3.5 w-3.5" />
-                    Post reply
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
+      <TopicDiscussion
+        messages={messages}
+        reply={reply}
+        mentorName={assignedMentor.name}
+        currentUser={currentUser}
+        onReplyChange={setReply}
+        onPostReply={handleReply}
+      />
     </div>
   );
 }

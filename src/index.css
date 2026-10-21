@@ -186,9 +186,6 @@
   .motion-stagger > * {
     animation: rise-in 650ms var(--motion-ease) both;
   }
-  .motion-stagger--once > * {
-    animation-fill-mode: both;
-  }
   .preview-card {
     transition:
       transform 420ms var(--motion-smooth),
@@ -257,9 +254,6 @@
   .deadline-row:focus-visible {
     outline: 2px solid rgb(13 148 136 / 0.65);
     outline-offset: -2px;
-  }
-  .live-dot {
-    animation: live-pulse 2.8s ease-in-out infinite;
   }
   @media (hover: hover) and (pointer: fine) {
     .motion-lift:hover {
@@ -657,6 +651,50 @@
   100% {
     transform: translateX(520%);
     opacity: 0;
+  }
+}
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
