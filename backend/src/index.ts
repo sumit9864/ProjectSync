@@ -3,6 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
+// ─── Route imports ────────────────────────────────────────────────────────────
+import authRouter        from './routes/auth';
+
 // ─── App setup ───────────────────────────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -25,6 +28,9 @@ app.use((req, _res, next) => {
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', mode: 'mock', timestamp: new Date().toISOString() });
 });
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+app.use('/api/auth',          authRouter);
 
 // ─── 404 fallback ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {
