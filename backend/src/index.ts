@@ -65,7 +65,7 @@ app.use('/api/mentor',        mentorGroupsRouter);
 app.use('/api/admin/allocation', allocationRouter);
 app.use('/api/admin/groups',  adminGroupsRouter);
 app.use('/api/admin/mentors', adminMentorsRouter);
-app.use('/api/admin/windows', adminWindowsRouter);
+app.use('/api/admin',         adminWindowsRouter);
 app.use('/api/admin/audit',   auditRouter);
 app.use('/api/admin/archive', archiveRouter);
 app.use('/api/admin',         adminDashboardRouter);
