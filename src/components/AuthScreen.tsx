@@ -7,7 +7,7 @@ import type { AuthSession } from '@/types';
 import type { ThemeMode } from '@/hooks/useTheme';
 
 type AuthScreenProps = {
-  onSignIn: (email: string, password: string) => { success: boolean; session?: AuthSession };
+  onSignIn: (email: string, password: string) => Promise<{ success: boolean; session?: AuthSession }>;
   theme: ThemeMode;
   onToggleTheme: () => void;
 };

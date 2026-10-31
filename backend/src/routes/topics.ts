@@ -76,6 +76,7 @@ router.post('/submit', requireAuth, requireRole('student'), (req, res) => {
     version: versionNumber,
     submittedAt: new Date().toISOString(),
     status: 'pending',
+    fields: { ...req.body.draft },
   };
   data.versions.push(newVersion);
   data.currentStatus = 'pending';

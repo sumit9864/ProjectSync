@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Users,
   ClipboardCheck,
@@ -25,18 +25,28 @@ import {
   StatCard,
   PageSkeleton,
 } from '@/components/ui/ui';
-import { useSimulatedLoad } from '@/hooks/useSimulatedLoad';
+import { apiGet } from '@/lib/apiClient';
 import type { MentorPageId } from '@/components/shell/MentorShell';
-import { mentorUser, mentorGroups, mentorStats, reviewWeekProgress } from '@/data/mentorData';
-import type { MentorGroup } from '@/data/mentorData';
 
-const statusBadgeMap: Record<
-  MentorGroup['status'],
-  { label: string; color: 'warning' | 'success' | 'error' | 'brand' }
-> = {
-  topic_pending: { label: 'Topic Pending', color: 'warning' },
-  topic_approved: { label: 'Topic Approved', color: 'success' },
-  topic_changes_requested: { label: 'Changes Requested', color: 'error' },
+type MentorGroup = {
+  id: string; projectId: string; name: string; status: string;
+  members: { id: string; name: string }[];
+  milestones: { id: string; status: string }[];
+  topicVersions: { version: number; status: string; submittedAt: string }[];
+  daysSinceLastActivity?: number;
+  description?: string;
+};
+
+type DashboardData = {
+  stats: { assignedGroups: number; pendingReviews: number; avgResponseTime: string; capacity: number };
+  weekProgress: { reviewed: number; total: number };
+  groups: MentorGroup[];
+};
+
+const statusBadgeMap: Record<string, { label: string; color: 'warning' | 'success' | 'error' | 'brand' }> = {
+  registered:       { label: 'Registered', color: 'warning' },
+  mentor_assigned:  { label: 'Mentor Assigned', color: 'brand' },
+  topic_approved:   { label: 'Topic Approved', color: 'success' },
   github_connected: { label: 'GitHub Connected', color: 'brand' },
 };
 
@@ -47,13 +57,24 @@ export function MentorOverviewPage({
   onNavigate: (page: MentorPageId) => void;
   onOpenReview: (groupId: string) => void;
 }) {
-  const loading = useSimulatedLoad();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DashboardData | null>(null);
+
+  useEffect(() => {
+    apiGet<DashboardData>('/api/mentor/dashboard')
+      .then(setData)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   if (loading) return <PageSkeleton />;
+  if (!data) return null;
 
-  const pendingReviews = mentorGroups.filter((g) => g.topicVersions[0]?.status === 'pending');
-
-  const weekProgress = Math.round((reviewWeekProgress.reviewed / reviewWeekProgress.total) * 100);
+  const { stats, weekProgress, groups } = data;
+  const pendingReviews = groups.filter((g) => g.topicVersions[0]?.status === 'pending');
+  const weekProgressPct = weekProgress.total > 0
+    ? Math.round((weekProgress.reviewed / weekProgress.total) * 100)
+    : 0;
 
   const getMilestoneCount = (group: MentorGroup) =>
     group.milestones.filter((m) => m.status === 'complete').length;
@@ -63,12 +84,12 @@ export function MentorOverviewPage({
       <div className="motion-stagger">
         <p className="section-kicker">Mentor workspace</p>
         <h1 className="font-display text-3xl font-bold tracking-tight text-ink-900 dark:text-ink-100">
-          Welcome back, {mentorUser.name.split(' ').slice(0, 2).join(' ')}
+          Welcome back
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-500 dark:text-ink-400">
           You have {pendingReviews.length} topic{' '}
           {pendingReviews.length === 1 ? 'review' : 'reviews'} waiting and{' '}
-          {mentorStats.assignedGroups} active groups.
+          {stats.assignedGroups} active groups.
         </p>
       </div>
 
@@ -77,29 +98,29 @@ export function MentorOverviewPage({
         <StatCard
           icon={<Users className="h-5 w-5" />}
           label="Assigned Groups"
-          value={String(mentorStats.assignedGroups)}
+          value={String(stats.assignedGroups)}
           sublabel="Active this semester"
           accent="brand"
         />
         <StatCard
           icon={<ClipboardCheck className="h-5 w-5" />}
           label="Pending Reviews"
-          value={String(mentorStats.pendingReviews)}
+          value={String(stats.pendingReviews)}
           sublabel="Awaiting your decision"
           accent="amber"
         />
         <StatCard
           icon={<Clock className="h-5 w-5" />}
           label="Avg Response Time"
-          value={mentorStats.avgResponseTime}
+          value={stats.avgResponseTime}
           sublabel="Last 30 days"
           accent="sky"
         />
         <StatCard
           icon={<Gauge className="h-5 w-5" />}
           label="Mentoring Capacity"
-          value={`${mentorStats.capacity.current}/${mentorStats.capacity.max}`}
-          sublabel={`${mentorStats.capacity.spaces} spaces remaining`}
+          value={`${stats.assignedGroups}/${stats.capacity}`}
+          sublabel={`${stats.capacity - stats.assignedGroups} spaces remaining`}
           accent="emerald"
         />
       </div>
@@ -217,23 +238,23 @@ export function MentorOverviewPage({
                     strokeWidth="8"
                     strokeLinecap="round"
                     className="text-brand-500 transition-all duration-700"
-                    strokeDasharray={`${(weekProgress / 100) * 264} 264`}
+                    strokeDasharray={`${(weekProgressPct / 100) * 264} 264`}
                   />
                 </svg>
                 <div className="absolute text-center">
                   <p className="font-display text-xl font-bold text-ink-900 dark:text-ink-100">
-                    {weekProgress}%
+                    {weekProgressPct}%
                   </p>
                 </div>
               </div>
               <p className="mt-4 text-sm text-ink-600 dark:text-ink-300">
                 <span className="font-semibold text-ink-800 dark:text-ink-100">
-                  {reviewWeekProgress.reviewed}
+                  {weekProgress.reviewed}
                 </span>{' '}
-                of {reviewWeekProgress.total} reviews completed
+                of {weekProgress.total} reviews completed
               </p>
               <p className="mt-1 text-xs text-ink-400 dark:text-ink-500">
-                {reviewWeekProgress.total - reviewWeekProgress.reviewed} remaining this week
+                {weekProgress.total - weekProgress.reviewed} remaining this week
               </p>
             </div>
           </CardBody>
@@ -245,7 +266,7 @@ export function MentorOverviewPage({
         <h2 className="mb-3 font-display text-lg font-semibold text-ink-900 dark:text-ink-100">
           Your Assigned Groups
         </h2>
-        {mentorGroups.length === 0 ? (
+        {groups.length === 0 ? (
           <Card>
             <EmptyState
               icon={<Users className="h-7 w-7" />}
@@ -255,7 +276,7 @@ export function MentorOverviewPage({
           </Card>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {mentorGroups.map((group) => {
+            {groups.map((group) => {
               const info = statusBadgeMap[group.status];
               const milestoneCount = getMilestoneCount(group);
               const latestVersion = group.topicVersions[0];
@@ -290,10 +311,10 @@ export function MentorOverviewPage({
                       )}
                     </div>
 
-                    {group.daysSinceLastActivity > 3 && (
+                    {(group.daysSinceLastActivity ?? 0) > 3 && (
                       <div className="mt-3 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-950/60 dark:text-amber-400">
                         <AlertCircle className="h-3.5 w-3.5" />
-                        Last activity {group.daysSinceLastActivity} days ago
+                        Last activity {group.daysSinceLastActivity ?? 0} days ago
                       </div>
                     )}
 

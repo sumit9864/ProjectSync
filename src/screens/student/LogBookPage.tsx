@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, ChevronDown, History, CheckCircle2, XCircle, Lock } from 'lucide-react';
 import { Card, Badge, Skeleton, EmptyState, PageHeader } from '@/components/ui/ui';
-import { logBookEntries } from '@/data/mockData';
+import { apiGet } from '@/lib/apiClient';
 import type { LogBookEntry } from '@/types';
 
 export function LogBookPage() {
   const [loading, setLoading] = useState(true);
+  const [entries, setEntries] = useState<LogBookEntry[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [historyExpanded, setHistoryExpanded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    apiGet<{ entries: LogBookEntry[] }>('/api/logbook/mine')
+      .then(({ entries }) => setEntries(entries))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const toggleHistory = (id: string) => {
@@ -47,7 +50,7 @@ export function LogBookPage() {
         </Badge>
       </div>
 
-      {logBookEntries.length === 0 ? (
+      {entries.length === 0 ? (
         <Card>
           <EmptyState
             icon={<BookOpen className="h-7 w-7" />}
@@ -57,7 +60,7 @@ export function LogBookPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {logBookEntries.map((entry) => (
+          {entries.map((entry) => (
             <LogEntryCard
               key={entry.id}
               entry={entry}

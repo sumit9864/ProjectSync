@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, ClipboardCheck, XCircle } from 'lucide-react';
 import {
   Card,
@@ -11,10 +11,19 @@ import {
 } from '@/components/ui/ui';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
-import { mentorUser, mentorGroups } from '@/data/mentorData';
-import type { MentorGroup } from '@/data/mentorData';
+import { apiGet, apiPost } from '@/lib/apiClient';
 import { ReviewGroupList } from './review/ReviewGroupList';
 import { ReviewDetail } from './review/ReviewDetail';
+
+type MentorGroup = {
+  id: string; projectId: string; name: string; status: string;
+  members: { id: string; name: string; rollNumber: string; email: string }[];
+  milestones: { id: string; status: string }[];
+  topicVersions: { version: number; status: string; submittedAt: string; feedback?: string; fields?: any }[];
+  discussion: { id: string; author: string; role: string; avatarColor: string; body: string; time: string }[];
+  topicDraft: any;
+  daysSinceLastActivity?: number;
+};
 
 export function MentorReviewQueuePage({
   preselectedGroupId,
@@ -24,10 +33,8 @@ export function MentorReviewQueuePage({
   onNavigateToLogBook: (groupId: string) => void;
 }) {
   const [loading, setLoading] = useState(true);
-  const [groups, setGroups] = useState<MentorGroup[]>(mentorGroups);
-  const [selectedId, setSelectedId] = useState<string | null>(
-    preselectedGroupId ?? mentorGroups[0]?.id ?? null
-  );
+  const [groups, setGroups] = useState<MentorGroup[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(preselectedGroupId ?? null);
   const [reply, setReply] = useState('');
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [confirmAction, setConfirmAction] = useState<{
@@ -37,8 +44,19 @@ export function MentorReviewQueuePage({
   const [feedbackText, setFeedbackText] = useState('');
   const { showToast } = useToast();
 
+  useEffect(() => {
+    apiGet<{ groups: MentorGroup[] }>('/api/mentor/groups')
+      .then(({ groups }) => {
+        setGroups(groups);
+        if (!preselectedGroupId && groups.length > 0) {
+          setSelectedId(groups[0].id);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   if (loading) {
-    setTimeout(() => setLoading(false), 500);
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-40 rounded-md" />
@@ -78,35 +96,23 @@ export function MentorReviewQueuePage({
     );
   };
 
-  const addReply = (groupId: string) => {
+  const addReply = async (groupId: string) => {
     if (!reply.trim()) return;
-    const now = new Date();
-    const timeStr =
-      now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-      ' · ' +
-      now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.id === groupId
-          ? {
-              ...g,
-              discussion: [
-                ...g.discussion,
-                {
-                  id: `msg-${Date.now()}`,
-                  author: mentorUser.name,
-                  role: 'Mentor',
-                  avatarColor: mentorUser.avatarColor,
-                  body: reply.trim(),
-                  time: timeStr,
-                },
-              ],
-            }
-          : g
-      )
-    );
-    setReply('');
-    showToast('Reply posted.', 'success');
+    try {
+      const { message } = await apiPost<{ message: any }>(
+        `/api/mentor/groups/${groupId}/discussion`,
+        { body: reply.trim() }
+      );
+      setGroups((prev) =>
+        prev.map((g) =>
+          g.id === groupId ? { ...g, discussion: [...(g.discussion ?? []), message] } : g
+        )
+      );
+      setReply('');
+      showToast('Reply posted.', 'success');
+    } catch {
+      showToast('Failed to post reply.', 'error');
+    }
   };
 
   const toggleBulkSelect = (groupId: string) => {
@@ -118,32 +124,46 @@ export function MentorReviewQueuePage({
     });
   };
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
     if (!confirmAction) return;
     const { type, groupId } = confirmAction;
 
-    if (type === 'approve' && groupId) {
-      updateGroupTopicStatus(groupId, 'approved', feedbackText || undefined);
-      showToast('Topic approved.', 'success');
-    } else if (type === 'reject' && groupId) {
-      if (!feedbackText.trim()) {
-        showToast('Please provide feedback when requesting changes.', 'error');
-        return;
+    try {
+      if (type === 'approve' && groupId) {
+        await apiPost(`/api/mentor/groups/${groupId}/topic/decision`, {
+          decision: 'approved', feedback: feedbackText || undefined,
+        });
+        updateGroupTopicStatus(groupId, 'approved', feedbackText || undefined);
+        showToast('Topic approved.', 'success');
+      } else if (type === 'reject' && groupId) {
+        if (!feedbackText.trim()) {
+          showToast('Please provide feedback when requesting changes.', 'error');
+          return;
+        }
+        await apiPost(`/api/mentor/groups/${groupId}/topic/decision`, {
+          decision: 'changes_requested', feedback: feedbackText,
+        });
+        updateGroupTopicStatus(groupId, 'changes_requested', feedbackText);
+        showToast('Changes requested with feedback.', 'success');
+      } else if (type === 'bulk_approve') {
+        const ids = [...bulkSelected];
+        await apiPost('/api/mentor/bulk-decision', { groupIds: ids, decision: 'approved', feedback: feedbackText || undefined });
+        ids.forEach((id) => updateGroupTopicStatus(id, 'approved'));
+        showToast(`Approved ${bulkSelected.size} topics.`, 'success');
+        setBulkSelected(new Set());
+      } else if (type === 'bulk_reject') {
+        if (!feedbackText.trim()) {
+          showToast('Please provide feedback for the requested changes.', 'error');
+          return;
+        }
+        const ids = [...bulkSelected];
+        await apiPost('/api/mentor/bulk-decision', { groupIds: ids, decision: 'changes_requested', feedback: feedbackText });
+        ids.forEach((id) => updateGroupTopicStatus(id, 'changes_requested', feedbackText));
+        showToast(`Requested changes for ${bulkSelected.size} topics.`, 'success');
+        setBulkSelected(new Set());
       }
-      updateGroupTopicStatus(groupId, 'changes_requested', feedbackText);
-      showToast('Changes requested with feedback.', 'success');
-    } else if (type === 'bulk_approve') {
-      bulkSelected.forEach((id) => updateGroupTopicStatus(id, 'approved'));
-      showToast(`Approved ${bulkSelected.size} topics.`, 'success');
-      setBulkSelected(new Set());
-    } else if (type === 'bulk_reject') {
-      if (!feedbackText.trim()) {
-        showToast('Please provide feedback for the requested changes.', 'error');
-        return;
-      }
-      bulkSelected.forEach((id) => updateGroupTopicStatus(id, 'changes_requested', feedbackText));
-      showToast(`Requested changes for ${bulkSelected.size} topics.`, 'success');
-      setBulkSelected(new Set());
+    } catch {
+      showToast('Action failed. Please try again.', 'error');
     }
 
     setConfirmAction(null);

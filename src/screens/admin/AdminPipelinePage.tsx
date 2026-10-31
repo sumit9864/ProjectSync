@@ -17,13 +17,24 @@ import {
   EmptyState,
   PageHeader,
 } from '@/components/ui/ui';
-import {
-  adminGroups,
-  pipelineStageLabels,
-  topicStatusLabel,
-  type AdminGroup,
-  type AdminPipelineStage,
-} from '@/data/adminData';
+import { apiGet } from '@/lib/apiClient';
+
+type AdminPipelineStage = 'awaiting_allocation' | 'mentor_assigned' | 'topic_review' | 'building';
+type AdminGroup = {
+  id: string; projectId: string; name: string; memberCount: number;
+  elective: string; mentorId: string | null; mentorName: string | null;
+  topicStatus: string; githubConnected: boolean; stage: string;
+};
+
+const pipelineStageLabels: Record<string, string> = {
+  awaiting_allocation: 'Awaiting Allocation',
+  mentor_assigned:     'Mentor Assigned',
+  topic_review:        'Topic Review',
+  building:            'Building',
+};
+const topicStatusLabel: Record<string, string> = {
+  none: 'None', pending: 'Pending', approved: 'Approved', changes_requested: 'Changes Requested',
+};
 
 const stageBadgeColor: Record<AdminPipelineStage, 'warning' | 'info' | 'brand' | 'success'> = {
   awaiting_allocation: 'warning',
@@ -44,15 +55,30 @@ const topicBadgeColor: Record<
 
 export function AdminPipelinePage() {
   const [loading, setLoading] = useState(true);
+  const [groups, setGroups] = useState<AdminGroup[]>([]);
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<AdminPipelineStage | 'all'>('all');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const loadGroups = (q?: { search?: string; stage?: string }) => {
+    const params = new URLSearchParams({ limit: '200' });
+    if (q?.search) params.set('search', q.search);
+    if (q?.stage && q.stage !== 'all') params.set('stage', q.stage);
+    setLoading(true);
+    apiGet<{ groups: AdminGroup[] }>(`/api/admin/groups?${params}`)
+      .then(({ groups }) => setGroups(groups))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { loadGroups(); }, []);
+
+  // Debounce search
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
+    const t = setTimeout(() => loadGroups({ search, stage: stageFilter }), 300);
     return () => clearTimeout(t);
-  }, []);
+  }, [search, stageFilter]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -64,46 +90,10 @@ export function AdminPipelinePage() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const filtered = adminGroups.filter((g) => {
-    const matchesSearch =
-      g.name.toLowerCase().includes(search.toLowerCase()) ||
-      g.projectId.toLowerCase().includes(search.toLowerCase()) ||
-      g.elective.toLowerCase().includes(search.toLowerCase());
-    const matchesStage = stageFilter === 'all' || g.stage === stageFilter;
-    return matchesSearch && matchesStage;
-  });
+  const filtered = groups;
 
   const exportCsv = () => {
-    const headers = [
-      'Group Name',
-      'Project ID',
-      'Members',
-      'Elective',
-      'Mentor',
-      'Topic Status',
-      'GitHub',
-      'Stage',
-    ];
-    const rows = adminGroups.map((g) => [
-      g.name,
-      g.projectId,
-      String(g.memberCount),
-      g.elective,
-      g.mentorName ?? 'Unassigned',
-      topicStatusLabel[g.topicStatus],
-      g.githubConnected ? 'Connected' : 'Not Connected',
-      pipelineStageLabels[g.stage],
-    ]);
-    const csv = [headers, ...rows]
-      .map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'pipeline-export.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    window.open('/api/admin/groups/export.csv', '_blank');
   };
 
   if (loading) {
@@ -220,7 +210,7 @@ export function AdminPipelinePage() {
                           )}
                         </td>
                         <td className="px-5 py-3.5">
-                          <Badge color={stageBadgeColor[g.stage]}>
+                          <Badge color={stageBadgeColor[g.stage as keyof typeof stageBadgeColor]}>
                             {pipelineStageLabels[g.stage]}
                           </Badge>
                         </td>
@@ -269,7 +259,7 @@ export function AdminPipelinePage() {
                         <p className="font-semibold text-ink-800 dark:text-ink-100">{g.name}</p>
                         <p className="text-xs text-ink-400 dark:text-ink-500">{g.projectId}</p>
                       </div>
-                      <Badge color={stageBadgeColor[g.stage]}>{pipelineStageLabels[g.stage]}</Badge>
+                      <Badge color={stageBadgeColor[g.stage as keyof typeof stageBadgeColor]}>{pipelineStageLabels[g.stage]}</Badge>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                       <span className="flex items-center gap-1 text-ink-500 dark:text-ink-400">

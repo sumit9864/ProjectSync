@@ -20,13 +20,20 @@ import {
   Skeleton,
 } from '@/components/ui/ui';
 import { useToast } from '@/components/ui/Toast';
-import {
-  adminGroups,
-  adminMentors,
-  type AdminGroup,
-  type AdminMentor,
-  type AllocationResult,
-} from '@/data/adminData';
+import { apiGet, apiPost } from '@/lib/apiClient';
+
+type AdminGroup = {
+  id: string; projectId: string; name: string; memberCount: number;
+  elective: string; mentorId: string | null; mentorName: string | null;
+  topicStatus: string; githubConnected: boolean; stage: string;
+  preferences: { mentorId: string; rank: number }[];
+};
+type AdminMentor = { id: string; name: string; domain: string; capacity: number; currentLoad: number };
+type AllocationResult = {
+  groupId: string; groupName: string; projectId?: string;
+  matchedRank?: number | null; matchedMentorId: string | null;
+  matchedMentorName?: string | null; status: 'assigned' | 'unassigned'; reason?: string;
+};
 
 type Props = { onRoundRun?: () => void };
 type Round = 1 | 2;
@@ -34,8 +41,8 @@ type RoundResults = Record<Round, AllocationResult[] | null>;
 
 export function AdminAllocationPage({ onRoundRun }: Props) {
   const [loading, setLoading] = useState(true);
-  const [groups, setGroups] = useState<AdminGroup[]>(adminGroups);
-  const [mentors, setMentors] = useState<AdminMentor[]>(adminMentors);
+  const [groups, setGroups] = useState<AdminGroup[]>([]);
+  const [mentors, setMentors] = useState<AdminMentor[]>([]);
   const [roundResults, setRoundResults] = useState<RoundResults>({ 1: null, 2: null });
   const [manualGroupId, setManualGroupId] = useState('');
   const [manualMentorId, setManualMentorId] = useState('');
@@ -43,8 +50,16 @@ export function AdminAllocationPage({ onRoundRun }: Props) {
   const { showToast } = useToast();
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 400);
-    return () => clearTimeout(timer);
+    Promise.all([
+      apiGet<{ groups: AdminGroup[]; total: number }>('/api/admin/groups?limit=200'),
+      apiGet<{ mentors: AdminMentor[] }>('/api/admin/mentors'),
+    ])
+      .then(([gData, mData]) => {
+        setGroups(gData.groups);
+        setMentors(mData.mentors);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const unassignedGroups = groups.filter((group) => !group.mentorId);
@@ -62,106 +77,52 @@ export function AdminAllocationPage({ onRoundRun }: Props) {
     [unassignedGroups, manualAssignments]
   );
 
-  const runRound = (round: Round) => {
-    const mentorLoad: Record<string, number> = Object.fromEntries(
-      mentors.map((mentor) => [mentor.id, mentor.currentLoad])
-    );
-    const results: AllocationResult[] = [];
-    const updatedGroups = [...groups];
-    const updatedMentors = [...mentors];
-    groups
-      .filter((group) => !group.mentorId)
-      .forEach((group) => {
-        const preference = group.preferences.find((item) => {
-          const mentor = mentors.find((candidate) => candidate.id === item.mentorId);
-          return mentor && mentorLoad[mentor.id] < mentor.capacity;
-        });
-        const mentor = preference
-          ? mentors.find((candidate) => candidate.id === preference.mentorId)
-          : null;
-        if (mentor && preference) {
-          mentorLoad[mentor.id] += 1;
-          results.push({
-            groupId: group.id,
-            groupName: group.name,
-            projectId: group.projectId,
-            matchedRank: preference.rank,
-            matchedMentorId: mentor.id,
-            matchedMentorName: mentor.name,
-            status: 'assigned',
-            reason: `Matched at preference rank ${preference.rank}`,
-          });
-          const groupIndex = updatedGroups.findIndex((item) => item.id === group.id);
-          if (groupIndex >= 0)
-            updatedGroups[groupIndex] = {
-              ...updatedGroups[groupIndex],
-              mentorId: mentor.id,
-              mentorName: mentor.name,
-              stage: 'mentor_assigned',
-            };
-          const mentorIndex = updatedMentors.findIndex((item) => item.id === mentor.id);
-          if (mentorIndex >= 0)
-            updatedMentors[mentorIndex] = {
-              ...updatedMentors[mentorIndex],
-              currentLoad: mentorLoad[mentor.id],
-            };
-        } else
-          results.push({
-            groupId: group.id,
-            groupName: group.name,
-            projectId: group.projectId,
-            matchedRank: null,
-            matchedMentorId: null,
-            matchedMentorName: null,
-            status: 'unassigned',
-            reason: 'No capacity found across all preferences',
-          });
-      });
-    setRoundResults((current) => ({ ...current, [round]: results }));
-    setGroups(updatedGroups);
-    setMentors(updatedMentors);
-    onRoundRun?.();
-    showToast(
-      `Round ${round} complete: ${results.filter((item) => item.status === 'assigned').length} assigned.`,
-      'success'
-    );
+  const runRound = async (round: Round) => {
+    try {
+      const { results } = await apiPost<{ results: AllocationResult[] }>('/api/admin/allocation/run', { round });
+      setRoundResults((current) => ({ ...current, [round]: results }));
+      // Refresh groups and mentors to reflect new assignments
+      const [gData, mData] = await Promise.all([
+        apiGet<{ groups: AdminGroup[]; total: number }>('/api/admin/groups?limit=200'),
+        apiGet<{ mentors: AdminMentor[] }>('/api/admin/mentors'),
+      ]);
+      setGroups(gData.groups);
+      setMentors(mData.mentors);
+      onRoundRun?.();
+      const assigned = results.filter((item) => item.status === 'assigned').length;
+      showToast(`Round ${round} complete: ${assigned} assigned.`, 'success');
+    } catch (err: any) {
+      showToast(err?.message ?? `Failed to run Round ${round}.`, 'error');
+    }
   };
 
-  const forceAssign = () => {
+  const forceAssign = async () => {
     if (!selectedGroup || !selectedMentor) return;
-    const assignment: AllocationResult = {
-      groupId: selectedGroup.id,
-      groupName: selectedGroup.name,
-      projectId: selectedGroup.projectId,
-      matchedRank: null,
-      matchedMentorId: selectedMentor.id,
-      matchedMentorName: selectedMentor.name,
-      status: 'assigned',
-      reason: 'Manual override after allocation round',
-    };
-    setManualAssignments((current) => [...current, assignment]);
-    setGroups((current) =>
-      current.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              mentorId: selectedMentor.id,
-              mentorName: selectedMentor.name,
-              stage: 'mentor_assigned',
-            }
-          : group
-      )
-    );
-    setMentors((current) =>
-      current.map((mentor) =>
-        mentor.id === selectedMentor.id
-          ? { ...mentor, currentLoad: mentor.currentLoad + 1 }
-          : mentor
-      )
-    );
-    setManualGroupId('');
-    setManualMentorId('');
-    showToast(`${selectedGroup.name} assigned to ${selectedMentor.name}.`, 'success');
+    try {
+      const { result } = await apiPost<{ result: AllocationResult }>('/api/admin/allocation/manual', {
+        groupId: selectedGroup.id, mentorId: selectedMentor.id,
+      });
+      setManualAssignments((current) => [...current, result]);
+      setGroups((current) =>
+        current.map((group) =>
+          group.id === selectedGroup.id
+            ? { ...group, mentorId: selectedMentor.id, mentorName: selectedMentor.name, stage: 'mentor_assigned' }
+            : group
+        )
+      );
+      setMentors((current) =>
+        current.map((mentor) =>
+          mentor.id === selectedMentor.id
+            ? { ...mentor, currentLoad: mentor.currentLoad + 1 }
+            : mentor
+        )
+      );
+      setManualGroupId('');
+      setManualMentorId('');
+      showToast(`${selectedGroup.name} assigned to ${selectedMentor.name}.`, 'success');
+    } catch (err: any) {
+      showToast(err?.message ?? 'Failed to assign.', 'error');
+    }
   };
 
   const resultSection = (round: Round) => {

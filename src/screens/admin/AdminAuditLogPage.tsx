@@ -9,15 +9,20 @@ import {
   EmptyState,
   PageHeader,
 } from '@/components/ui/ui';
-import { auditEvents } from '@/data/adminData';
+import { apiGet } from '@/lib/apiClient';
+
+type AuditEvent = { id: string; timestamp: string; description: string; actor: string; group: string };
 
 export function AdminAuditLogPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    apiGet<{ events: AuditEvent[] }>('/api/admin/audit')
+      .then(({ events }) => setAuditEvents(events ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const systemEvents = auditEvents.filter((event) => event.actor === 'System').length;

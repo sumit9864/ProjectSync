@@ -9,7 +9,7 @@ import {
   EmptyState,
   PageHeader,
 } from '@/components/ui/ui';
-import { mentorCalendarEvents, calendarLatestActivity } from '@/data/mentorData';
+import { apiGet } from '@/lib/apiClient';
 
 const monthNames = [
   'January',
@@ -48,11 +48,18 @@ const eventTypeConfig: Record<string, { label: string; color: string; dot: strin
 
 export function MentorCalendarPage() {
   const [loading, setLoading] = useState(true);
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 1)); // September 2026
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarEvents, setCalendarEvents] = useState<{ day: number; title: string; type: 'review' | 'session' | 'deadline' }[]>([]);
+  const [recentActivity, setRecentActivity] = useState<{ id: string; group: string; action: string; time: string }[]>([]);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    apiGet<{ events: typeof calendarEvents; recentActivity: typeof recentActivity }>('/api/mentor/calendar')
+      .then((data) => {
+        setCalendarEvents(data.events ?? []);
+        setRecentActivity(data.recentActivity ?? []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -72,8 +79,8 @@ export function MentorCalendarPage() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
 
-  const eventsByDay = new Map<number, typeof mentorCalendarEvents>();
-  mentorCalendarEvents.forEach((e) => {
+  const eventsByDay = new Map<number, typeof calendarEvents>();
+  calendarEvents.forEach((e) => {
     const existing = eventsByDay.get(e.day) ?? [];
     eventsByDay.set(e.day, [...existing, e]);
   });
@@ -202,7 +209,7 @@ export function MentorCalendarPage() {
           <Card className="self-start">
             <CardHeader title="Latest Activity" subtitle="Across all your groups" />
             <CardBody className="p-0">
-              {calendarLatestActivity.length === 0 ? (
+              {recentActivity.length === 0 ? (
                 <EmptyState
                   icon={<Activity className="h-7 w-7" />}
                   title="No recent activity"
@@ -210,7 +217,7 @@ export function MentorCalendarPage() {
                 />
               ) : (
                 <div className="divide-y divide-ink-50 dark:divide-ink-800">
-                  {calendarLatestActivity.map((item) => (
+                  {recentActivity.map((item) => (
                     <div key={item.id} className="flex items-start gap-3 px-5 py-3.5">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400">
                         <Clock className="h-4 w-4" />
@@ -236,7 +243,7 @@ export function MentorCalendarPage() {
             <CardHeader title="Upcoming Events" subtitle="Next 30 days" />
             <CardBody className="p-0">
               <div className="divide-y divide-ink-50">
-                {mentorCalendarEvents.slice(0, 5).map((e, i) => {
+                {calendarEvents.slice(0, 5).map((e, i) => {
                   const config = eventTypeConfig[e.type];
                   return (
                     <div key={i} className="flex items-center gap-3 px-5 py-3">

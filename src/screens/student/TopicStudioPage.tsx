@@ -2,45 +2,74 @@ import { useState, useRef, useEffect } from 'react';
 import { Lock } from 'lucide-react';
 import { Badge, PageHeader, Skeleton } from '@/components/ui/ui';
 import { useToast } from '@/components/ui/Toast';
-import {
-  topicDraft,
-  topicVersions,
-  discussionMessages as initialMessages,
-  currentUser,
-  assignedMentor,
-} from '@/data/mockData';
-import type { TopicStatus } from '@/types';
+import { apiGet, apiPost, apiPut } from '@/lib/apiClient';
+import type { TopicStatus, TopicVersion, DiscussionMessage } from '@/types';
+import type { TopicDraft } from './topic/TopicForm';
 import { TopicForm } from './topic/TopicForm';
 import { TopicDiscussion } from './topic/TopicDiscussion';
 import { TopicVersionHistory } from './topic/TopicVersionHistory';
 
+const emptyDraft: TopicDraft = {
+  workingTitle: '',
+  existingWork: '',
+  problemIdentified: '',
+  proposedDifference: '',
+  innovation: '',
+  feasibility: '',
+};
+
+type TopicData = {
+  draft: TopicDraft | null;
+  versions: TopicVersion[];
+  currentStatus: TopicStatus | null;
+  discussion: DiscussionMessage[];
+};
+
 export function TopicStudioPage() {
   const [loading, setLoading] = useState(true);
-  const [draft, setDraft] = useState(topicDraft);
-  const [savedDraft, setSavedDraft] = useState(topicDraft);
-  const [isApproved] = useState(false);
-  const [currentStatus] = useState<TopicStatus>('changes_requested');
-  const [messages, setMessages] = useState(initialMessages);
+  const [draft, setDraft] = useState<TopicDraft>(emptyDraft);
+  const [savedDraft, setSavedDraft] = useState<TopicDraft>(emptyDraft);
+  const [currentStatus, setCurrentStatus] = useState<TopicStatus>('changes_requested');
+  const [isApproved, setIsApproved] = useState(false);
+  const [messages, setMessages] = useState<DiscussionMessage[]>([]);
   const [reply, setReply] = useState('');
-  const [versions, setVersions] = useState(topicVersions);
+  const [versions, setVersions] = useState<TopicVersion[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToast();
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    apiGet<TopicData>('/api/topics/mine')
+      .then((data) => {
+        if (data.draft) {
+          setDraft(data.draft);
+          setSavedDraft(data.draft);
+        }
+        setVersions(data.versions ?? []);
+        setMessages(data.discussion ?? []);
+        if (data.currentStatus) {
+          setCurrentStatus(data.currentStatus);
+          setIsApproved(data.currentStatus === 'approved');
+        }
+      })
+      .catch(() => showToast('Failed to load topic data.', 'error'))
+      .finally(() => setLoading(false));
   }, []);
 
   const hasUnsavedChanges = JSON.stringify(draft) !== JSON.stringify(savedDraft);
 
-  // Auto-save indicator
+  // Auto-save draft every 2s after edits
   useEffect(() => {
     if (!hasUnsavedChanges) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
-      setSavedDraft(draft);
-      showToast('All changes saved', 'success');
+    saveTimerRef.current = setTimeout(async () => {
+      try {
+        await apiPut('/api/topics/draft', { draft });
+        setSavedDraft(draft);
+        showToast('All changes saved', 'success');
+      } catch {
+        showToast('Failed to auto-save draft.', 'error');
+      }
     }, 2000);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -61,43 +90,31 @@ export function TopicStudioPage() {
     setDraft((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setSubmitting(true);
-    setTimeout(() => {
-      const now = new Date();
-      const newVersion = {
-        version: versions.length + 1,
-        submittedAt:
-          now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-          ' · ' +
-          now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-        status: 'pending' as TopicStatus,
-      };
-      setVersions((prev) => [newVersion, ...prev]);
+    try {
+      const { version } = await apiPost<{ version: TopicVersion }>('/api/topics/submit', { draft });
+      setVersions((prev) => [version, ...prev]);
+      setCurrentStatus('pending');
+      setSavedDraft(draft);
+      showToast(`Topic v${version.version} submitted for review.`, 'success');
+    } catch (err: any) {
+      showToast(err?.message ?? 'Failed to submit topic.', 'error');
+    } finally {
       setSubmitting(false);
-      showToast('Topic v' + newVersion.version + ' submitted for review.', 'success');
-    }, 800);
+    }
   };
 
-  const handleReply = () => {
+  const handleReply = async () => {
     if (!reply.trim()) return;
-    const now = new Date();
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `msg-${Date.now()}`,
-        author: currentUser.name,
-        role: 'Student',
-        avatarColor: currentUser.avatarColor,
-        body: reply.trim(),
-        time:
-          now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-          ' · ' +
-          now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      },
-    ]);
-    setReply('');
-    showToast('Reply posted.', 'success');
+    try {
+      const { message } = await apiPost<{ message: DiscussionMessage }>('/api/topics/discussion', { body: reply.trim() });
+      setMessages((prev) => [...prev, message]);
+      setReply('');
+      showToast('Reply posted.', 'success');
+    } catch {
+      showToast('Failed to post reply.', 'error');
+    }
   };
 
   return (
@@ -136,8 +153,8 @@ export function TopicStudioPage() {
       <TopicDiscussion
         messages={messages}
         reply={reply}
-        mentorName={assignedMentor.name}
-        currentUser={currentUser}
+        mentorName="Your Mentor"
+        currentUser={{ name: 'You', avatarColor: 'bg-brand-600' }}
         onReplyChange={setReply}
         onPostReply={handleReply}
       />

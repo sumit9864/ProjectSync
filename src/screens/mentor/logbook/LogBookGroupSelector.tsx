@@ -1,16 +1,17 @@
 import { Button, Card, EmptyState } from '@/components/ui/ui';
 import { BookOpen, Plus } from 'lucide-react';
-import { mentorGroups } from '@/data/mentorData';
+type SimpleGroup = { id: string; name: string };
 
 type Props = {
+  groups: SimpleGroup[];
   selectedGroupId: string;
   onSelectGroup: (id: string) => void;
   onNewSession: () => void;
 };
 
 /** Left-rail group selector tabs + "New session" button for the Log Book page. */
-export function LogBookGroupSelector({ selectedGroupId, onSelectGroup, onNewSession }: Props) {
-  if (mentorGroups.length === 0) {
+export function LogBookGroupSelector({ groups, selectedGroupId, onSelectGroup, onNewSession }: Props) {
+  if (groups.length === 0) {
     return (
       <Card>
         <EmptyState
@@ -25,7 +26,7 @@ export function LogBookGroupSelector({ selectedGroupId, onSelectGroup, onNewSess
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex flex-wrap gap-2">
-        {mentorGroups.map((g) => (
+        {groups.map((g) => (
           <button
             key={g.id}
             onClick={() => onSelectGroup(g.id)}

@@ -11,18 +11,26 @@ import {
   X,
 } from 'lucide-react';
 import { Card, CardBody, Badge, Skeleton, EmptyState, PageHeader } from '@/components/ui/ui';
-import { archiveEntries, type ArchiveEntry } from '@/data/adminData';
+import { apiGet } from '@/lib/apiClient';
+
+type ArchiveEntry = {
+  id: string; title: string; year: string; group: string; mentor: string;
+  elective: string; abstract: string; githubUrl: string | null;
+  grade: string | null; notes: string;
+};
 
 export function AdminArchivePage() {
   const [loading, setLoading] = useState(true);
-  const [entries, setEntries] = useState<ArchiveEntry[]>(archiveEntries);
+  const [entries, setEntries] = useState<ArchiveEntry[]>([]);
   const [search, setSearch] = useState('');
   const [yearFilter, setYearFilter] = useState<string>('all');
   const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    apiGet<{ entries: ArchiveEntry[] }>('/api/admin/archive')
+      .then(({ entries }) => setEntries(entries ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const years = Array.from(new Set(entries.map((e) => e.year)))
@@ -113,7 +121,7 @@ export function AdminArchivePage() {
         <div>
           <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">Project library</p>
           <p className="mt-1 text-xs text-ink-500">
-            {filtered.length} of {archiveEntries.length} projects shown
+            {filtered.length} of {entries.length} projects shown
           </p>
         </div>
         <span className="hidden text-xs text-ink-400 sm:block">Curated academic work</span>

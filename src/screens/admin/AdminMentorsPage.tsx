@@ -12,7 +12,10 @@ import {
   PageHeader,
 } from '@/components/ui/ui';
 import { useToast } from '@/components/ui/Toast';
-import { adminMentors, MAX_MENTOR_GROUPS, type AdminMentor } from '@/data/adminData';
+import { apiGet, apiPost, apiDelete } from '@/lib/apiClient';
+
+const MAX_MENTOR_GROUPS = 6;
+type AdminMentor = { id: string; name: string; domain: string; email: string; capacity: number; currentLoad: number; avatarColor: string };
 
 const avatarColors = [
   'bg-brand-600',
@@ -27,7 +30,7 @@ const avatarColors = [
 
 export function AdminMentorsPage() {
   const [loading, setLoading] = useState(true);
-  const [mentors, setMentors] = useState<AdminMentor[]>(adminMentors);
+  const [mentors, setMentors] = useState<AdminMentor[]>([]);
 
   // Single add form
   const [name, setName] = useState('');
@@ -42,33 +45,33 @@ export function AdminMentorsPage() {
   const { showToast } = useToast();
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    apiGet<{ mentors: AdminMentor[] }>('/api/admin/mentors')
+      .then(({ mentors }) => setMentors(mentors ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const addMentor = () => {
+  const addMentor = async () => {
     if (!name.trim() || !email.trim()) {
       showToast('Name and email are required.', 'error');
       return;
     }
-    const newMentor: AdminMentor = {
-      id: `mentor-${Date.now()}`,
-      name: name.trim(),
-      domain: domain.trim() || 'Unspecified',
-      email: email.trim(),
-      capacity: Math.min(
-        MAX_MENTOR_GROUPS,
-        Math.max(1, parseInt(capacity, 10) || MAX_MENTOR_GROUPS)
-      ),
-      currentLoad: 0,
-      avatarColor: avatarColors[mentors.length % avatarColors.length],
-    };
-    setMentors((prev) => [...prev, newMentor]);
-    showToast(`${newMentor.name} added.`, 'success');
-    setName('');
-    setDomain('');
-    setEmail('');
-    setCapacity(String(MAX_MENTOR_GROUPS));
+    try {
+      const { mentor } = await apiPost<{ mentor: AdminMentor }>('/api/admin/mentors', {
+        name: name.trim(),
+        domain: domain.trim() || 'Unspecified',
+        email: email.trim(),
+        capacity: Math.min(MAX_MENTOR_GROUPS, Math.max(1, parseInt(capacity, 10) || MAX_MENTOR_GROUPS)),
+      });
+      setMentors((prev) => [...prev, mentor]);
+      showToast(`${mentor.name} added.`, 'success');
+      setName('');
+      setDomain('');
+      setEmail('');
+      setCapacity(String(MAX_MENTOR_GROUPS));
+    } catch (err: any) {
+      showToast(err?.message ?? 'Failed to add mentor.', 'error');
+    }
   };
 
   const parseBulk = () => {
@@ -100,17 +103,31 @@ export function AdminMentorsPage() {
     setBulkPreview(parsed);
   };
 
-  const confirmBulk = () => {
+  const confirmBulk = async () => {
     if (!bulkPreview || bulkPreview.length === 0) return;
-    setMentors((prev) => [...prev, ...bulkPreview]);
-    showToast(`${bulkPreview.length} mentors added.`, 'success');
+    const added: AdminMentor[] = [];
+    for (const m of bulkPreview) {
+      try {
+        const { mentor } = await apiPost<{ mentor: AdminMentor }>('/api/admin/mentors', {
+          name: m.name, domain: m.domain, email: m.email, capacity: m.capacity,
+        });
+        added.push(mentor);
+      } catch { /* skip duplicates */ }
+    }
+    setMentors((prev) => [...prev, ...added]);
+    showToast(`${added.length} mentor${added.length !== 1 ? 's' : ''} added.`, 'success');
     setBulkPreview(null);
     setBulkText('');
   };
 
-  const removeMentor = (id: string) => {
-    setMentors((prev) => prev.filter((m) => m.id !== id));
-    showToast('Mentor removed.', 'info');
+  const removeMentor = async (id: string) => {
+    try {
+      await apiDelete(`/api/admin/mentors/${id}`);
+      setMentors((prev) => prev.filter((m) => m.id !== id));
+      showToast('Mentor removed.', 'info');
+    } catch (err: any) {
+      showToast(err?.message ?? 'Failed to remove mentor.', 'error');
+    }
   };
 
   if (loading) {

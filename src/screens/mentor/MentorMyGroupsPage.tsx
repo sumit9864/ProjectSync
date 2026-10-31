@@ -9,16 +9,27 @@ import {
   EmptyState,
   PageHeader,
 } from '@/components/ui/ui';
-import { mentorGroups } from '@/data/mentorData';
-import type { MentorGroup } from '@/data/mentorData';
+import { apiGet } from '@/lib/apiClient';
+
+type MentorGroup = {
+  id: string;
+  projectId: string;
+  name: string;
+  status: 'registered' | 'mentor_assigned' | 'topic_approved' | 'github_connected';
+  members: { id: string; name: string; rollNumber: string; email: string }[];
+  milestones: { id: string; status: string }[];
+  topicVersions: { status: string; version?: number }[];
+  lastActivityAt?: string;
+  daysSinceLastActivity?: number;
+};
 
 const statusBadgeMap: Record<
-  MentorGroup['status'],
+  string,
   { label: string; color: 'warning' | 'success' | 'error' | 'brand' }
 > = {
-  topic_pending: { label: 'Topic Pending', color: 'warning' },
-  topic_approved: { label: 'Topic Approved', color: 'success' },
-  topic_changes_requested: { label: 'Changes Requested', color: 'error' },
+  registered:       { label: 'Registered', color: 'warning' },
+  mentor_assigned:  { label: 'Mentor Assigned', color: 'brand' },
+  topic_approved:   { label: 'Topic Approved', color: 'success' },
   github_connected: { label: 'GitHub Connected', color: 'brand' },
 };
 
@@ -30,10 +41,13 @@ export function MentorMyGroupsPage({
   onOpenLogBook: (groupId: string) => void;
 }) {
   const [loading, setLoading] = useState(true);
+  const [groups, setGroups] = useState<MentorGroup[]>([]);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    apiGet<{ groups: MentorGroup[] }>('/api/mentor/groups')
+      .then(({ groups }) => setGroups(groups))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -56,7 +70,7 @@ export function MentorMyGroupsPage({
         subtitle="All groups assigned to you for mentoring this semester."
       />
 
-      {mentorGroups.length === 0 ? (
+      {groups.length === 0 ? (
         <Card>
           <EmptyState
             icon={<Users className="h-7 w-7" />}
@@ -66,7 +80,7 @@ export function MentorMyGroupsPage({
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {mentorGroups.map((group) => {
+          {groups.map((group) => {
             const info = statusBadgeMap[group.status];
             const completedMilestones = group.milestones.filter(
               (m) => m.status === 'complete'
@@ -91,10 +105,7 @@ export function MentorMyGroupsPage({
                     <Badge color={info.color}>{info.label}</Badge>
                   </div>
 
-                  {/* Description */}
-                  <p className="text-sm text-ink-600 line-clamp-2 dark:text-ink-300">
-                    {group.description}
-                  </p>
+                  {/* Description removed */}
 
                   {/* Members */}
                   <div className="flex items-center gap-1.5">

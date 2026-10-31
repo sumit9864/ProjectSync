@@ -1,255 +1,242 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/ui';
 import { useToast } from '@/components/ui/Toast';
-import { mentorGroups } from '@/data/mentorData';
+import { apiGet, apiPost, apiPut } from '@/lib/apiClient';
 import type { LogBookEntry } from '@/types';
 import { LogBookGroupSelector } from './logbook/LogBookGroupSelector';
 import { LogBookEntryList, LogBookEntryEditor } from './logbook/LogBookEntryEditor';
 import { LogBookVersionHistory } from './logbook/LogBookVersionHistory';
 
-type LogBookState = Record<string, { entries: LogBookEntry[]; nextEntryNumber: number }>;
-
-function buildInitialState(): LogBookState {
-  const state: LogBookState = {};
-  mentorGroups.forEach((g) => {
-    const sorted = [...g.logBook].sort((a, b) => b.entryNumber - a.entryNumber);
-    state[g.id] = {
-      entries: sorted,
-      nextEntryNumber: (sorted[0]?.entryNumber ?? 0) + 1,
-    };
-  });
-  return state;
-}
+type SimpleGroup = { 
+  id: string; projectId: string; name: string; 
+  members: { id: string; name: string }[];
+  milestones: { id: string; title: string; dueDate: string; status: string; number: number }[];
+};
+type LogBookState = Record<string, { entries: LogBookEntry[]; nextEntryNumber: number; loaded: boolean }>;
 
 export function MentorLogBookPage({ preselectedGroupId }: { preselectedGroupId?: string | null }) {
   const [loading, setLoading] = useState(true);
-  const [groupLogBooks, setGroupLogBooks] = useState<LogBookState>(buildInitialState);
-  const [selectedGroupId, setSelectedGroupId] = useState<string>(
-    preselectedGroupId ?? mentorGroups[0]?.id ?? ''
-  );
+  const [groups, setGroups] = useState<SimpleGroup[]>([]);
+  const [groupLogBooks, setGroupLogBooks] = useState<LogBookState>({});
+  const [selectedGroupId, setSelectedGroupId] = useState<string>(preselectedGroupId ?? '');
   const [newSessionOpen, setNewSessionOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<LogBookEntry | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [historyExpanded, setHistoryExpanded] = useState<Set<string>>(new Set());
-
-  // New session form state
-  const [sessionDate, setSessionDate] = useState(new Date().toISOString().split('T')[0]);
-  const [sessionTime, setSessionTime] = useState('14:00');
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  
+  // Editor state
+  const [sessionDate, setSessionDate] = useState('');
+  const [sessionTime, setSessionTime] = useState('');
   const [attendance, setAttendance] = useState<Record<string, boolean>>({});
   const [pointsDiscussed, setPointsDiscussed] = useState('');
   const [mentorSuggestions, setMentorSuggestions] = useState('');
   const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // List state
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [historyExpanded, setHistoryExpanded] = useState<Set<string>>(new Set());
+
   const { showToast } = useToast();
 
-  // Loading is simulated; swap for real API fetch later
+  const handleOpenNewSession = () => {
+    setSessionDate(new Date().toISOString().split('T')[0]);
+    setSessionTime('10:00');
+    setAttendance({});
+    setPointsDiscussed('');
+    setMentorSuggestions('');
+    setRemarks('');
+    setNewSessionOpen(true);
+  };
+
+  const handleOpenEditSession = (entry: LogBookEntry) => {
+    setSessionDate(entry.date.split('T')[0]);
+    setSessionTime(entry.date.split('T')[1].substring(0, 5));
+    const att: Record<string, boolean> = {};
+    entry.attendance.forEach((a) => {
+      const member = currentGroup?.members.find(m => m.name === a.name);
+      if (member) att[member.id] = a.present;
+    });
+    setAttendance(att);
+    setPointsDiscussed(entry.pointsDiscussed);
+    setMentorSuggestions(entry.mentorSuggestions);
+    setRemarks(entry.remarks);
+    setEditingEntryId(entry.id);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    const date = `${sessionDate}T${sessionTime}:00.000Z`;
+    const attendanceArray = currentGroup?.members.map(m => ({
+      memberId: m.id,
+      present: attendance[m.id] ?? true
+    })) ?? [];
+
+    if (editingEntryId) {
+      await handleEditEntry(editingEntryId, { date, attendance: attendanceArray, pointsDiscussed, mentorSuggestions, remarks });
+    } else {
+      await handleCreateEntry({ date, attendance: attendanceArray, pointsDiscussed, mentorSuggestions, remarks });
+    }
+    setSaving(false);
+    setNewSessionOpen(false);
+  };
+
+  // Load groups list
+  useEffect(() => {
+    apiGet<{ groups: SimpleGroup[] }>('/api/mentor/groups')
+      .then(({ groups }) => {
+        setGroups(groups);
+        if (!preselectedGroupId && groups.length > 0) {
+          setSelectedGroupId(groups[0].id);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Load logbook for selected group (lazy, per-group caching)
+  useEffect(() => {
+    if (!selectedGroupId) return;
+    if (groupLogBooks[selectedGroupId]?.loaded) return;
+
+    apiGet<{ entries: LogBookEntry[] }>(`/api/mentor/groups/${selectedGroupId}/logbook`)
+      .then(({ entries }) => {
+        const sorted = [...entries].sort((a, b) => b.entryNumber - a.entryNumber);
+        setGroupLogBooks((prev) => ({
+          ...prev,
+          [selectedGroupId]: {
+            entries: sorted,
+            nextEntryNumber: (sorted[0]?.entryNumber ?? 0) + 1,
+            loaded: true,
+          },
+        }));
+      })
+      .catch(() => {});
+  }, [selectedGroupId]);
+
+  const currentGroup = groups.find((g) => g.id === selectedGroupId) ?? null;
+  const logBook = groupLogBooks[selectedGroupId] ?? { entries: [], nextEntryNumber: 1, loaded: false };
+
+  const handleCreateEntry = async (entryData: {
+    date: string;
+    attendance: { memberId: string; present: boolean }[];
+    pointsDiscussed: string;
+    mentorSuggestions: string;
+    remarks: string;
+  }) => {
+    if (!selectedGroupId) return;
+    try {
+      const { entry } = await apiPost<{ entry: LogBookEntry }>(
+        `/api/mentor/groups/${selectedGroupId}/logbook`,
+        entryData
+      );
+      setGroupLogBooks((prev) => {
+        const current = prev[selectedGroupId] ?? { entries: [], nextEntryNumber: 1, loaded: true };
+        const entries = [entry, ...current.entries];
+        return {
+          ...prev,
+          [selectedGroupId]: {
+            entries,
+            nextEntryNumber: entry.entryNumber + 1,
+            loaded: true,
+          },
+        };
+      });
+      setNewSessionOpen(false);
+      showToast(`Session #${entry.entryNumber} logged.`, 'success');
+    } catch (err: any) {
+      showToast(err?.message ?? 'Failed to create log entry.', 'error');
+    }
+  };
+
+  const handleEditEntry = async (entryId: string, entryData: {
+    date: string;
+    attendance: { memberId: string; present: boolean }[];
+    pointsDiscussed: string;
+    mentorSuggestions: string;
+    remarks: string;
+  }) => {
+    if (!selectedGroupId) return;
+    try {
+      const { entry } = await apiPut<{ entry: LogBookEntry }>(
+        `/api/mentor/groups/${selectedGroupId}/logbook/${entryId}`,
+        entryData
+      );
+      setGroupLogBooks((prev) => {
+        const current = prev[selectedGroupId] ?? { entries: [], nextEntryNumber: 1, loaded: true };
+        return {
+          ...prev,
+          [selectedGroupId]: {
+            ...current,
+            entries: current.entries.map((e) => (e.id === entryId ? entry : e)),
+          },
+        };
+      });
+      setEditingEntryId(null);
+      showToast('Log entry updated.', 'success');
+    } catch (err: any) {
+      showToast(err?.message ?? 'Failed to update log entry.', 'error');
+    }
+  };
+
   if (loading) {
-    setTimeout(() => setLoading(false), 500);
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-40 rounded-md" />
-        <Skeleton className="h-12 w-full rounded-xl" />
-        <Skeleton className="h-96 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
       </div>
     );
   }
 
-  const selectedGroup = mentorGroups.find((g) => g.id === selectedGroupId) ?? null;
-  const currentEntries = groupLogBooks[selectedGroupId]?.entries ?? [];
-
-  const formatTimestamp = (dateStr: string, timeStr: string) => {
-    const d = new Date(`${dateStr}T${timeStr}`);
-    return (
-      d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-      ' · ' +
-      d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-    );
-  };
-
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr + 'T00:00');
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  const resetForm = () => {
-    setSessionDate(new Date().toISOString().split('T')[0]);
-    setSessionTime('14:00');
-    setPointsDiscussed('');
-    setMentorSuggestions('');
-    setRemarks('');
-    setAttendance({});
-  };
-
-  const openNewSession = () => {
-    if (!selectedGroup) return;
-    const initial: Record<string, boolean> = {};
-    selectedGroup.members.forEach((m) => {
-      initial[m.id] = true;
-    });
-    setAttendance(initial);
-    resetForm();
-    setEditingEntry(null);
-    setNewSessionOpen(true);
-  };
-
-  const openEditEntry = (entry: LogBookEntry) => {
-    if (!selectedGroup) return;
-    const initial: Record<string, boolean> = {};
-    selectedGroup.members.forEach((m) => {
-      const record = entry.attendance.find((a) => a.name === m.name);
-      initial[m.id] = record?.present ?? true;
-    });
-    setAttendance(initial);
-    setPointsDiscussed(entry.pointsDiscussed);
-    setMentorSuggestions(entry.mentorSuggestions);
-    setRemarks(entry.remarks);
-    setSessionDate(new Date(entry.date).toISOString().split('T')[0]);
-    setSessionTime('14:00');
-    setEditingEntry(entry);
-    setNewSessionOpen(true);
-  };
-
-  const handleSave = () => {
-    if (!selectedGroup) return;
-    if (!pointsDiscussed.trim() || !mentorSuggestions.trim()) {
-      showToast('Points discussed and mentor suggestions are required.', 'error');
-      return;
-    }
-
-    setSaving(true);
-    setTimeout(() => {
-      const timestamp = formatTimestamp(sessionDate, sessionTime);
-      const attendanceList = selectedGroup.members.map((m) => ({
-        name: m.name,
-        present: attendance[m.id] ?? true,
-      }));
-
-      if (editingEntry) {
-        setGroupLogBooks((prev) => {
-          const groupData = prev[selectedGroup.id];
-          const updatedEntries = groupData.entries.map((e) =>
-            e.id === editingEntry.id
-              ? {
-                  ...e,
-                  date: formatDate(sessionDate),
-                  lastEditedAt: timestamp,
-                  attendance: attendanceList,
-                  pointsDiscussed: pointsDiscussed.trim(),
-                  mentorSuggestions: mentorSuggestions.trim(),
-                  remarks: remarks.trim(),
-                  editHistory: [
-                    ...(e.editHistory ?? []),
-                    {
-                      editedAt: e.lastEditedAt,
-                      pointsDiscussed: e.pointsDiscussed,
-                      mentorSuggestions: e.mentorSuggestions,
-                      remarks: e.remarks,
-                    },
-                  ],
-                }
-              : e
-          );
-          return { ...prev, [selectedGroup.id]: { ...groupData, entries: updatedEntries } };
-        });
-        showToast('Session entry updated.', 'success');
-      } else {
-        const newEntry: LogBookEntry = {
-          id: `lb-${Date.now()}`,
-          entryNumber: groupLogBooks[selectedGroup.id].nextEntryNumber,
-          date: formatDate(sessionDate),
-          lastEditedAt: timestamp,
-          attendance: attendanceList,
-          pointsDiscussed: pointsDiscussed.trim(),
-          mentorSuggestions: mentorSuggestions.trim(),
-          remarks: remarks.trim(),
-        };
-        setGroupLogBooks((prev) => ({
-          ...prev,
-          [selectedGroup.id]: {
-            entries: [newEntry, ...prev[selectedGroup.id].entries],
-            nextEntryNumber: prev[selectedGroup.id].nextEntryNumber + 1,
-          },
-        }));
-        showToast('Session entry saved.', 'success');
-      }
-
-      setSaving(false);
-      setNewSessionOpen(false);
-      setEditingEntry(null);
-      resetForm();
-    }, 500);
-  };
-
-  const handleClose = () => {
-    setNewSessionOpen(false);
-    setEditingEntry(null);
-    resetForm();
-  };
-
-  const toggleHistory = (id: string) => {
-    setHistoryExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
   return (
     <div className="animate-fade-in space-y-6">
       <LogBookGroupSelector
+        groups={groups}
         selectedGroupId={selectedGroupId}
-        onSelectGroup={setSelectedGroupId}
-        onNewSession={openNewSession}
+        onSelectGroup={(id: string) => {
+          setSelectedGroupId(id);
+          setNewSessionOpen(false);
+          setEditingEntryId(null);
+        }}
+        onNewSession={handleOpenNewSession}
       />
 
-      {mentorGroups.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          {/* Entry list — main column */}
-          <div className="space-y-4 lg:col-span-2">
-            <LogBookEntryList
-              entries={currentEntries}
-              expandedId={expandedId}
-              historyExpanded={historyExpanded}
-              onToggleExpand={(id) => setExpandedId(expandedId === id ? null : id)}
-              onToggleHistory={toggleHistory}
-              onEditEntry={openEditEntry}
-              onNewSession={openNewSession}
-            />
-          </div>
+      <LogBookEntryList
+        entries={logBook.entries}
+        expandedId={expandedId}
+        historyExpanded={historyExpanded}
+        onToggleExpand={(id) => setExpandedId(expandedId === id ? null : id)}
+        onToggleHistory={(id) => {
+          const next = new Set(historyExpanded);
+          if (next.has(id)) next.delete(id);
+          else next.add(id);
+          setHistoryExpanded(next);
+        }}
+        onEditEntry={handleOpenEditSession}
+        onNewSession={handleOpenNewSession}
+      />
 
-          {/* Milestone progress — side panel */}
-          <div className="lg:col-span-1">
-            <LogBookVersionHistory group={selectedGroup} />
-          </div>
-        </div>
-      )}
+      <LogBookEntryEditor
+        open={newSessionOpen || !!editingEntryId}
+        editingEntry={editingEntryId ? logBook.entries.find(e => e.id === editingEntryId) ?? null : null}
+        group={currentGroup}
+        sessionDate={sessionDate}
+        sessionTime={sessionTime}
+        attendance={attendance}
+        pointsDiscussed={pointsDiscussed}
+        mentorSuggestions={mentorSuggestions}
+        remarks={remarks}
+        saving={saving}
+        onClose={() => { setNewSessionOpen(false); setEditingEntryId(null); }}
+        onSave={handleSave}
+        onSessionDateChange={setSessionDate}
+        onSessionTimeChange={setSessionTime}
+        onAttendanceChange={(id, p) => setAttendance(prev => ({ ...prev, [id]: p }))}
+        onPointsDiscussedChange={setPointsDiscussed}
+        onMentorSuggestionsChange={setMentorSuggestions}
+        onRemarksChange={setRemarks}
+      />
 
-      {/* New / Edit session modal */}
-      {selectedGroup && (
-        <LogBookEntryEditor
-          open={newSessionOpen}
-          editingEntry={editingEntry}
-          group={selectedGroup}
-          sessionDate={sessionDate}
-          sessionTime={sessionTime}
-          attendance={attendance}
-          pointsDiscussed={pointsDiscussed}
-          mentorSuggestions={mentorSuggestions}
-          remarks={remarks}
-          saving={saving}
-          onClose={handleClose}
-          onSave={handleSave}
-          onSessionDateChange={setSessionDate}
-          onSessionTimeChange={setSessionTime}
-          onAttendanceChange={(id, present) =>
-            setAttendance((prev) => ({ ...prev, [id]: present }))
-          }
-          onPointsDiscussedChange={setPointsDiscussed}
-          onMentorSuggestionsChange={setMentorSuggestions}
-          onRemarksChange={setRemarks}
-        />
-      )}
+      <LogBookVersionHistory group={currentGroup} />
     </div>
   );
 }

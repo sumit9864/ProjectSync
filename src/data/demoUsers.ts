@@ -15,21 +15,21 @@ export type DemoUser = {
 
 export const demoUsers: DemoUser[] = [
   {
-    email: 'coordinator@projectsync.edu',
-    password: 'Coordinator@123',
-    name: 'Project Coordinator',
+    email: 'admin@university.edu',
+    password: 'password',
+    name: 'Dr. Priya Krishnan',
     role: 'admin',
   },
   {
-    email: 'guide@projectsync.edu',
-    password: 'Guide@123',
-    name: 'Project Guide',
+    email: 'mentor@university.edu',
+    password: 'password',
+    name: 'Dr. Eliza Mathews',
     role: 'mentor',
   },
   {
-    email: 'leader@projectsync.edu',
-    password: 'Leader@123',
-    name: 'Team Leader',
+    email: 'student@university.edu',
+    password: 'password',
+    name: 'Aarav Sharma',
     role: 'student',
   },
 ];

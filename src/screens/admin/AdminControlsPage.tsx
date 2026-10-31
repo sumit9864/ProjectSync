@@ -10,55 +10,67 @@ import {
   EmptyState,
 } from '@/components/ui/ui';
 import { useToast } from '@/components/ui/Toast';
-import {
-  auditEvents,
-  controlWindows,
-  extensions as initialExtensions,
-  type Extension,
-} from '@/data/adminData';
+import { apiGet, apiPut, apiPost } from '@/lib/apiClient';
 
 type WindowKey = 'registration' | 'round1' | 'round2';
+type WindowConfig = { opensOn: string; closesOn: string; open: boolean };
+type Extension = { id: string; groupId: string; groupName: string; offsetDays: number; reason: string; grantedAt: string; grantedBy: string };
+
 type AdminControlsPageProps = { onViewResults?: () => void; hasResults?: boolean };
 
 export function AdminControlsPage({ onViewResults, hasResults = false }: AdminControlsPageProps) {
   const [loading, setLoading] = useState(true);
-  const [windows, setWindows] = useState(controlWindows);
-  const [extensions, setExtensions] = useState<Extension[]>(initialExtensions);
+  const [windows, setWindows] = useState<Record<WindowKey, WindowConfig>>({
+    registration: { opensOn: '', closesOn: '', open: false },
+    round1: { opensOn: '', closesOn: '', open: false },
+    round2: { opensOn: '', closesOn: '', open: false },
+  });
+  const [extensions, setExtensions] = useState<Extension[]>([]);
+  const [allocationAudit, setAllocationAudit] = useState<{ id: string; description: string; timestamp: string; actor: string }[]>([]);
   const [event, setEvent] = useState<WindowKey>('registration');
   const [offset, setOffset] = useState('7');
   const [reason, setReason] = useState('');
   const { showToast } = useToast();
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 400);
-    return () => clearTimeout(timer);
+    Promise.all([
+      apiGet<{ windows: Record<WindowKey, WindowConfig> }>('/api/admin/windows'),
+      apiGet<{ extensions: Extension[] }>('/api/admin/extensions'),
+    ])
+      .then(([wData, eData]) => {
+        setWindows(wData.windows);
+        setExtensions(eData.extensions ?? []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const updateWindow = (key: WindowKey, field: 'opensOn' | 'closesOn', value: string) => {
+  const updateWindow = async (key: WindowKey, field: 'opensOn' | 'closesOn' | 'open', value: string | boolean) => {
     setWindows((current) => ({ ...current, [key]: { ...current[key], [field]: value } }));
+    try {
+      await apiPut(`/api/admin/windows/${key}`, { [field]: value });
+    } catch {
+      showToast('Failed to update window.', 'error');
+    }
   };
 
-  const grantExtension = () => {
+  const grantExtension = async () => {
     const days = Number(offset);
     if (!Number.isInteger(days) || days < 1 || !reason.trim()) {
       showToast('Add a valid number of days and a reason.', 'error');
       return;
     }
-    setExtensions((current) => [
-      {
-        id: `ext-${Date.now()}`,
-        groupId: 'all',
-        groupName: 'All groups',
-        offsetDays: days,
-        reason: reason.trim(),
-        grantedAt: 'Today',
-        grantedBy: 'Dr. Priya Krishnan',
-      },
-      ...current,
-    ]);
-    setReason('');
-    setOffset('7');
-    showToast(`Deadline extended for all groups by ${days} days.`, 'success');
+    try {
+      const { extension } = await apiPost<{ extension: Extension }>('/api/admin/extensions', {
+        groupId: 'all', offsetDays: days, reason: reason.trim(),
+      });
+      setExtensions((current) => [extension, ...current]);
+      setReason('');
+      setOffset('7');
+      showToast(`Deadline extended for all groups by ${days} days.`, 'success');
+    } catch (err: any) {
+      showToast(err?.message ?? 'Failed to grant extension.', 'error');
+    }
   };
 
   if (loading)
@@ -78,9 +90,7 @@ export function AdminControlsPage({ onViewResults, hasResults = false }: AdminCo
     { key: 'round1', label: 'Preference round 1', eyebrow: 'First mentor preference pass' },
     { key: 'round2', label: 'Preference round 2', eyebrow: 'Final preference pass' },
   ];
-  const allocationAudit = auditEvents.filter((entry) =>
-    /allocation|assigned|extension/i.test(entry.description)
-  );
+
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">

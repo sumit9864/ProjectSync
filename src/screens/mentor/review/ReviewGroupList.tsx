@@ -1,6 +1,15 @@
 import { Badge, Card, CardBody, CardHeader, EmptyState } from '@/components/ui/ui';
 import { Check, ChevronRight, Clock, Users } from 'lucide-react';
-import type { MentorGroup } from '@/data/mentorData';
+export type MentorGroup = {
+  id: string; projectId: string; name: string; description?: string;
+  daysSinceLastActivity?: number;
+  members: { id: string; name: string; rollNumber?: string }[];
+  topicVersions: {
+    version: number; status: string; submittedAt: string; feedback?: string;
+    fields?: { workingTitle: string; existingWork: string; problemIdentified: string; proposedDifference: string; innovation: string; feasibility: string; };
+  }[];
+  discussion: { id: string; author: string; role: string; avatarColor: string; body: string; time: string }[];
+};
 
 const statusConfig: Record<string, { label: string; color: 'warning' | 'success' | 'error' }> = {
   pending: { label: 'Pending Review', color: 'warning' },
@@ -87,10 +96,10 @@ export function ReviewGroupList({
                       </p>
                       <div className="mt-1.5 flex items-center gap-1.5">
                         {statusInfo && <Badge color={statusInfo.color}>{statusInfo.label}</Badge>}
-                        {group.daysSinceLastActivity > 3 && isPending && (
+                        {(group.daysSinceLastActivity ?? 0) > 3 && isPending && (
                           <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
                             <Clock className="h-3 w-3" />
-                            {group.daysSinceLastActivity}d
+                            {group.daysSinceLastActivity ?? 0}d
                           </span>
                         )}
                       </div>

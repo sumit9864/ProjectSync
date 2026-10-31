@@ -21,12 +21,12 @@ import {
 } from '@/components/ui/ui';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
-import { milestones as initialMilestones } from '@/data/mockData';
+import { apiGet, apiPost } from '@/lib/apiClient';
 import type { Milestone } from '@/types';
 
 export function MilestonesPage() {
   const [loading, setLoading] = useState(true);
-  const [milestones, setMilestones] = useState<Milestone[]>(initialMilestones);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [checkInMilestone, setCheckInMilestone] = useState<Milestone | null>(null);
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
@@ -34,8 +34,10 @@ export function MilestonesPage() {
   const { showToast } = useToast();
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    apiGet<{ milestones: Milestone[] }>('/api/milestones/mine')
+      .then(({ milestones }) => setMilestones(milestones))
+      .catch(() => showToast('Failed to load milestones.', 'error'))
+      .finally(() => setLoading(false));
   }, []);
 
   const completed = milestones.filter((m) => m.status === 'complete').length;
@@ -54,38 +56,26 @@ export function MilestonesPage() {
     { label: 'Final delivery', items: milestones.slice(3) },
   ].filter((phase) => phase.items.length);
 
-  const handleCheckIn = () => {
+  const handleCheckIn = async () => {
     if (!checkInMilestone || !note.trim()) {
       showToast('Please add a note for your check-in.', 'error');
       return;
     }
     setSaving(true);
-    setTimeout(() => {
-      const now = new Date();
-      setMilestones((prev) =>
-        prev.map((m) =>
-          m.id === checkInMilestone.id
-            ? {
-                ...m,
-                status: 'complete',
-                checkInNote: note.trim(),
-                checkedInAt:
-                  now.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  }) +
-                  ' Â· ' +
-                  now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-              }
-            : m
-        )
+    try {
+      const { milestone } = await apiPost<{ milestone: Milestone }>(
+        `/api/milestones/${checkInMilestone.id}/checkin`,
+        { note: note.trim() }
       );
-      setSaving(false);
+      setMilestones((prev) => prev.map((m) => (m.id === milestone.id ? milestone : m)));
+      showToast(`Milestone "${checkInMilestone.title}" checked in.`, 'success');
       setCheckInMilestone(null);
       setNote('');
-      showToast(`Milestone "${checkInMilestone.title}" checked in.`, 'success');
-    }, 600);
+    } catch (err: any) {
+      showToast(err?.message ?? 'Failed to check in.', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {

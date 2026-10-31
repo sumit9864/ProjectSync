@@ -10,21 +10,32 @@ import {
   PageHeader,
 } from '@/components/ui/ui';
 import { useToast } from '@/components/ui/Toast';
-import { githubRepo } from '@/data/mockData';
+import { apiGet, apiPost } from '@/lib/apiClient';
+
+type GitHubData = {
+  connected: boolean;
+  url: string | null;
+  lastUpdated: string;
+};
 
 export function GithubTrackerPage() {
   const [loading, setLoading] = useState(true);
-  const [url, setUrl] = useState(githubRepo.url);
-  const [repo, setRepo] = useState(githubRepo);
+  const [repo, setRepo] = useState<GitHubData>({ connected: false, url: null, lastUpdated: '' });
+  const [url, setUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    apiGet<GitHubData>('/api/github/mine')
+      .then((data) => {
+        setRepo(data);
+        if (data.url) setUrl(data.url);
+      })
+      .catch(() => showToast('Failed to load GitHub data.', 'error'))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!url.trim()) {
       showToast('Please enter a repository URL.', 'error');
       return;
@@ -34,19 +45,15 @@ export function GithubTrackerPage() {
       return;
     }
     setSaving(true);
-    setTimeout(() => {
-      const now = new Date();
-      setRepo({
-        url: url.trim(),
-        lastUpdated:
-          now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
-          ' Â· ' +
-          now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-        connected: true,
-      });
-      setSaving(false);
+    try {
+      const updated = await apiPost<GitHubData>('/api/github/mine', { url: url.trim() });
+      setRepo(updated);
       showToast('GitHub repository updated.', 'success');
-    }, 800);
+    } catch {
+      showToast('Failed to save repository URL.', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -94,10 +101,10 @@ export function GithubTrackerPage() {
               </div>
               <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400">
                 <Clock className="h-3.5 w-3.5" />
-                Last updated {repo.lastUpdated}
+                Last updated {repo.lastUpdated || 'never'}
               </p>
             </div>
-            {repo.connected && (
+            {repo.connected && repo.url && (
               <a
                 href={repo.url}
                 target="_blank"

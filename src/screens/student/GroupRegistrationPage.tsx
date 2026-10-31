@@ -1,19 +1,11 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, useEffect, type ReactNode } from 'react';
 import { AlertTriangle, Check, ChevronDown, Plus } from 'lucide-react';
-import { Badge, Button, Card, CardBody, PageHeader } from '@/components/ui/ui';
+import { Badge, Button, Card, CardBody, PageHeader, Skeleton } from '@/components/ui/ui';
+import { apiGet, apiPost } from '@/lib/apiClient';
+import type { ElectiveOption } from '@/types';
 
 type Member = { crn: string; name: string; email: string };
 
-const electiveTwoOptions = [
-  'User Interface and User Experience',
-  'Generative AI and Prompt Engineering',
-  'High Performance Databases',
-];
-const electiveThreeOptions = [
-  'Cloud computing',
-  'Natural Language Processing',
-  'High Performance Computing',
-];
 const emptyMember = (): Member => ({ crn: '', name: '', email: '' });
 
 function Field({
@@ -98,6 +90,31 @@ export function GroupRegistrationPage() {
   const [electiveThree, setElectiveThree] = useState('');
   const [members, setMembers] = useState<Member[]>([emptyMember(), emptyMember()]);
   const [submitted, setSubmitted] = useState(false);
+  const [projectId, setProjectId] = useState('');
+  const [electiveTwoOptions, setElectiveTwoOptions] = useState<ElectiveOption[]>([]);
+  const [electiveThreeOptions, setElectiveThreeOptions] = useState<ElectiveOption[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [loadingElectives, setLoadingElectives] = useState(true);
+
+  useEffect(() => {
+    // Check if already in a group
+    apiGet<{ group: any }>('/api/groups/mine')
+      .then(({ group }) => {
+        if (group) setSubmitted(true);
+      })
+      .catch(() => {});
+
+    // Load elective options
+    apiGet<{ options: ElectiveOption[] }>('/api/electives')
+      .then(({ options }) => {
+        // Split into two sets for elective II and III
+        const half = Math.ceil(options.length / 2);
+        setElectiveTwoOptions(options.slice(0, half));
+        setElectiveThreeOptions(options.slice(half));
+      })
+      .catch(() => {})
+      .finally(() => setLoadingElectives(false));
+  }, []);
 
   const ready = useMemo(
     () =>
@@ -109,6 +126,34 @@ export function GroupRegistrationPage() {
       ),
     [leaderCrn, electiveTwo, electiveThree, members]
   );
+  const handleSubmit = async () => {
+    if (!ready || submitting) return;
+    setSubmitting(true);
+    try {
+      const data = await apiPost<{ group: { projectId: string } }>('/api/groups', {
+        leaderCrn,
+        electiveTwo,
+        electiveThree,
+        members,
+      });
+      setProjectId(data.group.projectId);
+      setSubmitted(true);
+    } catch (err: any) {
+      alert(err?.message ?? 'Failed to register group.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loadingElectives) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48 rounded-md" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </div>
+    );
+  }
+
   const updateMember = (index: number, field: keyof Member, value: string) =>
     setMembers((current) =>
       current.map((member, memberIndex) =>
@@ -118,7 +163,7 @@ export function GroupRegistrationPage() {
 
   if (submitted) {
     const registeredMembers = [
-      { crn: leaderCrn, name: 'Rushikesh Vasant Patil', email: 'rushikesh@edu.in' },
+      { crn: leaderCrn, name: 'You', email: '' },
       ...members,
     ];
     return (
@@ -132,7 +177,7 @@ export function GroupRegistrationPage() {
               Registration confirmed
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold text-ink-900 dark:text-ink-100 sm:text-4xl">
-              Your Project ID is: <span className="text-emerald-600 dark:text-emerald-400">1</span>
+              Your Project ID is: <span className="text-emerald-600 dark:text-emerald-400">{projectId || '—'}</span>
             </h1>
             <p className="mx-auto mt-3 max-w-lg text-sm text-ink-500 dark:text-ink-400">
               Your group was registered in FCFS order. The project ID is locked to your submission
@@ -203,7 +248,7 @@ export function GroupRegistrationPage() {
               >
                 <option value="">Select Elective II</option>
                 {electiveTwoOptions.map((option) => (
-                  <option key={option}>{option}</option>
+                  <option key={option.id} value={option.label}>{option.label}</option>
                 ))}
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-3 size-4 text-ink-400" />
@@ -218,7 +263,7 @@ export function GroupRegistrationPage() {
               >
                 <option value="">Select Elective III</option>
                 {electiveThreeOptions.map((option) => (
-                  <option key={option}>{option}</option>
+                  <option key={option.id} value={option.label}>{option.label}</option>
                 ))}
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-3 size-4 text-ink-400" />
@@ -258,8 +303,8 @@ export function GroupRegistrationPage() {
           <p className="text-xs text-ink-500 dark:text-ink-400">
             Minimum 3 members required to generate ID.
           </p>
-          <Button size="lg" onClick={() => setSubmitted(true)} disabled={!ready}>
-            Register Group &amp; Get ID
+          <Button size="lg" onClick={handleSubmit} disabled={!ready || submitting}>
+            {submitting ? 'Registering...' : 'Register Group & Get ID'}
           </Button>
         </div>
       </Card>

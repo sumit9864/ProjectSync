@@ -1,7 +1,7 @@
 import { Avatar, Badge, Button, Card, CardBody, CardHeader, EmptyState } from '@/components/ui/ui';
 import { AlertCircle, CheckCircle2, Lightbulb, MessageSquare, Send, XCircle } from 'lucide-react';
-import { mentorUser } from '@/data/mentorData';
-import type { MentorGroup } from '@/data/mentorData';
+import { useAuth } from '@/hooks/useAuth';
+import type { MentorGroup } from './ReviewGroupList';
 
 const statusConfig: Record<string, { label: string; color: 'warning' | 'success' | 'error' }> = {
   pending: { label: 'Pending Review', color: 'warning' },
@@ -39,12 +39,13 @@ export function ReviewDetail({
   onRequestChanges: () => void;
   onNavigateToLogBook: () => void;
 }) {
+  const { session } = useAuth();
   const latestVersion = group.topicVersions[0];
   const statusInfo = latestVersion ? statusConfig[latestVersion.status] : null;
   const isPending = latestVersion?.status === 'pending';
   const quietWarning =
-    group.daysSinceLastActivity > 3 && isPending
-      ? `Thread has been quiet for ${group.daysSinceLastActivity} days`
+    (group.daysSinceLastActivity ?? 0) > 3 && isPending
+      ? `Thread has been quiet for ${group.daysSinceLastActivity ?? 0} days`
       : null;
 
   if (!latestVersion) {
@@ -54,6 +55,18 @@ export function ReviewDetail({
           icon={<Lightbulb className="h-7 w-7" />}
           title="No topic submitted"
           message="This group has not submitted a topic for review yet."
+        />
+      </Card>
+    );
+  }
+
+  if (!latestVersion.fields) {
+    return (
+      <Card>
+        <EmptyState
+          icon={<Lightbulb className="h-7 w-7" />}
+          title="Incomplete submission"
+          message="This topic submission is missing required fields."
         />
       </Card>
     );
@@ -179,10 +192,10 @@ export function ReviewDetail({
           {/* Reply box */}
           <div className="border-t border-ink-100 pt-4 dark:border-ink-800">
             <div className="flex items-end gap-2">
-              <Avatar name={mentorUser.name} color={mentorUser.avatarColor} size="sm" />
+              <Avatar name={session?.name ?? 'Mentor'} color="bg-brand-600" size="sm" />
               <div className="flex max-w-[85%] flex-1 flex-col items-start">
                 <span className="mb-1 px-1 text-xs font-semibold text-ink-600 dark:text-ink-300">
-                  {mentorUser.name}
+                  {session?.name ?? 'Mentor'}
                 </span>
                 <textarea
                   value={reply}

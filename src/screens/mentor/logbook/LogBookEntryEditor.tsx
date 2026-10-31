@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { LogField } from './LogBookComponents';
 import type { LogBookEntry } from '@/types';
-import type { MentorGroup } from '@/data/mentorData';
+type SimpleGroup = { id: string; projectId: string; name: string; members: { id: string; name: string; rollNumber?: string }[] };
 
 type EntryListProps = {
   entries: LogBookEntry[];
@@ -193,7 +193,7 @@ export function LogBookEntryList({
 type EditorProps = {
   open: boolean;
   editingEntry: LogBookEntry | null;
-  group: MentorGroup;
+  group: SimpleGroup | null;
   sessionDate: string;
   sessionTime: string;
   attendance: Record<string, boolean>;
@@ -272,7 +272,7 @@ export function LogBookEntryEditor({
             Attendance
           </label>
           <div className="space-y-2">
-            {group.members.map((m) => {
+            {group?.members.map((m) => {
               const isPresent = attendance[m.id] ?? true;
               return (
                 <div

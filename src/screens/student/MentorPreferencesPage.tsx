@@ -13,28 +13,51 @@ import {
 } from '@/components/ui/ui';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
-import { mentors as allMentors } from '@/data/mockData';
+import { apiGet, apiPost } from '@/lib/apiClient';
 import type { Mentor, ShortlistSubmission } from '@/types';
+
+type PreferencesResponse = {
+  round: 1 | 2;
+  entries: { mentorId: string; rank: number }[];
+  submittedAt: string | null;
+};
+
+type MentorsResponse = { mentors: Mentor[] };
+type WindowsResponse = { windows: { registration: { open: boolean }; round1: { open: boolean }; round2: { open: boolean } } };
 
 export function MentorPreferencesPage() {
   const [loading, setLoading] = useState(true);
   const [round, setRound] = useState<1 | 2>(1);
-  const [shortlist, setShortlist] = useState<string[]>(['mentor-1', 'mentor-2', 'mentor-5']);
-  const [submission, setSubmission] = useState<ShortlistSubmission | null>({
-    round: 1,
-    entries: [
-      { mentorId: 'mentor-1', rank: 1 },
-      { mentorId: 'mentor-2', rank: 2 },
-      { mentorId: 'mentor-5', rank: 3 },
-    ],
-    submittedAt: 'Sep 22, 2026 Â· 3:45 PM',
-  });
+  const [allMentors, setAllMentors] = useState<Mentor[]>([]);
+  const [shortlist, setShortlist] = useState<string[]>([]);
+  const [submission, setSubmission] = useState<ShortlistSubmission | null>(null);
   const [profileMentor, setProfileMentor] = useState<Mentor | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    Promise.all([
+      apiGet<MentorsResponse>('/api/mentors'),
+      apiGet<PreferencesResponse>('/api/preferences/mine'),
+    ])
+      .then(([mentorsData, prefsData]) => {
+        setAllMentors(mentorsData.mentors);
+        if (prefsData.submittedAt && prefsData.entries.length > 0) {
+          setRound(prefsData.round);
+          setShortlist(
+            [...prefsData.entries]
+              .sort((a, b) => a.rank - b.rank)
+              .map((e) => e.mentorId)
+          );
+          setSubmission({
+            round: prefsData.round,
+            entries: prefsData.entries,
+            submittedAt: prefsData.submittedAt,
+          });
+        }
+      })
+      .catch(() => showToast('Failed to load mentor data.', 'error'))
+      .finally(() => setLoading(false));
   }, []);
 
   const isSubmitted = submission !== null && submission.round === round;
@@ -68,25 +91,27 @@ export function MentorPreferencesPage() {
     setSubmission(null);
   };
 
-  const submitShortlist = () => {
+  const submitShortlist = async () => {
     if (shortlist.length < 2) {
       showToast('You must rank at least 2 mentors.', 'error');
       return;
     }
-    const now = new Date();
-    setSubmission({
-      round,
-      entries: shortlist.map((mentorId, i) => ({ mentorId, rank: i + 1 })),
-      submittedAt:
-        now.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        }) +
-        ' Â· ' +
-        now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-    });
-    showToast(`Round ${round} preferences submitted.`, 'success');
+    setSubmitting(true);
+    try {
+      const entries = shortlist.map((mentorId, i) => ({ mentorId, rank: i + 1 }));
+      await apiPost('/api/preferences/submit', { round, entries });
+      const now = new Date();
+      const submittedAt =
+        now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+        ' · ' +
+        now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      setSubmission({ round, entries, submittedAt });
+      showToast(`Round ${round} preferences submitted.`, 'success');
+    } catch {
+      showToast('Failed to submit preferences. Please try again.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const shortlistedMentors = shortlist
@@ -149,8 +174,8 @@ export function MentorPreferencesPage() {
                 Submitted
               </Badge>
             ) : shortlist.length >= 2 ? (
-              <Button size="sm" onClick={submitShortlist}>
-                Submit preferences
+              <Button size="sm" onClick={submitShortlist} disabled={submitting}>
+                {submitting ? 'Submitting...' : 'Submit preferences'}
               </Button>
             ) : undefined
           }
@@ -189,16 +214,7 @@ export function MentorPreferencesPage() {
                         className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 disabled:opacity-30 transition-colors dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-300"
                         aria-label="Move up"
                       >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="18 15 12 9 6 15" />
                         </svg>
                       </button>
@@ -208,16 +224,7 @@ export function MentorPreferencesPage() {
                         className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 disabled:opacity-30 transition-colors dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-300"
                         aria-label="Move down"
                       >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="6 9 12 15 18 9" />
                         </svg>
                       </button>
@@ -280,9 +287,7 @@ export function MentorPreferencesPage() {
                       <div className="mt-3">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-ink-400 dark:text-ink-500">Current load</span>
-                          <span
-                            className={`font-medium ${full ? 'text-rose-600 dark:text-rose-400' : 'text-ink-600 dark:text-ink-300'}`}
-                          >
+                          <span className={`font-medium ${full ? 'text-rose-600 dark:text-rose-400' : 'text-ink-600 dark:text-ink-300'}`}>
                             {mentor.currentLoad}/{mentor.capacity}
                           </span>
                         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Users,
   UserPlus,
@@ -19,47 +19,50 @@ import {
   StatCard,
   PageSkeleton,
 } from '@/components/ui/ui';
-import { useSimulatedLoad } from '@/hooks/useSimulatedLoad';
+import { apiGet } from '@/lib/apiClient';
 import type { AdminPageId } from '@/components/shell/AdminShell';
-import { adminGroups, adminMentors, auditEvents, pipelineStageLabels } from '@/data/adminData';
+
+type DashboardGroup = {
+  id: string; projectId: string; name: string; memberCount: number;
+  elective: string; mentorId: string | null; mentorName: string | null;
+  topicStatus: string; githubConnected: boolean; stage: string;
+};
 
 export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPageId) => void }) {
-  const loading = useSimulatedLoad();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ totalGroups: 0, awaitingAllocation: 0, pendingTopics: 0, githubConnected: 0 });
+  const [attentionNeeded, setAttentionNeeded] = useState<DashboardGroup[]>([]);
+
+  useEffect(() => {
+    apiGet<{ stats: typeof stats; attentionNeeded: DashboardGroup[] }>('/api/admin/dashboard')
+      .then((data) => {
+        setStats(data.stats);
+        setAttentionNeeded(data.attentionNeeded ?? []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   if (loading) return <PageSkeleton />;
 
-  const activeGroups = adminGroups.length;
-  const awaitingAllocation = adminGroups.filter((g) => g.stage === 'awaiting_allocation').length;
-  const topicReviewsDue = adminGroups.filter((g) => g.topicStatus === 'pending').length;
-  const pastAllocation = adminGroups.filter((g) => g.stage !== 'awaiting_allocation').length;
-  const pctOnTrack = activeGroups > 0 ? Math.round((pastAllocation / activeGroups) * 100) : 0;
+  const pctOnTrack = stats.totalGroups > 0
+    ? Math.round(((stats.totalGroups - stats.awaitingAllocation) / stats.totalGroups) * 100)
+    : 0;
 
   const stageCounts = {
-    awaiting_allocation: adminGroups.filter((g) => g.stage === 'awaiting_allocation').length,
-    mentor_assigned: adminGroups.filter((g) => g.stage === 'mentor_assigned').length,
-    topic_review: adminGroups.filter((g) => g.stage === 'topic_review').length,
-    building: adminGroups.filter((g) => g.stage === 'building').length,
+    awaiting_allocation: stats.awaitingAllocation,
+    mentor_assigned:     stats.totalGroups - stats.awaitingAllocation - stats.pendingTopics,
+    topic_review:        stats.pendingTopics,
+    building:            stats.githubConnected,
   };
   const maxStageCount = Math.max(...Object.values(stageCounts), 1);
 
-  const attentionItems = adminGroups
-    .filter(
-      (g) =>
-        g.mentorId === null ||
-        (g.topicStatus === 'pending' && g.stage === 'topic_review') ||
-        !g.githubConnected
-    )
-    .map((g) => ({
-      id: g.id,
-      name: g.name,
-      projectId: g.projectId,
-      reason:
-        g.mentorId === null
-          ? 'No mentor assigned'
-          : g.topicStatus === 'pending'
-            ? 'Topic stuck in review'
-            : 'GitHub repo not connected',
-    }));
+  const pipelineStageLabels: Record<string, string> = {
+    awaiting_allocation: 'Awaiting Allocation',
+    mentor_assigned:     'Mentor Assigned',
+    topic_review:        'Topic Review',
+    building:            'Building',
+  };
 
   return (
     <div className="dashboard-canvas motion-page space-y-7">
@@ -69,8 +72,7 @@ export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPage
           Program Overview
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-500 dark:text-ink-400">
-          Final-year project pipeline at a glance Â· {activeGroups} groups Â· {adminMentors.length}{' '}
-          mentors
+          Final-year project pipeline at a glance Â· {stats.totalGroups} groups
         </p>
       </div>
 
@@ -79,21 +81,21 @@ export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPage
         <StatCard
           icon={<Users className="h-5 w-5" />}
           label="Active Groups"
-          value={String(activeGroups)}
+          value={String(stats.totalGroups)}
           sublabel="Registered this year"
           accent="brand"
         />
         <StatCard
           icon={<UserPlus className="h-5 w-5" />}
           label="Awaiting Allocation"
-          value={String(awaitingAllocation)}
+          value={String(stats.awaitingAllocation)}
           sublabel="Need a mentor assigned"
           accent="amber"
         />
         <StatCard
           icon={<ClipboardCheck className="h-5 w-5" />}
           label="Topic Reviews Due"
-          value={String(topicReviewsDue)}
+          value={String(stats.pendingTopics)}
           sublabel="Pending mentor decisions"
           accent="sky"
         />
@@ -151,7 +153,7 @@ export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPage
         <Card>
           <CardHeader title="Attention Needed" subtitle="Groups requiring admin intervention" />
           <CardBody className="p-0">
-            {attentionItems.length === 0 ? (
+            {attentionNeeded.length === 0 ? (
               <EmptyState
                 icon={<AlertTriangle className="h-7 w-7" />}
                 title="Nothing needs attention"
@@ -159,7 +161,7 @@ export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPage
               />
             ) : (
               <div className="divide-y divide-ink-50 dark:divide-ink-800">
-                {attentionItems.map((item) => (
+                {attentionNeeded.map((item) => (
                   <div
                     key={item.id}
                     className="activity-row flex items-center justify-between gap-3 px-5 py-4"
@@ -173,7 +175,7 @@ export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPage
                           {item.name}
                         </p>
                         <p className="text-xs text-ink-400 truncate dark:text-ink-500">
-                          {item.projectId} Â· {item.reason}
+                          {item.projectId} Â· {item.stage}
                         </p>
                       </div>
                     </div>
@@ -207,7 +209,8 @@ export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPage
           }
         />
         <CardBody className="p-0">
-          {auditEvents.length === 0 ? (
+          {/* Latest activity — show attentionNeeded groups as proxy until a dedicated audit endpoint is wired */}
+          {attentionNeeded.length === 0 ? (
             <EmptyState
               icon={<Activity className="h-7 w-7" />}
               title="No recent activity"
@@ -215,15 +218,15 @@ export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPage
             />
           ) : (
             <div className="divide-y divide-ink-50 dark:divide-ink-800">
-              {auditEvents.slice(0, 6).map((event) => (
-                <div key={event.id} className="activity-row flex items-start gap-3 px-5 py-3.5">
+              {attentionNeeded.slice(0, 6).map((group) => (
+                <div key={group.id} className="activity-row flex items-start gap-3 px-5 py-3.5">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-500 dark:bg-ink-800 dark:text-ink-400">
                     <Activity className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-ink-800 dark:text-ink-100">{event.description}</p>
+                    <p className="text-sm text-ink-800 dark:text-ink-100">{group.name} needs attention</p>
                     <p className="mt-0.5 text-xs text-ink-400 dark:text-ink-500">
-                      {event.timestamp} Â· {event.actor} Â· {event.group}
+                      Currently at {group.stage}
                     </p>
                   </div>
                 </div>

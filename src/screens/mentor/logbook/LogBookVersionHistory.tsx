@@ -1,9 +1,12 @@
 import { Badge, Card, CardBody, CardHeader, EmptyState } from '@/components/ui/ui';
 import { CalendarClock, CheckCircle2, Target } from 'lucide-react';
-import type { MentorGroup } from '@/data/mentorData';
+type GroupWithMilestones = {
+  name: string;
+  milestones: { id: string; title: string; dueDate: string; status: string; number: number }[];
+};
 
 type Props = {
-  group: MentorGroup | null;
+  group: GroupWithMilestones | null;
 };
 
 /**

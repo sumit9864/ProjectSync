@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   TrendingUp,
   CalendarClock,
@@ -25,42 +25,62 @@ import {
   PageSkeleton,
   Avatar,
 } from '@/components/ui/ui';
-import { useSimulatedLoad } from '@/hooks/useSimulatedLoad';
+import { apiGet } from '@/lib/apiClient';
 import type { StudentPageId as PageId } from '@/components/shell/StudentShell';
-import {
-  projectProgress,
-  groupHealth,
-  assignedMentor,
-  nextDeadline,
-  pipelineStages,
-  completedStages,
-  recentActivity,
-  upcomingDeadlines,
-  currentUser,
-  teamMembers,
-  groupName,
-} from '@/data/mockData';
+import type { ActivityItem, Deadline, GroupMember } from '@/types';
 import { PipelineBoard } from './overview/PipelineBoard';
 import { ActivityFeed } from './overview/ActivityFeed';
 
+const pipelineStages = [
+  { key: 'registered',       label: 'Registered',       order: 0 },
+  { key: 'mentor_assigned',  label: 'Mentor Assigned',  order: 1 },
+  { key: 'topic_approved',   label: 'Topic Approved',   order: 2 },
+  { key: 'github_connected', label: 'GitHub Connected', order: 3 },
+] as const;
+
 const activityIcons: Record<string, React.ElementType> = {
-  'user-check': UserCheck,
-  edit: Edit3,
-  list: ListChecks,
-  'check-circle': CheckCircle2,
-  users: Users,
+  'user-check':    UserCheck,
+  edit:            Edit3,
+  list:            ListChecks,
+  'check-circle':  CheckCircle2,
+  users:           Users,
+  activity:        Activity,
+};
+
+type DashboardData = {
+  projectProgress:       number;
+  groupHealth:           string;
+  groupName:             string | null;
+  teamMembers:           GroupMember[];
+  assignedMentor:        { name: string; domain: string } | null;
+  nextDeadline:          Deadline | null;
+  completedPipelineStages: string[];
+  recentActivity:        ActivityItem[];
+  upcomingDeadlines:     Deadline[];
 };
 
 export function OverviewPage({ onNavigate }: { onNavigate: (page: PageId) => void }) {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'at-risk' | 'week'>('all');
   const [draggedStage, setDraggedStage] = useState<string | null>(null);
   const [dropStage, setDropStage] = useState<string | null>(null);
 
-  const loading = useSimulatedLoad();
-  if (loading) return <PageSkeleton />;
+  useEffect(() => {
+    apiGet<DashboardData>('/api/dashboard/student')
+      .then(setData)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
-  const nextUpStage = completedStages.length;
+  if (loading) return <PageSkeleton />;
+  if (!data) return null;
+
+  const { projectProgress, groupHealth, groupName, teamMembers, assignedMentor,
+          nextDeadline, completedPipelineStages, recentActivity, upcomingDeadlines } = data;
+
+  const nextUpStage = completedPipelineStages.length;
   const nextUp = pipelineStages[nextUpStage] ?? pipelineStages[pipelineStages.length - 1];
 
   const nextUpMessages: Record<string, { message: string; page: PageId; cta: string }> = {
@@ -87,6 +107,7 @@ export function OverviewPage({ onNavigate }: { onNavigate: (page: PageId) => voi
   };
 
   const nextUpInfo = nextUpMessages[nextUp.key] ?? nextUpMessages.registered;
+  const healthLabel = groupHealth === 'on_track' ? 'On track' : groupHealth === 'at_risk' ? 'At risk' : groupHealth;
 
   return (
     <div className="dashboard-canvas motion-stagger flex flex-col gap-6">
@@ -94,7 +115,7 @@ export function OverviewPage({ onNavigate }: { onNavigate: (page: PageId) => voi
       <header className="dashboard-heading">
         <p className="section-kicker">Project command centre</p>
         <h1 className="font-display text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-100 sm:text-3xl">
-          Welcome back, {currentUser.name.split(' ')[0]}
+          Welcome back
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-ink-500 dark:text-ink-400">
           Here is a snapshot of where your final-year project stands and what deserves your
@@ -108,28 +129,28 @@ export function OverviewPage({ onNavigate }: { onNavigate: (page: PageId) => voi
           icon={<TrendingUp className="h-5 w-5" />}
           label="Project Progress"
           value={`${projectProgress}%`}
-          sublabel="On track"
+          sublabel={healthLabel}
           accent="brand"
         />
         <StatCard
           icon={<CalendarClock className="h-5 w-5" />}
           label="Next Deadline"
-          value={nextDeadline.date}
-          sublabel={`${nextDeadline.daysLeft} days left`}
+          value={nextDeadline?.date ?? 'None'}
+          sublabel={nextDeadline ? `${nextDeadline.daysLeft} days left` : '—'}
           accent="amber"
         />
         <StatCard
           icon={<UserCheck className="h-5 w-5" />}
           label="Assigned Mentor"
-          value={assignedMentor.name}
-          sublabel={assignedMentor.domain}
+          value={assignedMentor?.name ?? 'Not assigned'}
+          sublabel={assignedMentor?.domain ?? '—'}
           accent="sky"
         />
         <StatCard
           icon={<Heart className="h-5 w-5" />}
           label="Group Health"
-          value={groupHealth}
-          sublabel="3 of 3 members active"
+          value={healthLabel}
+          sublabel={`${teamMembers.length} members`}
           accent="emerald"
         />
       </div>
@@ -141,8 +162,8 @@ export function OverviewPage({ onNavigate }: { onNavigate: (page: PageId) => voi
             title="Project health"
             subtitle="A quick read on momentum, risk, and team capacity"
             action={
-              <Badge color="success">
-                <ShieldCheck className="h-3.5 w-3.5" /> On track
+              <Badge color={groupHealth === 'on_track' ? 'success' : groupHealth === 'at_risk' ? 'warning' : 'error'}>
+                <ShieldCheck className="h-3.5 w-3.5" /> {healthLabel}
               </Badge>
             }
           />
@@ -247,7 +268,7 @@ export function OverviewPage({ onNavigate }: { onNavigate: (page: PageId) => voi
       {/* Pipeline board */}
       <PipelineBoard
         pipelineStages={pipelineStages}
-        completedStages={completedStages}
+        completedStages={completedPipelineStages}
         selectedStage={selectedStage}
         draggedStage={draggedStage}
         dropStage={dropStage}
@@ -275,65 +296,29 @@ export function OverviewPage({ onNavigate }: { onNavigate: (page: PageId) => voi
       />
 
       {/* Team Roster + Account */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card className="motion-lift">
-          <CardHeader title="Team Roster" subtitle={`Members of "${groupName}"`} />
-          <CardBody className="p-0">
-            <div className="divide-y divide-ink-50 dark:divide-ink-800">
-              {teamMembers.map((m) => (
-                <div key={m.id} className="team-row flex items-center gap-3 px-5 py-3.5">
-                  <Avatar name={m.name} color="bg-brand-600" size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-ink-800 dark:text-ink-100">
-                      {m.name}
-                      {m.email === currentUser.email && (
-                        <span className="ml-2 text-xs font-normal text-brand-600 dark:text-brand-400">
-                          (you)
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-ink-400 dark:text-ink-500">{m.email}</p>
+      {groupName && (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Card className="motion-lift">
+            <CardHeader title="Team Roster" subtitle={`Members of "${groupName}"`} />
+            <CardBody className="p-0">
+              <div className="divide-y divide-ink-50 dark:divide-ink-800">
+                {teamMembers.map((m) => (
+                  <div key={m.id} className="team-row flex items-center gap-3 px-5 py-3.5">
+                    <Avatar name={m.name} color="bg-brand-600" size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-ink-800 dark:text-ink-100">
+                        {m.name}
+                      </p>
+                      <p className="text-xs text-ink-400 dark:text-ink-500">{m.email}</p>
+                    </div>
+                    <Badge color="neutral">{m.rollNumber}</Badge>
                   </div>
-                  <Badge color="neutral">{m.rollNumber}</Badge>
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="motion-lift">
-          <CardHeader title="Account" subtitle="Your profile information" />
-          <CardBody>
-            <div className="flex items-center gap-4">
-              <Avatar name={currentUser.name} color={currentUser.avatarColor} size="lg" />
-              <div>
-                <p className="font-display text-lg font-bold text-ink-900 dark:text-ink-100">
-                  {currentUser.name}
-                </p>
-                <p className="text-sm text-ink-500 dark:text-ink-400">{currentUser.email}</p>
+                ))}
               </div>
-            </div>
-            <div className="mt-4 space-y-2.5 rounded-xl bg-ink-50 p-4 dark:bg-ink-800/50">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-ink-400 dark:text-ink-500">Role</span>
-                <Badge color="brand">{currentUser.role}</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-ink-400 dark:text-ink-500">Roll Number</span>
-                <span className="text-sm font-medium text-ink-700 dark:text-ink-200">
-                  {currentUser.rollNumber}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-ink-400 dark:text-ink-500">Elective</span>
-                <span className="text-right text-sm font-medium text-ink-700 dark:text-ink-200">
-                  {currentUser.elective}
-                </span>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      </div>
+            </CardBody>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

@@ -344,7 +344,7 @@ router.get('/calendar', (req, res) => {
   const recentActivity = auditEvents
     .filter(e => myGroups.some(g => g.name === e.group))
     .slice(0, 5)
-    .map(e => ({ group: e.group, action: e.description, time: e.timestamp }));
+    .map(e => ({ id: e.id, group: e.group, action: e.description, time: e.timestamp }));
 
   res.json({ events, recentActivity });
 });

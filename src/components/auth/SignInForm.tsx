@@ -12,7 +12,7 @@ export function SignInForm({
   showToast,
   onSwitchToSignUp,
 }: {
-  onSignIn: (email: string, password: string) => { success: boolean; session?: AuthSession };
+  onSignIn: (email: string, password: string) => Promise<{ success: boolean; session?: AuthSession }>;
   showToast: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   onSwitchToSignUp: () => void;
 }) {
@@ -53,23 +53,21 @@ export function SignInForm({
     return valid;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
-    window.setTimeout(() => {
-      const result = onSignIn(email, password);
-      setLoading(false);
+    const result = await onSignIn(email, password);
+    setLoading(false);
 
-      if (result.success && result.session) {
-        showToast(`Welcome back, ${result.session.name}`, 'success');
-      } else {
-        setAuthError('Incorrect email or password');
-        setPassword('');
-        setShowPassword(false);
-      }
-    }, 700);
+    if (result.success && result.session) {
+      showToast(`Welcome back, ${result.session.name}`, 'success');
+    } else {
+      setAuthError('Incorrect email or password');
+      setPassword('');
+      setShowPassword(false);
+    }
   };
 
   const fillDemoAccount = (demoEmail: string, demoPassword: string) => {
