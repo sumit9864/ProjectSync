@@ -143,9 +143,9 @@ export function AdminAuditLogPage() {
                     <p className="text-sm text-ink-800 dark:text-ink-100">{event.description}</p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
                       <span className="text-ink-400 dark:text-ink-500">{event.timestamp}</span>
-                      <span className="text-ink-300 dark:text-ink-600">Â·</span>
+                      <span className="text-ink-300 dark:text-ink-600">·</span>
                       <Badge color="info">{event.actor}</Badge>
-                      <span className="text-ink-300 dark:text-ink-600">Â·</span>
+                      <span className="text-ink-300 dark:text-ink-600">·</span>
                       <span className="text-ink-500 dark:text-ink-400">{event.group}</span>
                     </div>
                   </div>

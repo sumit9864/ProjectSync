@@ -50,7 +50,7 @@ router.post('/', requireAuth, requireRole('student'), (req, res) => {
   const totalMembers = members.length + 1; // +1 for leader
   const year = new Date().getFullYear();
   const seqNum = String(groups.length + 1).padStart(3, '0');
-  const projectId = `FYP-${year}-${seqNum}`;
+  const projectId = seqNum;
 
   const newGroup: Group = {
     id:            `group-${Date.now()}`,

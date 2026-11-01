@@ -24,15 +24,4 @@ export interface AllocationHistoryEntry {
   unassignedCount: number;
 }
 
-export const allocationHistory: AllocationHistoryEntry[] = [
-  {
-    id:    'alloc-hist-1',
-    round: 1,
-    ranAt: '2026-09-13T08:00:00.000Z',
-    results: [
-      { groupId: 'group-1', groupName: 'Neural Knights', status: 'assigned', matchedMentorId: 'mentor-1', matchedRank: 1 },
-    ],
-    assignedCount:   1,
-    unassignedCount: 0,
-  },
-];
+export const allocationHistory: AllocationHistoryEntry[] = [];

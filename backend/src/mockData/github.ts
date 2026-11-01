@@ -12,10 +12,4 @@ export interface GitHubData {
 }
 
 // Keyed by groupId
-export const githubByGroup: Record<string, GitHubData> = {
-  'group-1': {
-    url:         'https://github.com/neural-knights/ecg-transformer',
-    lastUpdated: 'Oct 1, 2026 · 2:30 PM',
-    connected:   true,
-  },
-};
+export const githubByGroup: Record<string, GitHubData> = {};

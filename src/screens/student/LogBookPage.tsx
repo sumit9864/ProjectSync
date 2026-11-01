@@ -42,7 +42,7 @@ export function LogBookPage() {
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <PageHeader
           title="Log Book"
-          subtitle="Session entries logged by your mentor. View only â€” students cannot edit."
+          subtitle="Session entries logged by your mentor. View only Ã¢â‚¬â€ students cannot edit."
         />
         <Badge color="neutral">
           <Lock className="h-3.5 w-3.5" />
@@ -107,7 +107,7 @@ function LogEntryCard({
               Session {entry.entryNumber}
             </p>
             <p className="text-xs text-ink-400 dark:text-ink-500">
-              {entry.date} Â· Last edited {entry.lastEditedAt}
+              {entry.date} · Last edited {entry.lastEditedAt}
             </p>
           </div>
         </div>
@@ -187,7 +187,7 @@ function LogEntryCard({
                       className="rounded-xl border border-dashed border-ink-200 bg-ink-50/50 p-4 dark:border-ink-700 dark:bg-ink-800/30"
                     >
                       <p className="mb-3 text-xs font-medium text-ink-400 dark:text-ink-500">
-                        Previous version Â· edited {edit.editedAt}
+                        Previous version · edited {edit.editedAt}
                       </p>
                       <div className="space-y-2.5">
                         <LogField label="Points Discussed" content={edit.pointsDiscussed} compact />

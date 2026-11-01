@@ -110,7 +110,7 @@ export function MilestonesPage() {
                     </h2>
                     <p className="mt-2 flex items-center gap-2 text-sm text-ink-500 dark:text-ink-400">
                       <CalendarClock className="h-4 w-4" />
-                      Due {upcoming.dueDate} Â· {daysUntil(upcoming.dueDate)} days remaining
+                      Due {upcoming.dueDate} · {daysUntil(upcoming.dueDate)} days remaining
                     </p>
                   </div>
                   <Button
@@ -208,7 +208,7 @@ export function MilestonesPage() {
                               <CalendarClock className="h-3.5 w-3.5" />
                               Due {m.dueDate}
                               {!complete &&
-                                ` Â· ${Math.abs(daysUntil(m.dueDate))} days ${overdueItem ? 'late' : 'remaining'}`}
+                                ` · ${Math.abs(daysUntil(m.dueDate))} days ${overdueItem ? 'late' : 'remaining'}`}
                             </p>
                           </div>
                           {!complete && (
@@ -240,7 +240,7 @@ export function MilestonesPage() {
                               <div className="mt-3 border-l-2 border-blue-300 bg-blue-50/60 px-4 py-3 dark:border-blue-700 dark:bg-blue-950/25">
                                 <p className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300">
                                   <UserRound className="h-3.5 w-3.5" />
-                                  Student check-in Â· {m.checkedInAt}
+                                  Student check-in · {m.checkedInAt}
                                 </p>
                                 <p className="mt-2 font-serif text-sm italic leading-6 text-ink-700 dark:text-ink-200">
                                   {m.checkInNote}

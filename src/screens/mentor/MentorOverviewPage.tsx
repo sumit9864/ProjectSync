@@ -196,7 +196,7 @@ export function MentorOverviewPage({
                             {group.name}
                           </p>
                           <p className="text-xs text-ink-400 truncate dark:text-ink-500">
-                            {group.projectId} Â· v{latestVersion.version} Â· submitted{' '}
+                            {group.projectId} · v{latestVersion.version} · submitted{' '}
                             {latestVersion.submittedAt}
                           </p>
                         </div>

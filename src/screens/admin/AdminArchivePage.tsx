@@ -224,7 +224,7 @@ function ArchiveCard({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-xs font-medium text-ink-400 dark:text-ink-500">
-              {entry.year} Â· {entry.group}
+              {entry.year} · {entry.group}
             </p>
             <p className="mt-0.5 font-display text-lg font-semibold leading-snug text-ink-900 transition-colors group-hover:text-brand-700 dark:text-ink-100 dark:group-hover:text-brand-300">
               {entry.title}
@@ -250,7 +250,7 @@ function ArchiveCard({
             <BookOpen className="h-3.5 w-3.5 text-ink-400 dark:text-ink-500" />
             {entry.elective}
           </span>
-          <span className="text-ink-300 dark:text-ink-600">Â·</span>
+          <span className="text-ink-300 dark:text-ink-600">·</span>
           <span>{entry.mentor}</span>
         </div>
       </CardBody>

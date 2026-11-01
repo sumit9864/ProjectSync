@@ -72,7 +72,7 @@ export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPage
           Program Overview
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-500 dark:text-ink-400">
-          Final-year project pipeline at a glance Â· {stats.totalGroups} groups
+          Final-year project pipeline at a glance · {stats.totalGroups} groups
         </p>
       </div>
 
@@ -175,7 +175,7 @@ export function AdminOverviewPage({ onNavigate }: { onNavigate: (page: AdminPage
                           {item.name}
                         </p>
                         <p className="text-xs text-ink-400 truncate dark:text-ink-500">
-                          {item.projectId} Â· {item.stage}
+                          {item.projectId} · {item.stage}
                         </p>
                       </div>
                     </div>

@@ -170,7 +170,7 @@ export function AdminAllocationPage({ onRoundRun }: Props) {
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-ink-900 dark:text-ink-100">
-                      {result.projectId} Â· {result.groupName}
+                      {result.projectId} · {result.groupName}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-500 dark:text-ink-400">
                       <span>
@@ -178,7 +178,7 @@ export function AdminAllocationPage({ onRoundRun }: Props) {
                           ? `Matched preference ${result.matchedRank}`
                           : 'No capacity found'}
                       </span>
-                      <span className="text-ink-300">Â·</span>
+                      <span className="text-ink-300">·</span>
                       <span>{result.matchedMentorName || 'No mentor matched'}</span>
                     </div>
                   </div>
@@ -283,10 +283,10 @@ export function AdminAllocationPage({ onRoundRun }: Props) {
                   >
                     <div>
                       <p className="text-sm font-semibold text-ink-900 dark:text-ink-100">
-                        {result.projectId} Â· {result.groupName}
+                        {result.projectId} · {result.groupName}
                       </p>
                       <p className="mt-1 text-xs text-ink-500">
-                        Manual override Â· {result.matchedMentorName}
+                        Manual override · {result.matchedMentorName}
                       </p>
                     </div>
                     <Badge color="success">Assigned</Badge>
@@ -301,7 +301,7 @@ export function AdminAllocationPage({ onRoundRun }: Props) {
       <Card className="border-amber-200/80 dark:border-amber-900/50">
         <CardHeader
           title="Manual assignment"
-          subtitle="Exception path â€” override allocation results"
+          subtitle="Exception path Ã¢â‚¬â€ override allocation results"
         />
         <CardBody className="flex flex-col gap-5">
           <div className="flex items-start gap-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
@@ -340,7 +340,7 @@ export function AdminAllocationPage({ onRoundRun }: Props) {
                 <option value="">Select a mentor...</option>
                 {availableMentors.map((mentor) => (
                   <option key={mentor.id} value={mentor.id}>
-                    {mentor.name} â€” {mentor.currentLoad}/{mentor.capacity} ({mentor.domain})
+                    {mentor.name} Ã¢â‚¬â€ {mentor.currentLoad}/{mentor.capacity} ({mentor.domain})
                   </option>
                 ))}
               </select>

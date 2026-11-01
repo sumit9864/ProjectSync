@@ -248,7 +248,7 @@ export function AdminMentorsPage() {
                           {m.name}
                         </p>
                         <p className="text-xs text-ink-400 truncate dark:text-ink-500">
-                          {m.email} Â· {m.domain} Â· cap {m.capacity}
+                          {m.email} · {m.domain} · cap {m.capacity}
                         </p>
                       </div>
                     </div>

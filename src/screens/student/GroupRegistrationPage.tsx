@@ -185,7 +185,7 @@ export function GroupRegistrationPage() {
             </p>
             <div className="mx-auto mt-8 max-w-2xl rounded-xl border border-ink-200 text-left dark:border-ink-700">
               <div className="border-b border-ink-200 px-4 py-3 text-sm font-semibold text-ink-900 dark:border-ink-700 dark:text-ink-100">
-                Registered group Â· {electiveTwo} Â· {electiveThree}
+                Registered group · {electiveTwo} · {electiveThree}
               </div>
               <div className="divide-y divide-ink-100 dark:divide-ink-800">
                 {registeredMembers.map((member, index) => (
@@ -197,7 +197,7 @@ export function GroupRegistrationPage() {
                       {member.name || 'Member'}
                     </span>
                     <span className="text-ink-500 dark:text-ink-400">
-                      {member.crn} Â· {member.email}
+                      {member.crn} · {member.email}
                     </span>
                   </div>
                 ))}

@@ -99,7 +99,7 @@ export function MentorPreferencesPage() {
     setSubmitting(true);
     try {
       const entries = shortlist.map((mentorId, i) => ({ mentorId, rank: i + 1 }));
-      await apiPost('/api/preferences/submit', { round, entries });
+      await apiPost('/api/preferences', { round, entries });
       const now = new Date();
       const submittedAt =
         now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
@@ -107,8 +107,8 @@ export function MentorPreferencesPage() {
         now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
       setSubmission({ round, entries, submittedAt });
       showToast(`Round ${round} preferences submitted.`, 'success');
-    } catch {
-      showToast('Failed to submit preferences. Please try again.', 'error');
+    } catch (err: any) {
+      showToast(err?.message ?? 'Failed to submit preferences. Please try again.', 'error');
     } finally {
       setSubmitting(false);
     }

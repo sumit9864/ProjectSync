@@ -15,13 +15,4 @@ export interface ShortlistSubmission {
 }
 
 // Key: `${groupId}-${round}` → submission
-export const preferencesByGroup: Record<string, ShortlistSubmission> = {
-  'group-1-1': {
-    round: 1,
-    entries: [
-      { mentorId: 'mentor-1', rank: 1 },
-      { mentorId: 'mentor-3', rank: 2 },
-    ],
-    submittedAt: '2026-09-10T08:00:00.000Z',
-  },
-};
+export const preferencesByGroup: Record<string, ShortlistSubmission> = {};

@@ -166,7 +166,7 @@ export function AppShell({
               <Search className="h-4 w-4" />
               <span>Search</span>
               <kbd className="rounded bg-ink-100 px-1.5 py-0.5 font-mono text-[10px] dark:bg-ink-800">
-                âŒ˜K
+                ⌘K
               </kbd>
             </button>
 

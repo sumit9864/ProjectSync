@@ -30,25 +30,7 @@ export interface Group {
 }
 
 // The single demo student group
-export const groups: Group[] = [
-  {
-    id:            'group-1',
-    projectId:     'FYP-2026-001',
-    name:          'Neural Knights',
-    leaderCrn:     'CS21B1042',
-    electiveTwo:   'Machine Learning & Data Science',
-    electiveThree: 'Artificial Intelligence',
-    members: [
-      { id: 'm1', name: 'Aarav Sharma',  rollNumber: 'CS21B1042', email: 'aarav.sharma@university.edu',  elective: 'Machine Learning & Data Science' },
-      { id: 'm2', name: 'Priya Nair',    rollNumber: 'CS21B1055', email: 'priya.nair@university.edu',    elective: 'Machine Learning & Data Science' },
-      { id: 'm3', name: 'Rohan Kapoor',  rollNumber: 'CS21B1067', email: 'rohan.kapoor@university.edu',  elective: 'Machine Learning & Data Science' },
-    ],
-    mentorId:     'mentor-1',
-    registeredAt: '2026-09-15T10:00:00.000Z',
-    stage:        'mentor_assigned',
-    ownerUserId:  'user-student-1',
-  },
-];
+export const groups: Group[] = [];
 
 /** Look up the group that belongs to a given student user ID */
 export function getGroupByOwner(userId: string): Group | null {

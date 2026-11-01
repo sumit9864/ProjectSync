@@ -73,6 +73,27 @@ export function AdminControlsPage({ onViewResults, hasResults = false }: AdminCo
     }
   };
 
+  const handleQuickAction = async (action: 'open' | 'close' | 'run', key: WindowKey) => {
+    const today = new Date().toISOString().split('T')[0];
+    if (action === 'open') {
+      await updateWindow(key, 'opensOn', today);
+      await updateWindow(key, 'open', true);
+      showToast(`${key} window opened`, 'success');
+    } else if (action === 'close') {
+      await updateWindow(key, 'closesOn', today);
+      await updateWindow(key, 'open', false);
+      showToast(`${key} window closed`, 'success');
+    } else if (action === 'run') {
+      try {
+        const round = key === 'round1' ? 1 : 2;
+        await apiPost('/api/admin/allocation/run', { round });
+        showToast(`Round ${round} completed successfully`, 'success');
+      } catch (err: any) {
+        showToast(err?.message ?? 'Action failed', 'error');
+      }
+    }
+  };
+
   if (loading)
     return (
       <div className="flex flex-col gap-4">
@@ -127,36 +148,62 @@ export function AdminControlsPage({ onViewResults, hasResults = false }: AdminCo
                 key={key}
                 className="rounded-2xl border border-ink-100 bg-ink-50/30 p-4 dark:border-ink-800 dark:bg-ink-950/30"
               >
-                <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <CalendarClock className="h-4 w-4 text-brand-600" />
-                      <p className="font-semibold text-ink-900 dark:text-ink-100">{label}</p>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <CalendarClock className="h-4 w-4 text-brand-600" />
+                        <p className="font-semibold text-ink-900 dark:text-ink-100">{label}</p>
+                      </div>
+                      <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{eyebrow}</p>
+                      <Badge color={windows[key].open ? 'success' : 'neutral'}>
+                        {windows[key].open ? 'Scheduled' : 'Upcoming'}
+                      </Badge>
                     </div>
-                    <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{eyebrow}</p>
-                    <Badge color={windows[key].open ? 'success' : 'neutral'}>
-                      {windows[key].open ? 'Scheduled' : 'Upcoming'}
-                    </Badge>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:w-[460px]">
+                      <label className="text-xs font-medium text-ink-500">
+                        Starts
+                        <input
+                          value={windows[key].opensOn}
+                          onChange={(e) => updateWindow(key, 'opensOn', e.target.value)}
+                          onBlur={() => showToast('Schedule saved.', 'success')}
+                          className="input-field mt-1 text-xs"
+                        />
+                      </label>
+                      <label className="text-xs font-medium text-ink-500">
+                        Closes
+                        <input
+                          value={windows[key].closesOn}
+                          onChange={(e) => updateWindow(key, 'closesOn', e.target.value)}
+                          onBlur={() => showToast('Schedule saved.', 'success')}
+                          className="input-field mt-1 text-xs"
+                        />
+                      </label>
+                    </div>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:w-[460px]">
-                    <label className="text-xs font-medium text-ink-500">
-                      Starts
-                      <input
-                        value={windows[key].opensOn}
-                        onChange={(e) => updateWindow(key, 'opensOn', e.target.value)}
-                        onBlur={() => showToast('Schedule saved.', 'success')}
-                        className="input-field mt-1 text-xs"
-                      />
-                    </label>
-                    <label className="text-xs font-medium text-ink-500">
-                      Closes
-                      <input
-                        value={windows[key].closesOn}
-                        onChange={(e) => updateWindow(key, 'closesOn', e.target.value)}
-                        onBlur={() => showToast('Schedule saved.', 'success')}
-                        className="input-field mt-1 text-xs"
-                      />
-                    </label>
+                  
+                  {/* Quick Actions */}
+                  <div className="flex w-full flex-wrap items-center gap-2 border-t border-ink-100 pt-3 dark:border-ink-800">
+                    {key === 'registration' && (
+                      <>
+                        <Button variant="secondary" size="sm" onClick={() => handleQuickAction('open', key)}>Open Registration</Button>
+                        <Button variant="secondary" size="sm" onClick={() => handleQuickAction('close', key)}>Close Registration</Button>
+                      </>
+                    )}
+                    {key === 'round1' && (
+                      <>
+                        <Button variant="secondary" size="sm" onClick={() => handleQuickAction('open', key)}>Open Round 1</Button>
+                        <Button variant="secondary" size="sm" onClick={() => handleQuickAction('close', key)}>Close Round 1</Button>
+                        <Button variant="primary" size="sm" onClick={() => handleQuickAction('run', key)}>Run Round 1</Button>
+                      </>
+                    )}
+                    {key === 'round2' && (
+                      <>
+                        <Button variant="secondary" size="sm" onClick={() => handleQuickAction('open', key)}>Open Round 2</Button>
+                        <Button variant="secondary" size="sm" onClick={() => handleQuickAction('close', key)}>Close Round 2</Button>
+                        <Button variant="primary" size="sm" onClick={() => handleQuickAction('run', key)}>Run Round 2</Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -178,7 +225,7 @@ export function AdminControlsPage({ onViewResults, hasResults = false }: AdminCo
                         {entry.description}
                       </p>
                       <p className="mt-1 text-xs text-ink-500">
-                        {entry.timestamp} Â· {entry.actor}
+                        {entry.timestamp} · {entry.actor}
                       </p>
                     </div>
                   </div>
@@ -240,7 +287,7 @@ export function AdminControlsPage({ onViewResults, hasResults = false }: AdminCo
                     </span>
                   </p>
                   <p className="text-xs text-ink-500">
-                    {extension.reason} Â· {extension.grantedAt} by {extension.grantedBy}
+                    {extension.reason} · {extension.grantedAt} by {extension.grantedBy}
                   </p>
                 </div>
                 <button
