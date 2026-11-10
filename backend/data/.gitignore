@@ -1,0 +1,3 @@
+# Exclude the generated database file from version control.
+# The data/ directory is kept so the folder structure is preserved.
+db.json
