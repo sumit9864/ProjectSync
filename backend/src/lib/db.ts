@@ -16,6 +16,7 @@
 
 import fs   from 'fs';
 import path from 'path';
+import { getDefaults } from './db-defaults';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -216,3 +217,47 @@ export interface DbSchema {
   };
 }
 
+// ── File path ──────────────────────────────────────────────────────────────────
+// Stored at backend/data/db.json — outside src/ so it isn't watched by tsx
+const DATA_DIR  = path.join(__dirname, '..', '..', 'data');
+const DB_FILE   = path.join(DATA_DIR, 'db.json');
+
+// ── Bootstrap ──────────────────────────────────────────────────────────────────
+function loadOrInit(): DbSchema {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(DB_FILE)) {
+    const defaults = getDefaults();
+    fs.writeFileSync(DB_FILE, JSON.stringify(defaults, null, 2), 'utf-8');
+    return defaults;
+  }
+  try {
+    const raw = fs.readFileSync(DB_FILE, 'utf-8');
+    return JSON.parse(raw) as DbSchema;
+  } catch {
+    console.warn('[db] db.json corrupted — resetting to defaults');
+    const defaults = getDefaults();
+    fs.writeFileSync(DB_FILE, JSON.stringify(defaults, null, 2), 'utf-8');
+    return defaults;
+  }
+}
+
+/** The live in-memory database. Mutate this object freely, then call saveDb(). */
+export const db: DbSchema = loadOrInit();
+
+/** Flush the in-memory database to disk. Call after every mutation. */
+export function saveDb(): void {
+  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
+}
+
+/**
+ * Reset the entire database to factory defaults and flush to disk.
+ * Called by the developer reset endpoint / script.
+ */
+export function resetDb(): void {
+  const defaults = getDefaults();
+  (Object.keys(defaults) as (keyof DbSchema)[]).forEach((key) => {
+    (db as unknown as Record<string, unknown>)[key] = (defaults as unknown as Record<string, unknown>)[key];
+  });
+  saveDb();
+  console.log('[db] Database reset to factory defaults.');
+}
