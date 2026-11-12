@@ -6,6 +6,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Allow the local network IP to access the dev server
+  allowedDevOrigins: ['10.241.163.200'],
 
   // ─── API Proxy ─────────────────────────────────────────────────────────────
   // Forwards all /api/* requests from the browser to the Express backend.
