@@ -1,0 +1,357 @@
+// ============================================================
+// Prisma schema — College Final-Year Project Management System
+// Database: PostgreSQL
+// Status: DRAFT — field names/shapes here are what v0's mock data
+// should mirror, and what the Express backend will implement.
+// Some multi-row business rules noted below are NOT enforced by
+// this schema alone — see "Design & trade-off notes" at the end.
+// ============================================================
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------------- Enums ----------------
+
+enum Role {
+  STUDENT
+  MENTOR
+  ADMIN
+}
+
+enum GroupStatus {
+  REGISTERED
+  MENTOR_ASSIGNED
+  TOPIC_APPROVED
+}
+
+enum AllocationStatus {
+  ASSIGNED
+  UNASSIGNED
+}
+
+enum TopicStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+enum WindowType {
+  REGISTRATION
+  PREFERENCE_ROUND
+}
+
+enum NotificationType {
+  WINDOW_OPENED
+  WINDOW_CLOSING_SOON
+  ALLOCATION_RESULT
+  TOPIC_APPROVED
+  TOPIC_REJECTED
+  GENERAL
+}
+
+// ---------------- Core identity ----------------
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  student       Student?
+  mentor        Mentor?
+  notifications Notification[]
+  auditLogs     AuditLog[] @relation("ActorAuditLogs")
+}
+
+model Student {
+  id       String  @id @default(cuid())
+  userId   String  @unique
+  user     User    @relation(fields: [userId], references: [id])
+  elective String
+  groupId  String?
+  group    Group?  @relation(fields: [groupId], references: [id])
+
+  // "A student can be in only one group" falls directly out of this
+  // being a single nullable foreign key, not a many-to-many table.
+}
+
+model Mentor {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  domain       String
+  focus        String?  // short tagline, e.g. "responsible systems, field research"
+  pastProjects String[] // list of distinct entries, e.g. "Smart Campus Energy Dashboard (2024)"
+  maxCapacity  Int      @default(3)
+
+  preferences    MentorPreference[]
+  allocations    Allocation[]
+  logBookEntries LogBookEntry[]
+}
+
+// ---------------- Groups ----------------
+
+model Group {
+  id          String      @id @default(cuid())
+  projectId   String      @unique // immutable once assigned
+  name        String      @unique // chosen at registration; duplicate-name check is a plain unique constraint (unlike group-size/mentor-capacity, this one IS declarative)
+  description String? // one-line description, shown on pipeline table / group cards
+  elective    String
+  status      GroupStatus @default(REGISTERED)
+  createdAt   DateTime    @default(now())
+
+  members        Student[]
+  preferences    MentorPreference[]
+  allocations    Allocation[]
+  topic          Topic?
+  githubLink     GitHubLink?
+  logBookEntries LogBookEntry[]
+  milestones     Milestone[]
+  extensions     DeadlineExtension[]
+
+  @@index([status])
+}
+
+// ---------------- Mentor preference + allocation ----------------
+
+model MentorPreference {
+  id          String   @id @default(cuid())
+  groupId     String
+  group       Group    @relation(fields: [groupId], references: [id])
+  mentorId    String
+  mentor      Mentor   @relation(fields: [mentorId], references: [id])
+  rank        Int      // 1, 2, or 3
+  roundNumber Int      // which allocation round this belongs to
+  submittedAt DateTime @default(now()) // drives FCFS ordering
+
+  @@index([roundNumber, submittedAt])
+}
+
+model AllocationRound {
+  id          String  @id @default(cuid())
+  roundNumber Int     @unique
+  windowId    String?
+  window      Window? @relation(fields: [windowId], references: [id])
+  isComplete  Boolean @default(false)
+}
+
+model Allocation {
+  id          String           @id @default(cuid())
+  groupId     String
+  group       Group            @relation(fields: [groupId], references: [id])
+  mentorId    String?
+  mentor      Mentor?          @relation(fields: [mentorId], references: [id])
+  roundNumber Int
+  status      AllocationStatus
+  decidedAt   DateTime         @default(now())
+
+  @@index([roundNumber, status])
+}
+
+// ---------------- Topic workflow ----------------
+
+model Topic {
+  id                 String                   @id @default(cuid())
+  groupId            String                   @unique
+  group              Group                    @relation(fields: [groupId], references: [id])
+  status             TopicStatus              @default(PENDING)
+  submissions        TopicSubmission[]
+  discussionMessages TopicDiscussionMessage[]
+}
+
+model TopicSubmission {
+  id                 String      @id @default(cuid())
+  topicId            String
+  topic              Topic       @relation(fields: [topicId], references: [id])
+  existingWork       String
+  problemIdentified  String
+  proposedDifference String
+  innovation         String
+  feasibility        String
+  status             TopicStatus @default(PENDING)
+  mentorFeedback     String?
+  submittedAt        DateTime    @default(now())
+  decidedAt          DateTime?
+
+  @@index([topicId, submittedAt])
+}
+
+model TopicDiscussionMessage {
+  id        String   @id @default(cuid())
+  topicId   String
+  topic     Topic    @relation(fields: [topicId], references: [id])
+  authorId  String   // User.id of the student or mentor who wrote it
+  message   String
+  createdAt DateTime @default(now())
+}
+
+// ---------------- GitHub link ----------------
+
+model GitHubLink {
+  id        String   @id @default(cuid())
+  groupId   String   @unique
+  group     Group    @relation(fields: [groupId], references: [id])
+  url       String
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------- Log book (versioned) ----------------
+
+model LogBookEntry {
+  id                String   @id @default(cuid())
+  groupId           String
+  group             Group    @relation(fields: [groupId], references: [id])
+  mentorId          String
+  mentor            Mentor   @relation(fields: [mentorId], references: [id])
+  entryNumber       Int      // sequential per group
+  sessionDate       DateTime
+  pointsDiscussed   String
+  mentorSuggestions String
+  remarks           String?
+  lastEditedAt      DateTime @default(now())
+
+  attendance LogBookAttendance[]
+  versions   LogBookEntryVersion[] // snapshot taken before every edit
+
+  @@unique([groupId, entryNumber])
+}
+
+model LogBookAttendance {
+  id             String            @id @default(cuid())
+  logBookEntryId String
+  logBookEntry   LogBookEntry      @relation(fields: [logBookEntryId], references: [id])
+  studentId      String
+  status         AttendanceStatus
+}
+
+// Snapshot of a LogBookEntry's editable fields, taken immediately
+// before each edit — this is what makes "previous versions retained"
+// (Module 16) true, instead of edits silently overwriting history.
+model LogBookEntryVersion {
+  id                String       @id @default(cuid())
+  logBookEntryId    String
+  logBookEntry      LogBookEntry @relation(fields: [logBookEntryId], references: [id])
+  pointsDiscussed   String
+  mentorSuggestions String
+  remarks           String?
+  editedAt          DateTime     @default(now())
+}
+
+model Milestone {
+  id         String   @id @default(cuid())
+  groupId    String
+  group      Group    @relation(fields: [groupId], references: [id])
+  title      String
+  achievedAt DateTime @default(now())
+}
+
+// ---------------- Windows / deadlines ----------------
+
+model Window {
+  id      String     @id @default(cuid())
+  type    WindowType
+  startAt DateTime
+  endAt   DateTime
+  isOpen  Boolean    @default(true)
+
+  allocationRounds AllocationRound[]
+  extensions       DeadlineExtension[]
+}
+
+model DeadlineExtension {
+  id         String   @id @default(cuid())
+  windowId   String
+  window     Window   @relation(fields: [windowId], references: [id])
+  groupId    String
+  group      Group    @relation(fields: [groupId], references: [id])
+  extendedTo DateTime
+  offsetNote String?  // the offset agreed among mentors, for marking purposes
+}
+
+// ---------------- Notifications ----------------
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
+
+// ---------------- Audit log ----------------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation("ActorAuditLogs", fields: [actorId], references: [id])
+  action     String   // e.g. "GROUP_REGISTERED", "TOPIC_APPROVED"
+  entityType String   // e.g. "Group", "Topic", "Allocation"
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
+
+// ============================================================
+// Design & trade-off notes (read before implementing)
+// ============================================================
+//
+// 1. "Student can only be in one group", "one Topic per Group", and
+//    "no duplicate group name" are enforced structurally —
+//    Student.groupId is a single nullable FK, Topic.groupId is
+//    @unique, and Group.name is @unique. No app-level check needed
+//    for these three; a duplicate-name POST /groups call fails on
+//    the DB constraint and surfaces via the standard `fields` error
+//    shape in ApiContract.txt.
+//
+// 2. "Group size 3-4" and "mentor capacity <= 3 groups" are NOT
+//    declarative constraints in this schema — Postgres doesn't have
+//    a simple built-in way to say "this relation must have between
+//    3 and 4 rows" or "count of related rows <= N." These are the
+//    two constraints that actually need the transactional handling
+//    that was the main argument for Postgres over MongoDB:
+//      - Group size: check member count in the same transaction
+//        that flips a group's status away from an initial
+//        "draft"/incomplete state, before allowing it to register.
+//      - Mentor capacity: when creating an Allocation row, run
+//        `SELECT ... FOR UPDATE` on the Mentor row (or use a
+//        SERIALIZABLE transaction) to lock it, COUNT existing
+//        ASSIGNED allocations for that mentor+round, and only
+//        insert if the count is below maxCapacity — all inside one
+//        transaction. This is what actually prevents two groups
+//        racing for a mentor's last slot; a plain application-level
+//        "check then insert" without the lock/transaction would not.
+//    Consider a Postgres trigger as an extra safety net for the
+//    capacity rule if you want it enforced even against a bug in
+//    the application code — optional at this project's scale.
+//
+// 3. TopicSubmission is separate from Topic on purpose: Topic is the
+//    "slot" (one per group), TopicSubmission is one row per attempt.
+//    This gives the full submit/reject/resubmit history for free —
+//    Topic.status always reflects the latest submission's outcome.
+//
+// 4. LogBookEntryVersion is a snapshot-before-edit table, not a
+//    diff — simplest to implement correctly, and directly satisfies
+//    "previous versions are retained" from the spec.
+//
+// 5. AuditLog uses a generic entityType/entityId/metadata(Json)
+//    shape rather than one table per action type, so every module's
+//    actions (registration, preference, allocation, topic decision,
+//    GitHub link change) can log through the same function without
+//    a schema change each time a new action type is added.

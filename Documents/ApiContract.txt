@@ -1,0 +1,321 @@
+====================================================================
+API CONTRACT — College Final-Year Project Management System
+Status: DRAFT — this defines the mock-data shapes v0 should use for
+every screen, and is the implementation target for the Express
+backend. Field names match schema.prisma; keep the two in sync if
+either changes.
+====================================================================
+
+CROSS-CUTTING CONVENTIONS
+--------------------------------------------------------------------
+- Auth: every request except POST /auth/login carries
+  `Authorization: Bearer <jwt>`. The JWT payload includes userId and
+  role (STUDENT | MENTOR | ADMIN).
+- Errors: non-2xx responses return
+    { "error": { "message": string, "fields"?: { [fieldName]: string } } }
+  `fields` is present for validation errors (Module 1's "clear
+  validation errors, not silent failures" requirement) — e.g.
+  { "error": { "message": "Invalid group", "fields": {
+      "members": "All members must share the same elective" } } }
+- List/table endpoints accept `?page=&pageSize=` and return
+    { "items": [...], "total": number, "page": number, "pageSize": number }
+- Roles column below: S = Student, M = Mentor, A = Admin. "S(own)"
+  means a student can only access their own group's data; "M(own)"
+  means a mentor can only access groups assigned to them.
+
+
+MODULE — AUTH
+--------------------------------------------------------------------
+POST /auth/login
+  Roles: public
+  Body:     { "email": string, "password": string }
+  Response: { "token": string, "user": { "id", "name", "role" } }
+
+GET /auth/me
+  Roles: S, M, A
+  Response: { "id", "name", "email", "role" }
+
+
+MODULE 1 — GROUP REGISTRATION
+--------------------------------------------------------------------
+POST /groups
+  Roles: S (the submitting student becomes a member)
+  Body:     { "name": string, "description"?: string,
+              "memberStudentIds": string[], "elective": string }
+  Response: { "id", "projectId", "name", "description", "elective",
+              "status", "members": [...] }
+  Validation (returned via the `fields` error shape above):
+    - memberStudentIds.length must be 3 or 4
+    - every member's elective must match
+    - no member may already belong to another group
+    - no duplicate group for the same member set
+    - name must be unique (DB-level @unique constraint on Group.name)
+
+GET /groups/me
+  Roles: S(own)
+  Response: Group object (see POST /groups response) or 404 if not
+  yet registered.
+
+GET /groups/:groupId
+  Roles: S(own), M(own), A
+  Response: full Group object ("id", "projectId", "name",
+  "description", "elective", "status") incl. members, allocation
+  summary, topic status.
+
+
+MODULE 2 — MENTOR PREFERENCE SELECTION
+--------------------------------------------------------------------
+GET /mentors
+  Roles: S, M, A
+  Response: { "items": [{ "id", "name", "domain", "focus",
+              "maxCapacity", "assignedCount", "capacityRemaining",
+              "currentRoundOnly": boolean }] }
+  `currentRoundOnly` true = only shown because they still have
+  capacity in the current (2nd+) round. `capacityRemaining` is
+  maxCapacity - assignedCount, sent directly so the frontend doesn't
+  need to derive it for round-2 eligibility filtering or for a
+  current/max load-bar display.
+
+POST /groups/:groupId/preferences
+  Roles: S(own)
+  Body:     { "roundNumber": number,
+              "rankedMentorIds": [mentorId1, mentorId2, mentorId3] }
+  Response: { "submittedAt": ISODateTime }
+  Notes: server sets submittedAt from its own clock (not the
+  client's) — this timestamp is what FCFS allocation uses.
+
+
+MODULE 3/4 — MENTOR ALLOCATION ENGINE
+--------------------------------------------------------------------
+GET /groups/:groupId/allocation
+  Roles: S(own), M(own), A
+  Response: { "status": "ASSIGNED" | "UNASSIGNED" | "PENDING",
+              "mentor": {...} | null, "roundNumber": number }
+
+GET /admin/allocation/status
+  Roles: A
+  Response: { "roundNumber": number,
+              "groupsAssigned": number, "groupsUnassigned": number,
+              "mentorLoad": [{ "mentorId", "name", "assignedCount",
+                                 "maxCapacity" }] }
+
+POST /admin/allocation/rounds/:roundNumber/run
+  Roles: A
+  Response: { "assigned": number, "stillUnassigned": number }
+  Notes: runs the FCFS engine for that round inside one DB
+  transaction per mentor (see schema.prisma trade-off notes on
+  capacity locking). Can also be triggered automatically by
+  node-cron when a preference-round window closes — this endpoint
+  is for manual/admin-triggered re-runs.
+
+
+MODULE 5/14 — TOPIC SUBMISSION, APPROVAL & DISCUSSION
+--------------------------------------------------------------------
+GET /groups/:groupId/topic
+  Roles: S(own), M(own), A
+  Response: { "status", "submissions": [{ "id", "existingWork",
+              "problemIdentified", "proposedDifference", "innovation",
+              "feasibility", "status", "mentorFeedback", "submittedAt",
+              "decidedAt" }] }
+  (Full history — newest submission first.)
+
+POST /groups/:groupId/topic/submissions
+  Roles: S(own)
+  Body: { "existingWork", "problemIdentified", "proposedDifference",
+          "innovation", "feasibility" } (all strings)
+  Response: created TopicSubmission object, status PENDING.
+
+POST /topics/:topicId/submissions/:submissionId/decision
+  Roles: M(own)
+  Body:     { "decision": "APPROVED" | "REJECTED", "feedback": string }
+  Response: updated TopicSubmission + Topic.status.
+
+GET /topics/:topicId/discussion
+  Roles: S(own), M(own), A
+  Response: { "items": [{ "id", "authorId", "authorName", "message",
+              "createdAt" }] }
+
+POST /topics/:topicId/discussion
+  Roles: S(own), M(own)
+  Body:     { "message": string }
+  Response: created message object.
+
+
+MODULE 6 — GITHUB LINK
+--------------------------------------------------------------------
+GET /groups/:groupId/github-link
+  Roles: S(own), M(own), A
+  Response: { "url": string | null, "updatedAt": ISODateTime | null }
+
+PUT /groups/:groupId/github-link
+  Roles: S(own)
+  Body:     { "url": string }
+  Response: { "url", "updatedAt" }
+
+
+MODULE 8 — ADMIN PANEL
+--------------------------------------------------------------------
+GET /admin/windows
+  Roles: A
+  Response: { "items": [{ "id", "type", "startAt", "endAt", "isOpen" }] }
+
+POST /admin/windows
+  Roles: A
+  Body:     { "type": "REGISTRATION" | "PREFERENCE_ROUND",
+              "startAt", "endAt" }
+  Response: created Window object.
+
+PATCH /admin/windows/:windowId
+  Roles: A
+  Body:     { "endAt"?: ISODateTime, "isOpen"?: boolean }
+  Response: updated Window object.
+
+POST /admin/windows/:windowId/extensions
+  Roles: A
+  Body:     { "groupId": string, "extendedTo": ISODateTime,
+              "offsetNote": string }
+  Response: created DeadlineExtension object.
+  Notes: extensions are granted per-group (matches how the rest of
+  the system keys off Group, not individual students).
+
+GET /admin/mentors
+  Roles: A
+  Response: { "items": [{ "id", "name", "email", "domain", "focus",
+              "maxCapacity", "assignedCount", "pastProjects":
+              string[] }] }
+
+POST /admin/mentors
+  Roles: A
+  Body:     { "name", "email", "domain", "focus"?, "maxCapacity"? }
+              (maxCapacity default 3)
+  Response: created Mentor object (also creates the underlying User).
+
+PATCH /admin/mentors/:mentorId
+  Roles: A
+  Body:     { "domain"?, "focus"?, "maxCapacity"?,
+              "pastProjects"?: string[] }
+  Response: updated Mentor object.
+
+DELETE /admin/mentors/:mentorId
+  Roles: A
+  Response: 204. (Should be blocked / warned if the mentor has
+  active allocations — decide behavior when implementing.)
+
+POST /admin/allocations/manual
+  Roles: A
+  Body:     { "groupId": string, "mentorId": string }
+  Response: created/updated Allocation object.
+  Notes: this is the "manually intervene in edge cases" path from
+  Module 8 — bypasses FCFS/capacity auto-logic but should still
+  write an AuditLog entry noting it was a manual override.
+
+
+MODULE 9 — NOTIFICATIONS
+--------------------------------------------------------------------
+GET /notifications
+  Roles: S, M, A (own notifications only)
+  Response: { "items": [{ "id", "type", "message", "isRead",
+              "createdAt" }] }
+
+PATCH /notifications/:id/read
+  Roles: S, M, A (own only)
+  Response: updated Notification object.
+
+Notes: real-time delivery is via Socket.io (a "notification" event
+pushed to the relevant userId's socket room); this REST endpoint is
+for the notification bell's history/inbox view.
+
+
+MODULE 10 — DASHBOARDS
+--------------------------------------------------------------------
+GET /dashboard/student
+  Roles: S(own)
+  Response: { "groupStatus": "REGISTERED" | "MENTOR_ASSIGNED" |
+              "TOPIC_APPROVED", "mentor": {...} | null,
+              "topicSubmissionHistory": [...],
+              "githubLinkSet": boolean }
+
+GET /dashboard/mentor
+  Roles: M(own)
+  Response: { "assignedGroups": [...], "pendingTopicReviews": [...],
+              "groupsMilestoneSummary": [...] }
+
+GET /dashboard/admin
+  Roles: A
+  Response: { "registrationCount", "allocationProgress": {...},
+              "mentorWorkload": [...], "pendingTopicApprovals": number,
+              "groupsStuck": [{ "groupId", "stuckAtStage" }] }
+
+
+MODULE 12 — MENTOR PROFILE
+--------------------------------------------------------------------
+GET /mentors/:mentorId
+  Roles: S, M, A
+  Response: { "id", "name", "domain", "focus", "pastProjects": string[],
+              "maxCapacity", "assignedCount",
+              "assignedGroups": [...] (visible to A/M(own) only) }
+
+
+MODULE 13 — AUDIT LOG
+--------------------------------------------------------------------
+GET /admin/audit-log
+  Roles: A
+  Query:    ?entityType=&entityId=&actorId=&page=&pageSize=
+  Response: { "items": [{ "id", "actorId", "actorName", "action",
+              "entityType", "entityId", "metadata", "createdAt" }],
+              "total", "page", "pageSize" }
+
+
+MODULE 15 — DATA EXPORT
+--------------------------------------------------------------------
+GET /admin/export/groups.csv
+GET /admin/export/allocations.csv
+GET /admin/export/topics.csv
+  Roles: A
+  Response: text/csv file stream.
+  Decision: CSV export plus a client-side styled print view (browser
+  print/"Save as PDF") stands in for real PDF generation — no
+  PDF-generation endpoint is needed. The print view is a frontend
+  concern (a print-friendly layout of the same data these CSV
+  endpoints already expose), not a separate backend endpoint.
+
+
+MODULE 16 — LOG BOOK & MILESTONES
+--------------------------------------------------------------------
+GET /groups/:groupId/logbook
+  Roles: S(own), M(own), A
+  Response: { "items": [{ "id", "entryNumber", "sessionDate",
+              "pointsDiscussed", "mentorSuggestions", "remarks",
+              "lastEditedAt", "attendance": [{ "studentId", "status" }],
+              "hasEditHistory": boolean }] }
+
+POST /groups/:groupId/logbook
+  Roles: M(own)
+  Body:     { "sessionDate", "pointsDiscussed", "mentorSuggestions",
+              "remarks"?, "attendance": [{ "studentId", "status" }] }
+  Response: created LogBookEntry (entryNumber auto-assigned, next in
+  sequence for that group).
+
+PATCH /logbook/:entryId
+  Roles: M(own)
+  Body:     { "pointsDiscussed"?, "mentorSuggestions"?, "remarks"? }
+  Response: updated LogBookEntry.
+  Notes: server snapshots the entry's current field values into
+  LogBookEntryVersion BEFORE applying the update — this is the
+  mechanism, not just the intent, behind "previous versions
+  retained."
+
+GET /logbook/:entryId/versions
+  Roles: S(own), M(own), A
+  Response: { "items": [{ "pointsDiscussed", "mentorSuggestions",
+              "remarks", "editedAt" }] } (oldest first)
+
+GET /groups/:groupId/milestones
+  Roles: S(own), M(own), A
+  Response: { "items": [{ "id", "title", "achievedAt" }] }
+
+POST /groups/:groupId/milestones
+  Roles: M(own)
+  Body:     { "title": string }
+  Response: created Milestone object.
+====================================================================
