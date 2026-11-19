@@ -3,8 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-// ─── Route imports (wired in Task 2.2) ───────────────────────────────────────
+// ─── Route imports ──────────────────────────────────────────────────────────────
 import authRouter        from './routes/auth';
+import resetRouter       from './routes/reset';
 import electivesRouter   from './routes/electives';
 import groupsRouter      from './routes/groups';
 import mentorsRouter     from './routes/mentors';
@@ -70,6 +71,9 @@ app.use('/api/admin/audit',   auditRouter);
 app.use('/api/admin/archive', archiveRouter);
 app.use('/api/admin',         adminDashboardRouter);
 
+// ─── Developer utilities (disable before production) ──────────────────────────
+app.use('/api/dev', resetRouter);
+
 // ─── 404 fallback ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } });
@@ -78,7 +82,9 @@ app.use((_req, res) => {
 // ─── Start ────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n🚀 ProjectSync mock server running at http://localhost:${PORT}`);
-  console.log(`   Health check: http://localhost:${PORT}/health\n`);
+  console.log(`   Health check:  http://localhost:${PORT}/health`);
+  console.log(`   Dev reset:     POST http://localhost:${PORT}/api/dev/reset`);
+  console.log(`   DB file:       backend/data/db.json\n`);
 });
 
 export default app;
