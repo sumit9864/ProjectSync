@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "db:reset": "node -e \"require('fs').writeFileSync('data/db.json', JSON.stringify(require('./src/lib/db-defaults').getDefaults(), null, 2))\""
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
