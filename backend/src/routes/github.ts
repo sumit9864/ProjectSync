@@ -1,20 +1,22 @@
-import { Router } from 'express';
-import { requireAuth } from '../middleware/auth';
-import { requireRole } from '../middleware/requireRole';
-import { githubByGroup, GitHubData } from '../mockData/github';
-import { getGroupByOwner, groups } from '../mockData/groups';
-import { writeAudit } from '../lib/audit';
+/**
+ * routes/github.ts
+ * GET /api/github/mine  — Team Leader reads their GitHub link
+ * PUT /api/github       — Save / update GitHub URL
+ */
+
+import { Router }     from 'express';
+import { requireAuth }  from '../middleware/auth';
+import { requireRole }  from '../middleware/requireRole';
+import { db, saveDb }   from '../lib/db';
+import { writeAudit }   from '../lib/audit';
 
 const router = Router();
 
 // GET /api/github/mine
 router.get('/mine', requireAuth, requireRole('student'), (req, res) => {
-  const group = getGroupByOwner(req.user!.userId);
-  if (!group) {
-    res.json({ url: null, lastUpdated: null, connected: false });
-    return;
-  }
-  const data = githubByGroup[group.id] ?? { url: null, lastUpdated: null, connected: false };
+  const group = db.groups.find(g => g.ownerUserId === req.user!.userId);
+  if (!group) { res.json({ url: null, lastUpdated: null, connected: false }); return; }
+  const data = db.github[group.id] ?? { url: null, lastUpdated: null, connected: false };
   res.json(data);
 });
 
@@ -29,33 +31,33 @@ router.put('/', requireAuth, requireRole('student'), (req, res) => {
     return;
   }
 
-  const group = getGroupByOwner(req.user!.userId);
+  const group = db.groups.find(g => g.ownerUserId === req.user!.userId);
   if (!group) {
     res.status(422).json({ error: { code: 'BUSINESS_RULE', message: 'You must be in a group to connect a GitHub repository.' } });
     return;
   }
 
-  const now = new Date();
+  const now         = new Date();
   const lastUpdated = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
     + ' · ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
-  const data: GitHubData = { url, lastUpdated, connected: true };
-  githubByGroup[group.id] = data;
+  db.github[group.id] = { url, lastUpdated, connected: true };
 
-  // Update group stage if not already past this stage
+  // Update group stage if topic is approved
   if (group.stage === 'topic_approved') {
-    const idx = groups.findIndex(g => g.id === group.id);
-    if (idx !== -1) groups[idx].stage = 'github_connected';
+    const idx = db.groups.findIndex(g => g.id === group.id);
+    if (idx !== -1) db.groups[idx].stage = 'github_connected';
   }
 
+  saveDb();
+
   writeAudit({
-    actor: req.user!.name,
-    group: group.name,
+    actor:       req.user!.name,
+    group:       group.name,
     description: `Group ${group.name} connected GitHub repository`,
   });
 
-  res.json(data);
+  res.json(db.github[group.id]);
 });
 
 export default router;
-
