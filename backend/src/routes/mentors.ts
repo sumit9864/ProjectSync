@@ -1,14 +1,17 @@
-import { Router } from 'express';
-import { mentors } from '../mockData/mentors';
+/**
+ * routes/mentors.ts
+ * GET /api/mentors — Public list of Project Guide profiles
+ */
+
+import { Router }   from 'express';
+import { db }       from '../lib/db';
 
 const router = Router();
 
-// GET /api/mentors — public
-router.get('/', (req, res) => {
-  // Strip email (admin-only field) before returning to students
-  const publicMentors = mentors.map(({ email: _, ...m }) => m);
+router.get('/', (_req, res) => {
+  // Strip userId (internal linkage) before sending to frontend
+  const publicMentors = db.mentors.map(({ userId: _, ...m }) => m);
   res.json({ mentors: publicMentors });
 });
 
 export default router;
-

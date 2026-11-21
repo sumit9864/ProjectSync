@@ -1,27 +1,39 @@
-import { Router } from 'express';
-import { requireAuth } from '../middleware/auth';
-import { requireRole } from '../middleware/requireRole';
-import { groups, getGroupsByMentor } from '../mockData/groups';
-import { topicsByGroup, TopicVersion, DiscussionMessage, TopicData } from '../mockData/topics';
-import { logbookByGroup, LogBookEntry } from '../mockData/logbook';
-import { milestonesByGroup } from '../mockData/milestones';
-import { mentors } from '../mockData/mentors';
-import { auditEvents } from '../mockData/audit';
-import { writeAudit } from '../lib/audit';
-import { demoUsers } from '../mockData/auth';
+/**
+ * routes/mentorGroups.ts
+ * All /api/mentor/* routes for ProjectGuide (Mentor) role.
+ * Uses persistent db — all data survives hot-reloads.
+ */
+
+import { Router }     from 'express';
+import { requireAuth }  from '../middleware/auth';
+import { requireRole }  from '../middleware/requireRole';
+import { db, saveDb }   from '../lib/db';
+import type { DbLogBookEntry, DbDiscussionMessage, DbTopicData } from '../lib/db';
+import { writeAudit }   from '../lib/audit';
 
 const router = Router();
 
 // All mentor routes require mentor role (BR-18)
 router.use(requireAuth, requireRole('mentor'));
 
-// ─── Helper: find mentor's ID from demoUsers ──────────────────────────────────
-// The mock mentor user id maps to mentor record id via email
+// ── Helper: map userId → mentor record (via email in db) ──────────────────────
 function getMentorRecordId(userId: string): string | null {
-  const user = demoUsers.find(u => u.id === userId);
+  const user   = db.users.find(u => u.id === userId);
   if (!user) return null;
-  const mentor = mentors.find(m => m.email === user.email);
+  const mentor = db.mentors.find(m => m.email === user.email);
   return mentor?.id ?? null;
+}
+
+function getGroupsByMentor(mentorId: string) {
+  return db.groups.filter(g => g.mentorId === mentorId);
+}
+
+function getOrCreateTopic(groupId: string): DbTopicData {
+  if (!db.topics[groupId]) {
+    db.topics[groupId] = { draft: null as any, versions: [], currentStatus: null, discussion: [] };
+    saveDb();
+  }
+  return db.topics[groupId];
 }
 
 // ─── F.11 — Mentor Groups ─────────────────────────────────────────────────────
@@ -29,58 +41,37 @@ function getMentorRecordId(userId: string): string | null {
 // GET /api/mentor/groups
 router.get('/groups', (req, res) => {
   const mentorId = getMentorRecordId(req.user!.userId);
-  if (!mentorId) {
-    res.json({ groups: [] });
-    return;
-  }
+  if (!mentorId) { res.json({ groups: [] }); return; }
 
-  const myGroups = getGroupsByMentor(mentorId);
-  const mentorGroups = myGroups.map(g => {
-    const topicData = topicsByGroup[g.id] ?? { draft: null, versions: [], currentStatus: null, discussion: [] };
-    const milestones = milestonesByGroup[g.id] ?? [];
-    return {
-      id:            g.id,
-      projectId:     g.projectId,
-      name:          g.name,
-      status:        g.stage,
-      members:       g.members,
-      milestones,
-      topicVersions: topicData.versions,
-      discussion:    topicData.discussion,
-      topicDraft:    topicData.draft ?? null,
-    };
-  });
+  const myGroups = getGroupsByMentor(mentorId).map(g => ({
+    id:            g.id,
+    projectId:     g.projectId,
+    name:          g.name,
+    status:        g.stage,
+    members:       g.members,
+    milestones:    db.milestones[g.id] ?? [],
+    topicVersions: db.topics[g.id]?.versions ?? [],
+    discussion:    db.topics[g.id]?.discussion ?? [],
+    topicDraft:    db.topics[g.id]?.draft ?? null,
+  }));
 
-  res.json({ groups: mentorGroups });
+  res.json({ groups: myGroups });
 });
 
 // GET /api/mentor/groups/:groupId/topic
 router.get('/groups/:groupId/topic', (req, res) => {
-  const group = groups.find(g => g.id === req.params.groupId);
-  if (!group) {
-    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } });
-    return;
-  }
-
-  const mentorId = getMentorRecordId(req.user!.userId);
-  const data = topicsByGroup[group.id] ?? { draft: null, versions: [], currentStatus: null, discussion: [] };
-  res.json({
-    versions:      data.versions,
-    currentStatus: data.currentStatus,
-    draft:         data.draft ?? null,
-    discussion:    data.discussion,
-  });
+  const group = db.groups.find(g => g.id === req.params.groupId);
+  if (!group) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } }); return; }
+  const data = db.topics[group.id] ?? { draft: null, versions: [], currentStatus: null, discussion: [] };
+  res.json({ versions: data.versions, currentStatus: data.currentStatus, draft: data.draft ?? null, discussion: data.discussion });
 });
 
 // ─── F.12 — Mentor Topic Decisions ────────────────────────────────────────────
 
 // POST /api/mentor/groups/:groupId/topic/decision
 router.post('/groups/:groupId/topic/decision', (req, res) => {
-  const group = groups.find(g => g.id === req.params.groupId);
-  if (!group) {
-    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } });
-    return;
-  }
+  const group = db.groups.find(g => g.id === req.params.groupId);
+  if (!group) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } }); return; }
 
   // BR-15: Only the group's assigned mentor can make topic decisions
   const mentorId = getMentorRecordId(req.user!.userId);
@@ -90,31 +81,31 @@ router.post('/groups/:groupId/topic/decision', (req, res) => {
   }
 
   const { decision, feedback } = req.body as { decision: 'approved' | 'changes_requested'; feedback?: string };
-  const data = topicsByGroup[group.id];
+  const data = db.topics[group.id];
 
   if (!data || data.versions.length === 0) {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'No topic submission found for this group.' } });
     return;
   }
 
-  // Update the latest version status
-  const latestVersion = data.versions[data.versions.length - 1];
-  latestVersion.status = decision;
+  const latestVersion    = data.versions[data.versions.length - 1];
+  latestVersion.status   = decision;
   if (feedback) latestVersion.feedback = feedback;
-  data.currentStatus = decision;
+  data.currentStatus     = decision;
 
   // Update group pipeline stage if approved
   if (decision === 'approved') {
-    const idx = groups.findIndex(g => g.id === group.id);
-    if (idx !== -1 && groups[idx].stage === 'mentor_assigned') {
-      groups[idx].stage = 'topic_approved';
+    const idx = db.groups.findIndex(g => g.id === group.id);
+    if (idx !== -1 && db.groups[idx].stage === 'mentor_assigned') {
+      db.groups[idx].stage = 'topic_approved';
     }
   }
+
+  saveDb();
 
   const auditDesc = decision === 'approved'
     ? `Mentor ${req.user!.name} approved topic for ${group.name}`
     : `Mentor ${req.user!.name} requested changes on ${group.name}'s topic`;
-
   writeAudit({ actor: req.user!.name, group: group.name, description: auditDesc });
 
   res.json({ version: latestVersion });
@@ -122,17 +113,11 @@ router.post('/groups/:groupId/topic/decision', (req, res) => {
 
 // POST /api/mentor/groups/:groupId/discussion
 router.post('/groups/:groupId/discussion', (req, res) => {
-  const group = groups.find(g => g.id === req.params.groupId);
-  if (!group) {
-    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } });
-    return;
-  }
+  const group = db.groups.find(g => g.id === req.params.groupId);
+  if (!group) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } }); return; }
 
-  if (!topicsByGroup[group.id]) {
-    topicsByGroup[group.id] = { draft: null as any, versions: [], currentStatus: null, discussion: [] };
-  }
-
-  const message: DiscussionMessage = {
+  const data    = getOrCreateTopic(group.id);
+  const message: DbDiscussionMessage = {
     id:          `msg-${Date.now()}`,
     author:      req.user!.name,
     role:        'Mentor',
@@ -140,7 +125,8 @@ router.post('/groups/:groupId/discussion', (req, res) => {
     body:        req.body.body,
     time:        new Date().toISOString(),
   };
-  topicsByGroup[group.id].discussion.push(message);
+  data.discussion.push(message);
+  saveDb();
   res.status(201).json({ message });
 });
 
@@ -154,14 +140,14 @@ router.post('/bulk-decision', (req, res) => {
 
   let updated = 0;
   for (const gid of groupIds) {
-    const data = topicsByGroup[gid];
+    const data = db.topics[gid];
     if (data && data.versions.length > 0) {
-      const latest = data.versions[data.versions.length - 1];
-      latest.status = decision;
+      const latest   = data.versions[data.versions.length - 1];
+      latest.status  = decision;
       if (feedback) latest.feedback = feedback;
       data.currentStatus = decision;
       updated++;
-      const g = groups.find(g => g.id === gid);
+      const g = db.groups.find(g => g.id === gid);
       if (g) {
         const auditDesc = decision === 'approved'
           ? `Mentor ${req.user!.name} approved topic for ${g.name}`
@@ -170,7 +156,7 @@ router.post('/bulk-decision', (req, res) => {
       }
     }
   }
-
+  saveDb();
   res.json({ updated });
 });
 
@@ -178,21 +164,15 @@ router.post('/bulk-decision', (req, res) => {
 
 // GET /api/mentor/groups/:groupId/logbook
 router.get('/groups/:groupId/logbook', (req, res) => {
-  const group = groups.find(g => g.id === req.params.groupId);
-  if (!group) {
-    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } });
-    return;
-  }
-  res.json({ entries: logbookByGroup[group.id] ?? [] });
+  const group = db.groups.find(g => g.id === req.params.groupId);
+  if (!group) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } }); return; }
+  res.json({ entries: db.logbook[group.id] ?? [] });
 });
 
 // POST /api/mentor/groups/:groupId/logbook
 router.post('/groups/:groupId/logbook', (req, res) => {
-  const group = groups.find(g => g.id === req.params.groupId);
-  if (!group) {
-    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } });
-    return;
-  }
+  const group = db.groups.find(g => g.id === req.params.groupId);
+  if (!group) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } }); return; }
 
   // BR-14: Only the group's assigned mentor can write logbook entries
   const mentorId = getMentorRecordId(req.user!.userId);
@@ -201,12 +181,12 @@ router.post('/groups/:groupId/logbook', (req, res) => {
     return;
   }
 
-  if (!logbookByGroup[group.id]) logbookByGroup[group.id] = [];
-  const entries = logbookByGroup[group.id];
+  if (!db.logbook[group.id]) db.logbook[group.id] = [];
+  const entries     = db.logbook[group.id];
   const entryNumber = entries.length + 1;
 
   const { date, attendance, pointsDiscussed, mentorSuggestions, remarks } = req.body;
-  const newEntry: LogBookEntry = {
+  const newEntry: DbLogBookEntry = {
     id:                `lb-${Date.now()}`,
     entryNumber,
     date,
@@ -221,6 +201,7 @@ router.post('/groups/:groupId/logbook', (req, res) => {
   };
 
   entries.push(newEntry);
+  saveDb();
 
   writeAudit({
     actor:       req.user!.name,
@@ -233,28 +214,21 @@ router.post('/groups/:groupId/logbook', (req, res) => {
 
 // PUT /api/mentor/groups/:groupId/logbook/:entryId
 router.put('/groups/:groupId/logbook/:entryId', (req, res) => {
-  const group = groups.find(g => g.id === req.params.groupId);
-  if (!group) {
-    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } });
-    return;
-  }
+  const group = db.groups.find(g => g.id === req.params.groupId);
+  if (!group) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Group not found.' } }); return; }
 
-  // BR-14: Only the group's assigned mentor can write logbook entries
+  // BR-14
   const mentorId = getMentorRecordId(req.user!.userId);
   if (group.mentorId !== mentorId) {
     res.status(403).json({ error: { code: 'FORBIDDEN', message: 'BR-14: You are not the assigned mentor for this group.' } });
     return;
   }
 
-  const entries = logbookByGroup[group.id] ?? [];
-  const idx = entries.findIndex(e => e.id === req.params.entryId);
-  if (idx === -1) {
-    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Log book entry not found.' } });
-    return;
-  }
+  const entries = db.logbook[group.id] ?? [];
+  const idx     = entries.findIndex(e => e.id === req.params.entryId);
+  if (idx === -1) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Log book entry not found.' } }); return; }
 
   const old = entries[idx];
-  // Archive previous values into editHistory
   if (!old.editHistory) old.editHistory = [];
   old.editHistory.push({
     editedAt:          old.lastEditedAt,
@@ -264,8 +238,8 @@ router.put('/groups/:groupId/logbook/:entryId', (req, res) => {
   });
 
   const { date, attendance, pointsDiscussed, mentorSuggestions, remarks } = req.body;
-  old.date = date;
-  old.attendance = attendance.map((a: { memberId: string; present: boolean }) => {
+  old.date              = date;
+  old.attendance        = attendance.map((a: { memberId: string; present: boolean }) => {
     const member = group.members.find(m => m.id === a.memberId);
     return { name: member?.name ?? a.memberId, present: a.present };
   });
@@ -273,6 +247,7 @@ router.put('/groups/:groupId/logbook/:entryId', (req, res) => {
   old.mentorSuggestions = mentorSuggestions;
   old.remarks           = remarks;
   old.lastEditedAt      = new Date().toISOString();
+  saveDb();
 
   writeAudit({
     actor:       req.user!.name,
@@ -287,41 +262,33 @@ router.put('/groups/:groupId/logbook/:entryId', (req, res) => {
 
 // GET /api/mentor/dashboard
 router.get('/dashboard', (req, res) => {
-  const mentorId = getMentorRecordId(req.user!.userId);
-  const mentorRecord = mentors.find(m => m.id === mentorId);
-  const myGroups = mentorId ? getGroupsByMentor(mentorId) : [];
+  const mentorId     = getMentorRecordId(req.user!.userId);
+  const mentorRecord = db.mentors.find(m => m.id === mentorId);
+  const myGroups     = mentorId ? getGroupsByMentor(mentorId) : [];
 
-  // Pending reviews = groups with currentStatus === 'pending'
-  const pendingReviews = myGroups.filter(g => {
-    const data = topicsByGroup[g.id];
-    return data && data.currentStatus === 'pending';
-  }).length;
+  const pendingReviews = myGroups.filter(g => db.topics[g.id]?.currentStatus === 'pending').length;
 
-  const mentorGroups = myGroups.map(g => {
-    const topicData = topicsByGroup[g.id] ?? { draft: null, versions: [], currentStatus: null, discussion: [] };
-    const milestones = milestonesByGroup[g.id] ?? [];
-    return {
-      id:            g.id,
-      projectId:     g.projectId,
-      name:          g.name,
-      status:        g.stage,
-      members:       g.members,
-      milestones,
-      topicVersions: topicData.versions,
-      discussion:    topicData.discussion,
-      topicDraft:    topicData.draft ?? null,
-    };
-  });
+  const mentorGroups = myGroups.map(g => ({
+    id:            g.id,
+    projectId:     g.projectId,
+    name:          g.name,
+    status:        g.stage,
+    members:       g.members,
+    milestones:    db.milestones[g.id] ?? [],
+    topicVersions: db.topics[g.id]?.versions ?? [],
+    discussion:    db.topics[g.id]?.discussion ?? [],
+    topicDraft:    db.topics[g.id]?.draft ?? null,
+  }));
 
   res.json({
     stats: {
-      assignedGroups:    myGroups.length,
+      assignedGroups:  myGroups.length,
       pendingReviews,
-      avgResponseTime:   '1.2 days',
-      capacity:          mentorRecord?.capacity ?? 0,
+      avgResponseTime: '1.2 days',
+      capacity:        mentorRecord?.capacity ?? 0,
     },
     weekProgress: { reviewed: myGroups.length - pendingReviews, total: myGroups.length },
-    groups:        mentorGroups,
+    groups:       mentorGroups,
   });
 });
 
@@ -330,18 +297,14 @@ router.get('/calendar', (req, res) => {
   const mentorId = getMentorRecordId(req.user!.userId);
   const myGroups = mentorId ? getGroupsByMentor(mentorId) : [];
 
-  // Build calendar events from milestones
   const events: { day: number; title: string; type: 'review' | 'session' | 'deadline' }[] = [];
   for (const g of myGroups) {
-    const milestones = milestonesByGroup[g.id] ?? [];
-    for (const m of milestones) {
-      const day = new Date(m.dueDate).getDate();
-      events.push({ day, title: `${g.name}: ${m.title}`, type: 'deadline' });
+    for (const m of db.milestones[g.id] ?? []) {
+      events.push({ day: new Date(m.dueDate).getDate(), title: `${g.name}: ${m.title}`, type: 'deadline' });
     }
   }
 
-  // Recent activity
-  const recentActivity = auditEvents
+  const recentActivity = db.auditEvents
     .filter(e => myGroups.some(g => g.name === e.group))
     .slice(0, 5)
     .map(e => ({ id: e.id, group: e.group, action: e.description, time: e.timestamp }));
@@ -350,4 +313,3 @@ router.get('/calendar', (req, res) => {
 });
 
 export default router;
-
