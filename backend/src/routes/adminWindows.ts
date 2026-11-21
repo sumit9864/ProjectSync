@@ -1,51 +1,65 @@
-import { Router } from 'express';
-import { requireAuth } from '../middleware/auth';
-import { requireRole } from '../middleware/requireRole';
-import { windows, extensions, WindowKey, Extension } from '../mockData/windows';
-import { groups } from '../mockData/groups';
-import { writeAudit } from '../lib/audit';
+/**
+ * routes/adminWindows.ts
+ * GET  /api/admin/windows         — Project Coordinator reads all window states
+ * PUT  /api/admin/windows/:key    — Project Coordinator opens/closes a window
+ * GET  /api/admin/extensions      — List deadline extensions
+ * POST /api/admin/extensions      — Grant a deadline extension
+ */
+
+import { Router }     from 'express';
+import { requireAuth }  from '../middleware/auth';
+import { requireRole }  from '../middleware/requireRole';
+import { db, saveDb }   from '../lib/db';
+import type { DbExtension } from '../lib/db';
+import { writeAudit }   from '../lib/audit';
 
 const router = Router();
 
-// All routes require admin (BR-17)
+// All routes require admin / Project Coordinator (BR-17)
 router.use(requireAuth, requireRole('admin'));
 
+type WindowKey = 'registration' | 'round1' | 'round2';
 const VALID_KEYS: WindowKey[] = ['registration', 'round1', 'round2'];
 
 // GET /api/admin/windows
-router.get('/windows', (req, res) => {
-  res.json({ windows });
+router.get('/windows', (_req, res) => {
+  res.json({ windows: db.windows });
 });
 
 // PUT /api/admin/windows/:key
 router.put('/windows/:key', (req, res) => {
   const key = req.params.key as WindowKey;
   if (!VALID_KEYS.includes(key)) {
-    res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: `Invalid window key.` } });
+    res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid window key.' } });
     return;
   }
 
   const { opensOn, closesOn, open } = req.body;
-  if (opensOn  !== undefined) windows[key].opensOn  = opensOn;
-  if (closesOn !== undefined) windows[key].closesOn = closesOn;
-  if (open     !== undefined) windows[key].open     = open;
+  if (opensOn  !== undefined) db.windows[key].opensOn  = opensOn;
+  if (closesOn !== undefined) db.windows[key].closesOn = closesOn;
+  if (open     !== undefined) db.windows[key].open     = open;
+  saveDb();
 
   const auditDesc = open
-    ? `Admin opened ${key} window (closes ${windows[key].closesOn})`
+    ? `Admin opened ${key} window (closes ${db.windows[key].closesOn})`
     : `Admin closed ${key} window`;
   writeAudit({ actor: req.user!.name, group: 'System', description: auditDesc });
 
-  res.json({ window: windows[key] });
+  res.json({ window: db.windows[key] });
 });
 
 // GET /api/admin/extensions
-router.get('/extensions', (req, res) => {
-  res.json({ extensions });
+router.get('/extensions', (_req, res) => {
+  res.json({ extensions: db.extensions });
 });
 
 // POST /api/admin/extensions
 router.post('/extensions', (req, res) => {
-  const { groupId, offsetDays, reason } = req.body as { groupId: string | 'all'; offsetDays: number; reason: string };
+  const { groupId, offsetDays, reason } = req.body as {
+    groupId:    string | 'all';
+    offsetDays: number;
+    reason:     string;
+  };
 
   if (!offsetDays || !reason) {
     res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'offsetDays and reason are required.' } });
@@ -54,9 +68,9 @@ router.post('/extensions', (req, res) => {
 
   const groupName = groupId === 'all'
     ? 'All Groups'
-    : (groups.find(g => g.id === groupId)?.name ?? groupId);
+    : (db.groups.find(g => g.id === groupId)?.name ?? groupId);
 
-  const ext: Extension = {
+  const ext: DbExtension = {
     id:         `ext-${Date.now()}`,
     groupId,
     groupName,
@@ -65,7 +79,9 @@ router.post('/extensions', (req, res) => {
     grantedAt:  new Date().toISOString(),
     grantedBy:  req.user!.name,
   };
-  extensions.push(ext);
+
+  db.extensions.push(ext);
+  saveDb();
 
   writeAudit({
     actor:       req.user!.name,
@@ -77,4 +93,3 @@ router.post('/extensions', (req, res) => {
 });
 
 export default router;
-
