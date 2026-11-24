@@ -1,9 +1,72 @@
-import { useState, useEffect, useRef, type FormEvent } from 'react';
-import { Eye, EyeOff, Mail, Lock, User as UserIcon, ArrowRight, Info } from 'lucide-react';
+﻿import { useState, useEffect, useRef, type FormEvent } from 'react';
+import {
+  Eye, EyeOff, Mail, Lock, User as UserIcon,
+  ArrowRight, CheckCircle2, AlertCircle, Loader2,
+} from 'lucide-react';
+import { register } from '@/lib/api/auth';
+import type { AuthSession } from '@/types';
 
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// â”€â”€ Validation helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+/** Only @kkwagh.edu.in emails are accepted for student registration */
+function isKkwaghEmail(email: string): boolean {
+  return /^[^\s@]+@kkwagh\.edu\.in$/i.test(email.trim());
 }
+
+/**
+ * Password rules:
+ *   â€¢ At least 8 characters
+ *   â€¢ At least one uppercase letter
+ *   â€¢ At least one lowercase letter
+ *   â€¢ At least one digit
+ *   â€¢ At least one special character
+ */
+function getPasswordStrength(pw: string): {
+  score: 0 | 1 | 2 | 3;
+  label: '' | 'Weak' | 'Fair' | 'Strong';
+  color: string;
+} {
+  let score = 0;
+  if (pw.length >= 8)            score++;
+  if (/[A-Z]/.test(pw))          score++;
+  if (/[0-9]/.test(pw))          score++;
+  if (/[^A-Za-z0-9]/.test(pw))  score++;
+
+  if (pw.length === 0) return { score: 0, label: '',       color: 'bg-ink-200 dark:bg-ink-700' };
+  if (score <= 2)      return { score: 1, label: 'Weak',   color: 'bg-rose-500' };
+  if (score === 3)     return { score: 2, label: 'Fair',   color: 'bg-amber-500' };
+  return               { score: 3, label: 'Strong', color: 'bg-emerald-500' };
+}
+
+function validateForm(
+  name: string,
+  email: string,
+  password: string,
+  confirmPassword: string,
+): Record<string, string> {
+  const e: Record<string, string> = {};
+
+  if (!name.trim())             e.name = 'Full name is required.';
+  else if (name.trim().length < 2) e.name = 'Name must be at least 2 characters.';
+
+  if (!email.trim())              e.email = 'Email is required.';
+  else if (!isKkwaghEmail(email)) e.email = 'Must be a valid @kkwagh.edu.in email address.';
+
+  if (!password)                          e.password = 'Password is required.';
+  else if (password.length < 8)           e.password = 'Password must be at least 8 characters.';
+  else if (!/[A-Z]/.test(password))       e.password = 'Must include at least one uppercase letter.';
+  else if (!/[a-z]/.test(password))       e.password = 'Must include at least one lowercase letter.';
+  else if (!/[0-9]/.test(password))       e.password = 'Must include at least one number.';
+  else if (!/[^A-Za-z0-9]/.test(password)) e.password = 'Must include at least one special character (e.g. @, #, !).';
+
+  if (!confirmPassword)                      e.confirmPassword = 'Please confirm your password.';
+  else if (password !== confirmPassword)     e.confirmPassword = 'Passwords do not match.';
+
+  return e;
+}
+
+// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
 
 export function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) {
   const [name, setName] = useState('');
