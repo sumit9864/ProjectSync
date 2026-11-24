@@ -55,7 +55,7 @@ function useNotifications(loggedIn: boolean) {
 }
 
 function App() {
-  const { session, signIn, signOut, hydrated: authHydrated } = useAuth();
+  const { session, signIn, signOut, setSession, hydrated: authHydrated } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [studentPage, setStudentPage] = useState<StudentPageId>('overview');
   const [mentorPage, setMentorPage]   = useState<MentorPageId>('overview');
@@ -82,7 +82,12 @@ function App() {
   if (!session) {
     return (
       <ToastProvider>
-        <AuthScreen onSignIn={signIn} theme={theme} onToggleTheme={toggleTheme} />
+        <AuthScreen
+          onSignIn={signIn}
+          onSessionCreated={setSession}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
       </ToastProvider>
     );
   }
