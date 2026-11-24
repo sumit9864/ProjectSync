@@ -8,15 +8,24 @@ import type { ThemeMode } from '@/hooks/useTheme';
 
 type AuthScreenProps = {
   onSignIn: (email: string, password: string) => Promise<{ success: boolean; session?: AuthSession }>;
+  /** Called with the session created by registration so App immediately authenticates. */
+  onSessionCreated?: (session: AuthSession) => void;
   theme: ThemeMode;
   onToggleTheme: () => void;
 };
 
 type Mode = 'signin' | 'signup';
 
-export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) {
+export function AuthScreen({ onSignIn, onSessionCreated, theme, onToggleTheme }: AuthScreenProps) {
   const [mode, setMode] = useState<Mode>('signin');
   const { showToast } = useToast();
+
+  const handleRegistered = (session: AuthSession) => {
+    // Delay very slightly so the success animation is visible for a moment
+    setTimeout(() => {
+      onSessionCreated?.(session);
+    }, 900);
+  };
 
   return (
     <div className="auth-shell relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-50 px-4 py-8 text-ink-800 dark:bg-ink-950 dark:text-ink-100">
@@ -97,7 +106,10 @@ export function AuthScreen({ onSignIn, theme, onToggleTheme }: AuthScreenProps) 
                 onSwitchToSignUp={() => setMode('signup')}
               />
             ) : (
-              <SignUpForm onSwitchToSignIn={() => setMode('signin')} />
+              <SignUpForm
+                onSwitchToSignIn={() => setMode('signin')}
+                onRegistered={handleRegistered}
+              />
             )}
           </div>
         </div>
