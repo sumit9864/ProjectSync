@@ -51,5 +51,5 @@ export function useAuth() {
     setSession(null);
   }, []);
 
-  return { session, signIn, signOut, hydrated };
+  return { session, setSession, signIn, signOut, hydrated };
 }
